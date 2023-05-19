@@ -1,0 +1,1432 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+
+<link href='https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap' rel='stylesheet' type='text/css' /><style type='text/css'>html {overflow-x: initial !important;}:root { --bg-color:#ffffff; --text-color:#333333; --select-text-bg-color:#B5D6FC; --select-text-font-color:auto; --monospace:"Lucida Console",Consolas,"Courier",monospace; --title-bar-height:20px; }
+.mac-os-11 { --title-bar-height:28px; }
+html { font-size: 14px; background-color: var(--bg-color); color: var(--text-color); font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+body { margin: 0px; padding: 0px; height: auto; inset: 0px; font-size: 1rem; line-height: 1.42857; overflow-x: hidden; background: inherit; tab-size: 4; }
+iframe { margin: auto; }
+a.url { word-break: break-all; }
+a:active, a:hover { outline: 0px; }
+.in-text-selection, ::selection { text-shadow: none; background: var(--select-text-bg-color); color: var(--select-text-font-color); }
+#write { margin: 0px auto; height: auto; width: inherit; word-break: normal; overflow-wrap: break-word; position: relative; white-space: normal; overflow-x: visible; padding-top: 36px; }
+#write.first-line-indent p { text-indent: 2em; }
+#write.first-line-indent li p, #write.first-line-indent p * { text-indent: 0px; }
+#write.first-line-indent li { margin-left: 2em; }
+.for-image #write { padding-left: 8px; padding-right: 8px; }
+body.typora-export { padding-left: 30px; padding-right: 30px; }
+.typora-export .footnote-line, .typora-export li, .typora-export p { white-space: pre-wrap; }
+.typora-export .task-list-item input { pointer-events: none; }
+@media screen and (max-width: 500px) {
+  body.typora-export { padding-left: 0px; padding-right: 0px; }
+  #write { padding-left: 20px; padding-right: 20px; }
+  .CodeMirror-sizer { margin-left: 0px !important; }
+  .CodeMirror-gutters { display: none !important; }
+}
+#write li > figure:last-child { margin-bottom: 0.5rem; }
+#write ol, #write ul { position: relative; }
+img { max-width: 100%; vertical-align: middle; image-orientation: from-image; }
+button, input, select, textarea { color: inherit; font: inherit; }
+input[type="checkbox"], input[type="radio"] { line-height: normal; padding: 0px; }
+*, ::after, ::before { box-sizing: border-box; }
+#write h1, #write h2, #write h3, #write h4, #write h5, #write h6, #write p, #write pre { width: inherit; }
+#write h1, #write h2, #write h3, #write h4, #write h5, #write h6, #write p { position: relative; }
+p { line-height: inherit; }
+h1, h2, h3, h4, h5, h6 { break-after: avoid-page; break-inside: avoid; orphans: 4; }
+p { orphans: 4; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.8rem; }
+h3 { font-size: 1.6rem; }
+h4 { font-size: 1.4rem; }
+h5 { font-size: 1.2rem; }
+h6 { font-size: 1rem; }
+.md-math-block, .md-rawblock, h1, h2, h3, h4, h5, h6, p { margin-top: 1rem; margin-bottom: 1rem; }
+.hidden { display: none; }
+.md-blockmeta { color: rgb(204, 204, 204); font-weight: 700; font-style: italic; }
+a { cursor: pointer; }
+sup.md-footnote { padding: 2px 4px; background-color: rgba(238, 238, 238, 0.7); color: rgb(85, 85, 85); border-radius: 4px; cursor: pointer; }
+sup.md-footnote a, sup.md-footnote a:hover { color: inherit; text-transform: inherit; text-decoration: inherit; }
+#write input[type="checkbox"] { cursor: pointer; width: inherit; height: inherit; }
+figure { overflow-x: auto; margin: 1.2em 0px; max-width: calc(100% + 16px); padding: 0px; }
+figure > table { margin: 0px; }
+tr { break-inside: avoid; break-after: auto; }
+thead { display: table-header-group; }
+table { border-collapse: collapse; border-spacing: 0px; width: 100%; overflow: auto; break-inside: auto; text-align: left; }
+table.md-table td { min-width: 32px; }
+.CodeMirror-gutters { border-right: 0px; background-color: inherit; }
+.CodeMirror-linenumber { user-select: none; }
+.CodeMirror { text-align: left; }
+.CodeMirror-placeholder { opacity: 0.3; }
+.CodeMirror pre { padding: 0px 4px; }
+.CodeMirror-lines { padding: 0px; }
+div.hr:focus { cursor: none; }
+#write pre { white-space: pre-wrap; }
+#write.fences-no-line-wrapping pre { white-space: pre; }
+#write pre.ty-contain-cm { white-space: normal; }
+.CodeMirror-gutters { margin-right: 4px; }
+.md-fences { font-size: 0.9rem; display: block; break-inside: avoid; text-align: left; overflow: visible; white-space: pre; background: inherit; position: relative !important; }
+.md-fences-adv-panel { width: 100%; margin-top: 10px; text-align: center; padding-top: 0px; padding-bottom: 8px; overflow-x: auto; }
+#write .md-fences.mock-cm { white-space: pre-wrap; }
+.md-fences.md-fences-with-lineno { padding-left: 0px; }
+#write.fences-no-line-wrapping .md-fences.mock-cm { white-space: pre; overflow-x: auto; }
+.md-fences.mock-cm.md-fences-with-lineno { padding-left: 8px; }
+.CodeMirror-line, twitterwidget { break-inside: avoid; }
+.footnotes { opacity: 0.8; font-size: 0.9rem; margin-top: 1em; margin-bottom: 1em; }
+.footnotes + .footnotes { margin-top: 0px; }
+.md-reset { margin: 0px; padding: 0px; border: 0px; outline: 0px; vertical-align: top; background: 0px 0px; text-decoration: none; text-shadow: none; float: none; position: static; width: auto; height: auto; white-space: nowrap; cursor: inherit; -webkit-tap-highlight-color: transparent; line-height: normal; font-weight: 400; text-align: left; box-sizing: content-box; direction: ltr; }
+li div { padding-top: 0px; }
+blockquote { margin: 1rem 0px; }
+li .mathjax-block, li p { margin: 0.5rem 0px; }
+li blockquote { margin: 1rem 0px; }
+li { margin: 0px; position: relative; }
+blockquote > :last-child { margin-bottom: 0px; }
+blockquote > :first-child, li > :first-child { margin-top: 0px; }
+.footnotes-area { color: rgb(136, 136, 136); margin-top: 0.714rem; padding-bottom: 0.143rem; white-space: normal; }
+#write .footnote-line { white-space: pre-wrap; }
+@media print {
+  body, html { border: 1px solid transparent; height: 99%; break-after: avoid; break-before: avoid; font-variant-ligatures: no-common-ligatures; }
+  #write { margin-top: 0px; padding-top: 0px; border-color: transparent !important; }
+  .typora-export * { -webkit-print-color-adjust: exact; }
+  .typora-export #write { break-after: avoid; }
+  .typora-export #write::after { height: 0px; }
+  .is-mac table { break-inside: avoid; }
+  .typora-export-show-outline .typora-export-sidebar { display: none; }
+}
+.footnote-line { margin-top: 0.714em; font-size: 0.7em; }
+a img, img a { cursor: pointer; }
+pre.md-meta-block { font-size: 0.8rem; min-height: 0.8rem; white-space: pre-wrap; background: rgb(204, 204, 204); display: block; overflow-x: hidden; }
+p > .md-image:only-child:not(.md-img-error) img, p > img:only-child { display: block; margin: auto; }
+#write.first-line-indent p > .md-image:only-child:not(.md-img-error) img { left: -2em; position: relative; }
+p > .md-image:only-child { display: inline-block; width: 100%; }
+#write .MathJax_Display { margin: 0.8em 0px 0px; }
+.md-math-block { width: 100%; }
+.md-math-block:not(:empty)::after { display: none; }
+.MathJax_ref { fill: currentcolor; }
+[contenteditable="true"]:active, [contenteditable="true"]:focus, [contenteditable="false"]:active, [contenteditable="false"]:focus { outline: 0px; box-shadow: none; }
+.md-task-list-item { position: relative; list-style-type: none; }
+.task-list-item.md-task-list-item { padding-left: 0px; }
+.md-task-list-item > input { position: absolute; top: 0px; left: 0px; margin-left: -1.2em; margin-top: calc(1em - 10px); border: none; }
+.math { font-size: 1rem; }
+.md-toc { min-height: 3.58rem; position: relative; font-size: 0.9rem; border-radius: 10px; }
+.md-toc-content { position: relative; margin-left: 0px; }
+.md-toc-content::after, .md-toc::after { display: none; }
+.md-toc-item { display: block; color: rgb(65, 131, 196); }
+.md-toc-item a { text-decoration: none; }
+.md-toc-inner:hover { text-decoration: underline; }
+.md-toc-inner { display: inline-block; cursor: pointer; }
+.md-toc-h1 .md-toc-inner { margin-left: 0px; font-weight: 700; }
+.md-toc-h2 .md-toc-inner { margin-left: 2em; }
+.md-toc-h3 .md-toc-inner { margin-left: 4em; }
+.md-toc-h4 .md-toc-inner { margin-left: 6em; }
+.md-toc-h5 .md-toc-inner { margin-left: 8em; }
+.md-toc-h6 .md-toc-inner { margin-left: 10em; }
+@media screen and (max-width: 48em) {
+  .md-toc-h3 .md-toc-inner { margin-left: 3.5em; }
+  .md-toc-h4 .md-toc-inner { margin-left: 5em; }
+  .md-toc-h5 .md-toc-inner { margin-left: 6.5em; }
+  .md-toc-h6 .md-toc-inner { margin-left: 8em; }
+}
+a.md-toc-inner { font-size: inherit; font-style: inherit; font-weight: inherit; line-height: inherit; }
+.footnote-line a:not(.reversefootnote) { color: inherit; }
+.md-attr { display: none; }
+.md-fn-count::after { content: "."; }
+code, pre, samp, tt { font-family: var(--monospace); }
+kbd { margin: 0px 0.1em; padding: 0.1em 0.6em; font-size: 0.8em; color: rgb(36, 39, 41); background: rgb(255, 255, 255); border: 1px solid rgb(173, 179, 185); border-radius: 3px; box-shadow: rgba(12, 13, 14, 0.2) 0px 1px 0px, rgb(255, 255, 255) 0px 0px 0px 2px inset; white-space: nowrap; vertical-align: middle; }
+.md-comment { color: rgb(162, 127, 3); opacity: 0.6; font-family: var(--monospace); }
+code { text-align: left; vertical-align: initial; }
+a.md-print-anchor { white-space: pre !important; border-width: initial !important; border-style: none !important; border-color: initial !important; display: inline-block !important; position: absolute !important; width: 1px !important; right: 0px !important; outline: 0px !important; background: 0px 0px !important; text-decoration: initial !important; text-shadow: initial !important; }
+.os-windows.monocolor-emoji .md-emoji { font-family: "Segoe UI Symbol", sans-serif; }
+.md-diagram-panel > svg { max-width: 100%; }
+[lang="flow"] svg, [lang="mermaid"] svg { max-width: 100%; height: auto; }
+[lang="mermaid"] .node text { font-size: 1rem; }
+table tr th { border-bottom: 0px; }
+video { max-width: 100%; display: block; margin: 0px auto; }
+iframe { max-width: 100%; width: 100%; border: none; }
+.highlight td, .highlight tr { border: 0px; }
+mark { background: rgb(255, 255, 0); color: rgb(0, 0, 0); }
+.md-html-inline .md-plain, .md-html-inline strong, mark .md-inline-math, mark strong { color: inherit; }
+.md-expand mark .md-meta { opacity: 0.3 !important; }
+mark .md-meta { color: rgb(0, 0, 0); }
+@media print {
+  .typora-export h1, .typora-export h2, .typora-export h3, .typora-export h4, .typora-export h5, .typora-export h6 { break-inside: avoid; }
+}
+.md-diagram-panel .messageText { stroke: none !important; }
+.md-diagram-panel .start-state { fill: var(--node-fill); }
+.md-diagram-panel .edgeLabel rect { opacity: 1 !important; }
+.md-fences.md-fences-math { font-size: 1em; }
+.md-fences-advanced:not(.md-focus) { padding: 0px; white-space: nowrap; border: 0px; }
+.md-fences-advanced:not(.md-focus) { background: inherit; }
+.typora-export-show-outline .typora-export-content { max-width: 1440px; margin: auto; display: flex; flex-direction: row; }
+.typora-export-sidebar { width: 300px; font-size: 0.8rem; margin-top: 80px; margin-right: 18px; }
+.typora-export-show-outline #write { --webkit-flex:2; flex: 2 1 0%; }
+.typora-export-sidebar .outline-content { position: fixed; top: 0px; max-height: 100%; overflow: hidden auto; padding-bottom: 30px; padding-top: 60px; width: 300px; }
+@media screen and (max-width: 1024px) {
+  .typora-export-sidebar, .typora-export-sidebar .outline-content { width: 240px; }
+}
+@media screen and (max-width: 800px) {
+  .typora-export-sidebar { display: none; }
+}
+.outline-content li, .outline-content ul { margin-left: 0px; margin-right: 0px; padding-left: 0px; padding-right: 0px; list-style: none; }
+.outline-content ul { margin-top: 0px; margin-bottom: 0px; }
+.outline-content strong { font-weight: 400; }
+.outline-expander { width: 1rem; height: 1.42857rem; position: relative; display: table-cell; vertical-align: middle; cursor: pointer; padding-left: 4px; }
+.outline-expander::before { content: ""; position: relative; font-family: Ionicons; display: inline-block; font-size: 8px; vertical-align: middle; }
+.outline-item { padding-top: 3px; padding-bottom: 3px; cursor: pointer; }
+.outline-expander:hover::before { content: ""; }
+.outline-h1 > .outline-item { padding-left: 0px; }
+.outline-h2 > .outline-item { padding-left: 1em; }
+.outline-h3 > .outline-item { padding-left: 2em; }
+.outline-h4 > .outline-item { padding-left: 3em; }
+.outline-h5 > .outline-item { padding-left: 4em; }
+.outline-h6 > .outline-item { padding-left: 5em; }
+.outline-label { cursor: pointer; display: table-cell; vertical-align: middle; text-decoration: none; color: inherit; }
+.outline-label:hover { text-decoration: underline; }
+.outline-item:hover { border-color: rgb(245, 245, 245); background-color: var(--item-hover-bg-color); }
+.outline-item:hover { margin-left: -28px; margin-right: -28px; border-left: 28px solid transparent; border-right: 28px solid transparent; }
+.outline-item-single .outline-expander::before, .outline-item-single .outline-expander:hover::before { display: none; }
+.outline-item-open > .outline-item > .outline-expander::before { content: ""; }
+.outline-children { display: none; }
+.info-panel-tab-wrapper { display: none; }
+.outline-item-open > .outline-children { display: block; }
+.typora-export .outline-item { padding-top: 1px; padding-bottom: 1px; }
+.typora-export .outline-item:hover { margin-right: -8px; border-right: 8px solid transparent; }
+.typora-export .outline-expander::before { content: "+"; font-family: inherit; top: -1px; }
+.typora-export .outline-expander:hover::before, .typora-export .outline-item-open > .outline-item > .outline-expander::before { content: "−"; }
+.typora-export-collapse-outline .outline-children { display: none; }
+.typora-export-collapse-outline .outline-item-open > .outline-children, .typora-export-no-collapse-outline .outline-children { display: block; }
+.typora-export-no-collapse-outline .outline-expander::before { content: "" !important; }
+.typora-export-show-outline .outline-item-active > .outline-item .outline-label { font-weight: 700; }
+.md-inline-math-container mjx-container { zoom: 0.95; }
+
+
+/*
+ * Copyright (C) 2018 Drake, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * GitHub https://github.com/liangjingkanji/DrakeTyporaTheme
+ */
+@import url();
+@include-when-export url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+:root {
+    --text-color: rgba(255, 255, 255, 0.75);
+    --bg-color: rgb(26, 26, 26);
+    --control-text-color: var(--text-color);
+    --meta-content-color: var(--text-color);
+    --active-file-border-color: var(--drake-accent);
+    --rawblock-edit-panel-bd: var(--code-block-bg-color);
+    --item-hover-bg-color: #323232;
+    --active-file-bg-color: var(--item-hover-bg-color);
+    --mermaid-theme: night;
+
+    --blur-text-color: rgba(179, 190, 196, 0.5);
+    --md-char-color: #535455;
+    --side-bar-bg-color: var(--bg-color);
+    --search-select-bg-color: #ffffff;
+    --search-select-text-color: var(--bg-color);
+    --select-text-bg-color: #3473B068;
+    --window-border: 1px solid #282828;
+
+    --drake-accent: #42B883;
+    --drake-highlight: #AAC8E4;
+    --a-color: #42B883;
+    --variable-color: var(--drake-highlight);
+    --outline-active-color: var(--title-color);
+    --code-block-bg-color: #242424;
+    --code-block-color: #A6ACCD;
+    --title-color: rgba(255, 255, 255, 0.85);
+    --blockquote-border-color: transparent;
+    --blockquote-color: #EBEBEB99;
+    --blockquote-bg-color: #242424;
+    --strong-color: var(--title-color);
+    --h2-underline-color: var(--title-color);
+    --horizontal-divider-color: var(--title-color);
+    --height-light-color: var(--drake-accent);
+    --height-light-border-color: var(--drake-accent);
+    --yaml-color: #676773;
+    --yaml-bg-color: var(--code-block-bg-color);
+    --footnotes-bg-color: var(--item-hover-bg-color);
+    --footnotes-highlight: #FFD760;
+    --table-border-color: var(--item-hover-bg-color);
+    --table-header-bg-color: #242424;
+    --table-bg-color: var(--bg-color);
+    --table-n2-bg-color: var(--table-header-bg-color);
+    --input-bg-color: var(--item-hover-bg-color);
+    --btn-hover-bg-color: var(--item-hover-bg-color);
+    --checkbox-checked: url("data:image/svg+xml,%3Csvg class='icon' viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cpath d='M425.984 726.016l384-384-59.99-61.995-324.01 324.011-152.021-152.021L213.973 512zm384-598.016q36.01 0 61.013 25.984T896 213.974v596.01q0 34.005-25.003 59.99t-61.013 25.983h-596.01q-36.011 0-61.014-25.984t-25.003-59.989v-596.01q0-34.006 25.003-59.99T213.973 128h596.011z' fill='%2342B883'/%3E%3C/svg%3E");
+    --checkbox-unchecked: url("data:image/svg+xml,%3Csvg class='icon' viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cpath d='M810.667 213.333v597.334H213.333V213.333h597.334m0-85.333H213.333C166.4 128 128 166.4 128 213.333v597.334C128 857.6 166.4 896 213.333 896h597.334C857.6 896 896 857.6 896 810.667V213.333C896 166.4 857.6 128 810.667 128z' fill='%23acb7c4'/%3E%3C/svg%3E");
+}
+
+html {
+    font-size: var(--text-size);
+}
+
+body {
+    font-family: var(--text-font) !important;
+    color: var(--text-color);
+    -webkit-font-feature-settings: "liga" on, "calt" on;
+    -webkit-font-smoothing: subpixel-antialiased;
+    text-rendering: optimizeLegibility;
+    letter-spacing: 0;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+p {
+    line-height: var(--text-line-height);
+}
+
+/*code block*/
+.md-fences {
+    font-size: 1rem;
+    padding: 0.5rem !important;
+    border-radius: 8px;
+    word-wrap: normal;
+    background-color: var(--code-block-bg-color);
+    color: var(--code-block-color);
+    border: none;
+    line-height: var(--code-line-height);
+}
+
+/*inline latex*/
+.MathJax {
+    font-size: 120% !important;
+}
+.MathJax text, .MathJax use {
+    font-family: var(--latex-font);
+}
+/*math-block latex*/
+.md-math-block .MathJax {
+    font-size: 130% !important;
+}
+
+/*mermaid*/
+[id^=mermaidChart] .cluster rect {
+    fill: var(--table-n2-bg-color) !important;
+    stroke: var(--table-border-color) !important;
+}
+[id^=mermaidChart] .clusters span.nodeLabel {
+    color: var(--text-color) !important;
+    line-height: 1.8rem;
+}
+[mermaid-type="journey"] line {
+    stroke: #7a7a7a !important;
+}
+[mermaid-type="journey"] .label {
+    color: #333 !important;
+}
+[id^=mermaidChart] .relationshipLabelBox {
+    fill: var(--bg-color) !important;
+    opacity: 1 !important;
+    background-color: var(--bg-color) !important;
+}
+[id^=mermaidChart] .legend {
+    fill: var(--text-color) !important;
+}
+[id^=mermaidChart] g.label {
+    font-size: 1rem !important;
+}
+[id^=mermaidChart] line.divider {
+    stroke: var(--table-border-color) !important;
+}
+[id^=mermaidChart] span.nodeLabel {
+    color: var(--code-block-color) !important;
+    line-height: 1.8rem;
+}
+tspan {
+    color: var(--text-color)
+}
+[id^=mermaidChart] .entityLabel {
+    fill: var(--code-block-color) !important;
+}
+[id^=mermaidChart] {
+    fill: var(--text-color) !important;
+}
+[id^=mermaidChart] rect.rect {
+    fill: rgba(175, 255, 212, 0.3) !important;
+}
+.md-diagram-panel-preview text.actor > tspan { /*方块文字*/
+    fill: var(--code-block-color) !important;
+    stroke: none !important;
+    font-family: var(--text-font) !important;
+    font-size: 1rem !important;
+}
+.md-diagram-panel-preview .actor, .md-diagram-panel-preview .entityBox { /*方块*/
+    stroke: var(--table-border-color) !important;
+    fill: var(--code-block-bg-color) !important;
+}
+.md-diagram-panel-preview .actor-line { /*竖线*/
+    stroke: var(--text-color) !important;
+    stroke-width: 1px;
+}
+.md-diagram-panel-preview .messageLine0 { /*横线*/
+    stroke-width: 1.5;
+    stroke-dasharray: none;
+    stroke: var(--text-color) !important;
+}
+.md-diagram-panel-preview .messageLine1 { /*虚线*/
+    stroke-width: 1.5 !important;
+    stroke-dasharray: 2, 2 !important;
+    stroke: var(--text-color) !important;
+}
+.md-diagram-panel-preview .messageText { /*描述文字*/
+    fill: var(--text-color) !important;
+    font-family: var(--text-font) !important;
+    font-size: 1rem !important;
+}
+.md-diagram-panel-preview .activation0 { /*长方形*/
+    fill: #e6e6e6 !important;
+    stroke: var(--text-color) !important;
+}
+.md-diagram-panel-preview .labelText, .md-diagram-panel-preview .labelText > tspan { /*循环标记*/
+    fill: var(--code-block-color) !important;
+    font-family: var(--text-font) !important;
+    font-size: 1rem !important;
+    dominant-baseline: unset;
+    alignment-baseline: unset;
+}
+.md-diagram-panel-preview .labelBox { /*循环标记背景*/
+    stroke: var(--table-border-color) !important;
+    fill: var(--code-block-bg-color) !important;
+}
+.md-diagram-panel-preview .loopLine { /*循环标记虚线*/
+    stroke: var(--text-color) !important;
+}
+.md-diagram-panel-preview .loopText, .md-diagram-panel-preview .loopText > tspan { /*循环名称*/
+    fill: var(--text-color) !important;
+    font-size: 1rem !important;
+}
+.md-diagram-panel-preview .sequenceNumber { /*序号*/
+    fill: var(--bg-color) !important;
+}
+pre.md-fences-advanced.md-focus .md-fences-adv-panel {
+    border: none;
+}
+.md-diagram-panel-preview .edgePath .path { /*箭头*/
+    stroke: var(--text-color) !important;
+}
+.md-diagram-panel-preview .edgeLabel rect { /*条件文字背景*/
+    fill: var(--bg-color) !important;
+}
+.md-diagram-panel-preview .edgeLabel span { /*条件文字*/
+    color: var(--text-color) !important;
+    background: var(--bg-color) !important;
+}
+.md-diagram-panel-preview .node rect,
+.md-diagram-panel-preview .node circle,
+.md-diagram-panel-preview .node ellipse,
+.md-diagram-panel-preview .node polygon,
+.md-diagram-panel-preview .node path { /*形状*/
+    stroke: var(--table-border-color) !important;
+    fill: var(--code-block-bg-color) !important;
+}
+#write .md-diagram-panel .md-diagram-panel-preview div { /*形状内文字*/
+    color: var(--code-block-color);
+    font-family: var(--text-font) !important;
+    font-size: 1rem !important;
+}
+
+/*code snippet*/
+#write code, tt {
+    margin: 0 2px;
+    color: var(--drake-highlight);
+    background-color: #2F2F2F;
+    padding: .15em 0.5em;
+    border-radius: 4px;
+}
+
+/*variable*/
+var {
+    color: var(--variable-color);
+    font-weight: bold;
+}
+
+/*raw block*/
+.md-rawblock-control:not(.md-rawblock-tooltip) {
+    border-radius: 2px 0 2px 2px;
+    padding: 0.2rem !important;
+}
+.md-rawblock:hover > .md-rawblock-container {
+    background: none;
+}
+.md-rawblock-input {
+    font-size: 1rem;
+}
+.md-rawblock-tooltip-btn:hover {
+    background: none;
+}
+.md-rawblock:hover > .md-rawblock-tooltip {
+    border-radius: 2px 2px 0 0;
+    margin-bottom: 2px !important;
+}
+.md-rawblock-tooltip.md-rawblock-control {
+    border-radius: 2px 2px 0 0;
+    color: var(--code-block-color);
+}
+.md-rawblock-tooltip-name {
+    color: var(--code-block-color);
+    opacity: 1;
+}
+
+/*quote block*/
+blockquote:before {
+    display: block;
+    position: absolute;
+    content: '';
+    width: 4px;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background-color: var(--blockquote-border-color);
+    border-radius: 2px;
+}
+
+blockquote {
+    color: var(--blockquote-color);
+    border-radius: 8px;
+    padding: 20px;
+    background-color: var(--blockquote-bg-color);
+    position: relative;
+    border: 1px solid #42b883;
+}
+
+#write strong {
+    color: var(--strong-color);
+    font-weight: bold;
+}
+#write blockquote strong {
+    color: var(--blockquote-color);
+}
+
+/*link*/
+#write a {
+    color: var(--a-color);
+    text-decoration: none;
+}
+[md-inline=link] a {
+    margin: 0 .2rem;
+}
+a:any-link {
+    color: var(--a-color);
+}
+
+img {
+    border-left: none;
+    border-right: none;
+    vertical-align: baseline;
+    border-radius: 2px;
+}
+
+#write {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 30px 100px;
+}
+#typora-source .CodeMirror-lines {
+    max-width: 1200px;
+}
+
+#write > ul:first-child,
+#write > ol:first-child {
+    margin-top: 30px;
+}
+
+body > *:first-child {
+    margin-top: 0 !important;
+}
+
+body > *:last-child {
+    margin-bottom: 0 !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--title-font);
+    position: relative;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    line-height: 1.4;
+    cursor: text;
+    color: var(--title-color);
+}
+
+h3.md-focus:before, h4.md-focus:before, h5.md-focus:before, h6.md-focus:before {
+    visibility: hidden;
+}
+
+h1 {
+    font-size: 2rem;
+    text-align: center;
+    margin-top: 0;
+}
+
+h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.on-focus-mode h2.md-end-block.md-heading:not(.md-focus):not(.md-focus-container):after {
+    background-color: var(--blur-text-color) !important;
+}
+
+h3 {
+    font-size: 1.4rem;
+}
+
+h4 {
+    font-size: 1.2rem;
+}
+
+h5 {
+    font-size: 1rem;
+}
+
+h6 {
+    font-size: 1rem;
+}
+
+h1:hover a.anchor,
+h2:hover a.anchor,
+h3:hover a.anchor,
+h4:hover a.anchor,
+h5:hover a.anchor,
+h6:hover a.anchor {
+    text-decoration: none;
+}
+
+h1 tt,
+h1 code {
+    font-size: inherit !important;
+}
+
+h2 tt,
+h2 code {
+    font-size: inherit !important;
+}
+
+h3 tt,
+h3 code {
+    font-size: inherit !important;
+}
+
+h4 tt,
+h4 code {
+    font-size: inherit !important;
+}
+
+h5 tt,
+h5 code {
+    font-size: inherit !important;
+}
+
+h6 tt,
+h6 code {
+    font-size: inherit !important;
+}
+
+p, blockquote, ul, ol, dl, table {
+    margin: var(--p-spacing) 0;
+}
+
+li > ol,
+li > ul {
+    margin: 0 0;
+}
+li {
+    margin: 0.5em 0;
+}
+ul > li {
+    list-style: none;
+}
+#write ul > li:before {
+    content: "";
+    position: absolute;
+    width: 0.4em;
+    height: 0.4em;
+    border-radius: 50%;
+    background-color: #EBEBEB61;
+    transition: background-color .5s;
+    left: -1.25rem;
+    top: 0.55rem;
+}
+#write ul > .task-list-item:before {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    transition: background-color .5s;
+    border: none;
+    left: 0;
+    top: 0;
+}
+hr {
+    height: 2px;
+    padding: 0;
+    margin: 16px 0;
+    background-color: var(--horizontal-divider-color);
+    border: 0 none;
+    overflow: hidden;
+    box-sizing: content-box;
+}
+
+body > h2:first-child {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+body > h1:first-child {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+body > h1:first-child + h2 {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+body > h3:first-child,
+body > h4:first-child,
+body > h5:first-child,
+body > h6:first-child {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+a:first-child h1,
+a:first-child h2,
+a:first-child h3,
+a:first-child h4,
+a:first-child h5,
+a:first-child h6 {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+h1 p,
+h2 p,
+h3 p,
+h4 p,
+h5 p,
+h6 p {
+    margin-top: 0;
+}
+
+li p.first {
+    display: inline-block;
+}
+
+ul, ol {
+    padding-inline-start: 2em;
+}
+
+ul:first-child,
+ol:first-child {
+    margin-top: 0;
+}
+
+ul:last-child,
+ol:last-child {
+    margin-bottom: 0;
+}
+
+.ty-table-edit {
+    margin-top: -1rem !important;
+}
+#write table {
+    margin-top: 1rem;
+    word-break: initial;
+    background-color: var(--table-bg-color);
+}
+table tr {
+    border-top: .1em solid var(--table-border-color);
+    margin: 0;
+    padding: 0;
+}
+table th {
+    font-weight: bold;
+    border: .1em solid var(--table-border-color);
+    border-bottom: 0;
+    margin: 0;
+    padding: 13px 13px;
+}
+table td {
+    border: .1em solid var(--table-border-color);
+    margin: 0;
+    padding: 13px 13px;
+}
+table thead {
+    background-color: var(--table-header-bg-color);
+}
+table tr:nth-child(2n) {
+    background-color: var(--table-n2-bg-color);
+}
+table tr th:first-child,
+table tr td:first-child {
+    margin-top: 0;
+}
+table tr th:last-child,
+table tr td:last-child {
+    margin-bottom: 0;
+}
+
+#write em {
+    padding: 0 5px 0 2px;
+}
+
+#write table thead th {
+    background-color: var(--table-header-bg-color);
+}
+
+/* height light */
+#write mark {
+    border: .1em solid var(--height-light-border-color);
+    color: var(--height-light-color);
+    background-color: transparent;
+    padding: .1rem .5rem;
+    border-radius: 2rem;
+    margin: 0 .2rem;
+    font-size: .95rem;
+}
+
+/*shortcut*/
+kbd {
+    border: .1em solid #5b5b5e;
+    background: transparent;
+    color: var(--text-color);
+    margin: 0 .4rem;
+    font-family: var(--text-font) !important;
+    font-size: .95rem;
+    padding: .3em .4em;
+    border-radius: .4em;
+    box-shadow: .1em .1em .2em rgba(0, 0, 0, 0.3);
+}
+
+#write del {
+    padding: 1px 2px;
+}
+
+.md-task-list-item > input {
+    margin-left: -1.3em;
+}
+
+@media print {
+    html {
+        font-size: 12px;
+    }
+
+    table,
+    pre {
+        page-break-inside: avoid;
+    }
+
+    pre {
+        word-wrap: break-word;
+    }
+}
+
+/*YAML*/
+#write pre.md-meta-block {
+    padding: 1rem;
+    font-size: 1rem;
+    line-height: 1.45;
+    background-color: var(--yaml-bg-color);
+    border: 0;
+    border-radius: 2px;
+    color: var(--yaml-color);
+    margin-top: 0 !important;
+}
+
+.mathjax-block > .code-tooltip {
+    bottom: .375rem;
+}
+
+#write > h3.md-focus:before {
+    left: -1.5625rem;
+    top: .375rem;
+}
+
+#write > h4.md-focus:before {
+    left: -1.5625rem;
+    top: .285714286rem;
+}
+
+#write > h5.md-focus:before {
+    left: -1.5625rem;
+    top: .285714286rem;
+}
+
+#write > h6.md-focus:before {
+    left: -1.5625rem;
+    top: .285714286rem;
+}
+
+.md-image > .md-meta {
+    border-radius: 2px;
+    font-family: initial;
+    padding: 2px 0 0 4px;
+    color: inherit;
+}
+
+.md-tag {
+    color: inherit;
+}
+
+.md-toc {
+    margin-top: 20px;
+    padding-bottom: 20px;
+}
+
+.typora-quick-open-item {
+    font-size: 1rem !important;
+    height: 50px;
+    padding-left: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+#typora-quick-open {
+    box-shadow: 0 0 8px #00000045;
+    padding: 0;
+}
+
+.ty-quick-open-category.ty-has-prev .ty-quick-open-category-title {
+    border-top: none;
+}
+
+#typora-quick-open-input {
+    margin: 8px;
+    box-shadow: none;
+    border-radius: 2px;
+}
+
+#typora-quick-open-input input {
+    font-size: 1rem;
+    box-shadow: none;
+    padding-top: 2px;
+    padding-left: 10px;
+    padding-right: 10px;
+    line-height: 32px;
+    max-height: 32px;
+    border: none;
+}
+
+.modal-dialog#typora-quick-open {
+    border-radius: 8px;
+}
+
+.ty-quick-open-category-title {
+    padding-left: 8px;
+    color: #BEBEBE;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+}
+
+.typora-quick-open-item-path {
+    font-size: 0.8rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 1px;
+}
+
+/*search input*/
+.form-control {
+    border: none;
+    border-radius: 2px;
+    box-shadow: none;
+}
+
+#md-searchpanel .btn {
+    border-radius: 2px;
+}
+
+#search-panel-replaceall-btn {
+    padding-right: 5px !important;
+    text-align: center !important;
+}
+
+#search-panel-replace-btn {
+    text-align: center !important;
+}
+
+#md-searchpanel input {
+    background: var(--input-bg-color);
+    border-radius: 2px;
+}
+
+.searchpanel-search-option-btn {
+    border-radius: 2px;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+}
+
+.searchpanel-search-option-btn.active {
+    background: var(--text-color);
+    color: var(--bg-color);
+}
+
+.form-control:focus {
+    box-shadow: none;
+}
+
+#md-notification:before {
+    top: 10px;
+}
+
+/** focus mode */
+.on-focus-mode blockquote {
+    border-left-color: rgba(85, 85, 85, 0.12);
+}
+
+header,
+.context-menu,
+.megamenu-content,
+footer {
+    font-family: initial;
+}
+
+/*sidebar*/
+.file-node-content:hover .file-node-icon,
+.file-node-content:hover .file-node-open-state {
+    visibility: visible;
+}
+.file-node-content {
+    display: flex;
+    align-items: center;
+}
+.file-node-open-state {
+    margin-right: .5rem;
+}
+.file-node-icon {
+    margin-right: .5rem;
+}
+
+#typora-sidebar {
+    font-size: inherit;
+    font-family: var(--title-font);
+    color: #EBEBEB99;
+}
+
+.sidebar-tabs {
+    border-bottom: none;
+}
+
+.file-list-item-summary, .file-list-item-parent-loc, .file-list-item-time, .file-list-item-summary {
+    font-size: 0.9rem !important;
+    font-family: var(--text-font);
+}
+
+.file-list-item-file-ext-part {
+    display: none;
+}
+
+.outline-item {
+    font-size: 1rem;
+}
+
+/*footnotes mark*/
+#write .md-footnote {
+    background-color: inherit;
+    color: var(--drake-highlight);
+    font-size: 0.9rem;
+    border-radius: 0.9rem;
+    padding-left: 0;
+}
+
+#write .md-footnote:before {
+    content: "[";
+}
+
+#write .md-footnote:after {
+    content: "]";
+}
+
+/*footnotes content*/
+.md-hover-tip .code-tooltip-content {
+    border-radius: 2px;
+}
+
+/*footnotes title*/
+span.md-def-name {
+    padding-right: 3ch;
+    padding-left: 0;
+    position: relative;
+    font-weight: normal;
+}
+
+/*footnotes desc*/
+.footnotes {
+    font-size: 1rem;
+    font-weight: normal;
+    color: var(--text-color);
+    position: relative;
+}
+
+/*footnotes tooltip text*/
+.code-tooltip-content .md-plain {
+    font-size: 0.9rem;
+    font-family: inherit;
+}
+
+.code-tooltip-content code {
+    padding: 0 2px;
+    font-family: inherit;
+    color: var(--footnotes-highlight);
+    background-color: inherit;
+}
+
+.code-tooltip-content a {
+    color: var(--footnotes-highlight);
+}
+
+div.code-tooltip-content {
+    box-shadow: 0 0 8px #00000045;
+    background: var(--footnotes-bg-color);
+}
+
+.footnotes {
+    opacity: 1;
+}
+
+.md-def-name:after {
+    content: ". ^";
+    color: var(--text-color);
+}
+
+.md-def-footnote .md-def-name:before {
+    content: "";
+    color: var(--text-color);
+    position: absolute;
+}
+
+.md-def-name:before {
+    content: "";
+    color: var(--text-color);
+    position: absolute;
+}
+
+.md-content.md-url, .md-def-content.md-def-url.md-auto-disp {
+    text-decoration: none;
+    border-bottom: .1rem solid var(--text-color);
+}
+
+.CodeMirror-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.file-list-item-summary {
+    font-size: 1em;
+}
+
+.pin-outline #outline-content .outline-active strong, .pin-outline .outline-active {
+    font-weight: 500;
+    color: var(--outline-active-color);
+}
+
+.file-list-item.active {
+    border-left: 4px solid var(--drake-accent);
+}
+
+#md-searchpanel .btn:not(.close-btn):hover {
+    box-shadow: none;
+    background: var(--btn-hover-bg-color);
+}
+
+/*checkbox*/
+#write input[type=checkbox] {
+    opacity: 0;
+    height: 1.6rem;
+    width: 1.6rem;
+    margin-left: -2em;
+    margin-top: 0;
+    top: 0;
+}
+
+#write .ul-list li.md-task-list-item.task-list-done::before {
+    content: "";
+    background: var(--checkbox-checked) 0 0 no-repeat;
+    background-size: 100%;
+    display: inline-block;
+    position: absolute;
+    height: 1.6rem;
+    width: 1.6rem;
+    margin-left: -2em;
+}
+#write .ul-list li.md-task-list-item.task-list-not-done::before {
+    content: "";
+    background: var(--checkbox-unchecked) 0 0 no-repeat;
+    background-size: 100%;
+    display: inline-block;
+    position: absolute;
+    height: 1.6rem;
+    width: 1.6rem;
+    margin-left: -2em;
+}
+.task-list-item p {
+    line-height: 1.6rem;
+}
+
+/*insert table*/
+.btn {
+    border-radius: 2px;
+}
+
+.modal-content {
+    border-radius: 8px;
+}
+
+.btn-primary:hover, .btn-primary:active {
+    background-color: var(--btn-hover-bg-color);
+    color: var(--drake-highlight);
+}
+
+.btn-primary {
+    background-color: transparent;
+    color: var(--drake-highlight);
+}
+
+.btn-default {
+    background-color: transparent;
+}
+
+.btn:active {
+    box-shadow: none;
+    border-color: transparent;
+}
+
+.modal-footer {
+    border-top: none;
+}
+
+#table-insert-col, #table-insert-row {
+    background: var(--input-bg-color);
+    border-radius: 2px;
+}
+
+/*preference panel*/
+#megamenu-content {
+    background-image: none !important;
+    background-color: var(--bg-color);
+}
+#top-titlebar {
+    height: inherit;
+    background-color: var(--bg-color);
+}
+#megamenu-menu-sidebar {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+.long-btn {
+    width: inherit;
+    min-width: 300px;
+    border: 1px solid var(--text-color);
+    border-radius: 6px;
+}
+.megamenu-menu-panel h1 {
+    margin-bottom: 3rem;
+    text-align: left;
+}
+.megamenu-menu-panel h1, .megamenu-menu-panel h2 {
+    font-weight: normal;
+}
+#recent-file-panel-search-input {
+    height: 45px;
+    border: none;
+    border-bottom: 1px solid var(--text-color);
+    padding-left: 8px;
+}
+#recent-file-panel-search-input::placeholder {
+    color: var(--text-color);
+    opacity: .5;
+}
+.megamenu-menu-header {
+    border-bottom: none;
+}
+#recent-file-panel-action-btn {
+    background: none;
+    border: none;
+}
+#recent-file-panel-action-btn-container {
+    float: none;
+    display: inline-block;
+}
+#top-titlebar .toolbar-icon.btn.hover, #top-titlebar .toolbar-icon.btn:hover {
+    background-color: var(--btn-hover-bg-color);
+    color: var(--text-color);
+}
+.megamenu-menu-panel .btn:hover {
+    background-color: var(--btn-hover-bg-color) !important;
+    color: var(--text-color);
+}
+#recent-file-panel tbody tr:nth-child(2n-1),
+.megamenu-menu-panel table thead,
+.megamenu-menu-panel table tr {
+    background-color: transparent;
+}
+.megamenu-menu-panel table {
+    font-weight: normal;
+}
+#megamenu-back-btn {
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+}
+.megamenu-menu-header #megamenu-menu-header-title {
+    color: var(--text-color);
+}
+header, .context-menu, .megamenu-content, footer {
+    font-family: var(--text-font);
+}
+.ty-preferences select {
+    padding-left: 2px;
+}
+.preference-item-hint {
+    font-size: 14px;
+}
+a.ty-link {
+    color: var(--a-color);
+    margin: 0 .2rem;
+}
+
+/*
+  Name:       material
+  Author:     Mattia Astorino (http://github.com/equinusocio)
+  Website:    https://material-theme.site/
+*/
+.cm-s-inner.CodeMirror {
+    background: none;
+    color: var(--code-block-color);
+}
+.cm-s-inner .CodeMirror-gutters {
+    border-right: none;
+    border-radius: 2px;
+    padding-left: 0.5rem;
+    background: #212121;
+    color: #545454;
+}
+.cm-s-inner .CodeMirror-guttermarker,
+.cm-s-inner .CodeMirror-guttermarker-subtle,
+.cm-s-inner .CodeMirror-linenumber {
+    color: #545454;
+}
+.cm-s-inner .CodeMirror-line::selection,
+.cm-s-inner .CodeMirror-line > span::selection,
+.cm-s-inner .CodeMirror-line > span > span::selection {
+    background: rgba(128, 203, 196, 0.2);
+}
+.cm-s-inner .CodeMirror-line::-moz-selection,
+.cm-s-inner .CodeMirror-line > span::-moz-selection,
+.cm-s-inner .CodeMirror-line > span > span::-moz-selection {
+    background: rgba(128, 203, 196, 0.2);
+}
+.cm-s-inner .cm-keyword {
+    color: #C792EA;
+}
+.cm-s-inner .cm-operator {
+    color: #89DDFF;
+}
+.cm-s-inner .cm-variable-2 {
+    color: var(--code-block-color);
+}
+.cm-s-inner .cm-variable-3,
+.cm-s-inner .cm-type {
+    color: #f07178;
+}
+.cm-s-inner .cm-builtin {
+    color: #FFCB6B;
+}
+.cm-s-inner .cm-atom {
+    color: #F78C6C;
+}
+.cm-s-inner .cm-number {
+    color: #F07178;
+}
+.cm-s-inner .cm-def {
+    color: #82AAFF;
+}
+.cm-s-inner .cm-string {
+    color: #C3E88D;
+}
+.cm-s-inner .cm-string-2 {
+    color: #f07178;
+}
+.cm-s-inner .cm-comment {
+    color: #787878;
+}
+.cm-s-inner .cm-variable {
+    color: var(--code-block-color);
+}
+.cm-s-inner .cm-tag {
+    color: #F07178;
+}
+.cm-s-inner .cm-bracket {
+    color: #89DDFF;
+}
+.cm-s-inner .cm-meta {
+    color: #FFCB6B;
+}
+.cm-s-inner .cm-attribute {
+    color: #C792EA;
+}
+.cm-s-inner .cm-property {
+    color: #C792EA;
+}
+.cm-s-inner .cm-qualifier {
+    color: #DECB6B;
+}
+.cm-s-inner .cm-variable-3,
+.cm-s-inner .cm-type {
+    color: #DECB6B;
+}
+.cm-s-inner .cm-error {
+    color: rgba(255, 255, 255, 1.0);
+    background-color: #F07178;
+}
+.cm-s-inner .CodeMirror-matchingbracket {
+    text-decoration: underline;
+    color: white !important;
+}
+.cm-s-inner .CodeMirror-selected {
+    background: #214283 !important;
+}
+.cm-s-inner .CodeMirror-selectedtext {
+    background: #214283 !important;
+}
+.cm-s-typora-default .CodeMirror-selectedtext {
+    background: var(--select-text-bg-color) !important;
+}
+.cm-overlay.CodeMirror-selectedtext {
+    background: var(--select-text-bg-color) !important;
+}
+.cm-s-inner div.CodeMirror-cursor {
+    border-left: 1px solid var(--code-block-color);
+}
+.cm-s-inner .cm-header, .cm-s-inner.cm-header {
+    color: #FFD760;
+}
+
+
+</style><title>金砖样题-2022</title>
+</head>
+<body class='typora-export os-windows typora-export-show-outline typora-export-collapse-outline'><div class='typora-export-content'>
+<div class="typora-export-sidebar"><div class="outline-content"><li class="outline-item-wrapper outline-h1 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#第一阶段-职业素养与理论技能">第一阶段： 职业素养与理论技能</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h1 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#第二阶段-安全运营">第二阶段： 安全运营</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h1 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#第三阶段-应急响应">第三阶段： 应急响应</a></div><ul class="outline-children"></ul></li></div></div><div id='write'  class=' first-line-indent'><p><span> </span></p><h1 id='第一阶段-职业素养与理论技能'><span>第一阶段： 职业素养与理论技能</span></h1><p><strong><span>背景：</span></strong><span>作为信息安全技术人员必须能够掌握操作系统基础、网络基础、数据库基础等相关基础知识，利用这些基础知识进一步学习信息安全技术掌握模糊测试、漏洞挖掘，从而具备成为高水平信息安全人员的基础。</span></p><p>&nbsp;</p><p><span> </span></p><p><strong><span>项目</span></strong><span> </span><strong><span>1.</span></strong><span> </span><strong><span>职业素养</span></strong></p><p><span> </span></p><p><span>\1.    以下命令中会哪条会对 Linux 系统造成致命破坏</span></p><p><span> </span></p><p><span>A.    rm -f *</span></p><p><span>B.    rm /tmp</span></p><p><span>C.    yum update</span></p><p><span>D.    cat /dev/null &gt; /etc/fstab</span></p><p>&nbsp;</p><p><strong><span>A：强制删除根目录下的所有文件，此操作会将系统玩坏</span></strong></p><p><span>B：删除临时文件</span></p><p><span>C：更新yum软件列表</span></p><p><span>D：清空 /etc/fstab 文件</span></p><p><span> </span></p><p><span>\2.    密钥管理的主要内容包括密钥的那些内容？</span></p><p><span> </span></p><p><span>A.    生成、分配、使用、存储、备份、恢复和销毁</span></p><p><span>B.    生成、检验、使用、存储、备份、恢复和销毁</span></p><p><span>C.    生成、分配、使用、下载、备份、恢复和销毁</span></p><p><span>D.    生成、验证、使用、存储、备份、恢复和销毁</span></p><p><span> </span></p><p><span>\3.    常规加密密钥的分配方案，以下描述正确的是？</span></p><p><span> </span></p><p><span>A.    使费用减到最小与灾难恢复相结合</span></p><p><span>B.    提供足够的能力满足业务需求</span></p><p><span>C.    提供合理的担保满足对客户的责任</span></p><p><span>D.    及时地生成性能报告</span></p><p><span> </span></p><p><span>\4.    使用 openssl 工具查看证书信息的命令正确的是？</span></p><p><span> </span></p><p><span>A.    openssl x509 -noout -text -in cert.pem</span></p><p><span>B.    openssl x509 -noout -text -key cert.pem</span></p><p><span>C.    openssl genrsa -noout -text -in cert.pem</span></p><p><span>D.    openssl cert -noout -text -in cert.pem</span></p><p><span> </span></p><p><span>\5.    利用 cfssl 生成证书时可以查看的默认参数正确的是？</span></p><p><span> </span></p><p><span>A.    config,pem</span></p><p><span>B.    config,csr</span></p><p><span>C.    csr,pem</span></p><p><span>D.    csr,configs</span></p><p><span> </span></p><p><span>\6.    当一个关键文件服务器的存储增长没有被合理管理时，以下哪一项是最大的</span></p><p>&nbsp;</p><p><span> </span></p><p><span>风险？</span></p><p><span> </span></p><p><span>A.    备份时间会稳定增长</span></p><p><span>B.    备份成本会快速增长</span></p><p><span>C.    存储成本会快速增长</span></p><p><span>D.    服务器恢复工作不能满足恢复时间目标（RTO）的要求</span></p><p><span> </span></p><p><span>\7.    在 CMM 标准中，哪一个等级表明组织在软件开发过程中已经建立了定量的质量指标？</span></p><p><span> </span></p><p><span>A.    可重复级</span></p><p><span>B.    已定义级</span></p><p><span>C.    已管理级</span></p><p><span>D.    优化级</span></p><p><span> </span></p><p><span>\8.    在软件开发过程中，为了让程序内部接口错误能够被尽早发现，下列哪一种测试方法是最有效的？</span></p><p><span> </span></p><p><span>A.    自底向上测试</span></p><p><span>B.    白盒测试</span></p><p><span>C.    自顶向下测试</span></p><p><span>D.    黑盒测试</span></p><p><span> </span></p><p><span>\9.    在可信计算机系统评估准则（TCSEC）中，下列哪一项是满足强制保护要求的最低级别？</span></p><p><span> </span></p><p><span>A.    C2</span></p><p><span>B.    C1</span></p><p><span>C.    B2</span></p><p><span>D.    B1</span></p><p><span> </span></p><p><span>\10.  Clark-Wilson 模型可以满足所有三个完整性安全目标，哪一个是错误的？</span></p><p><span> </span></p><p><span>A.    防止授权用户不适当的修改</span></p><p><span>B.    防止非授权用户进行篡改</span></p><p><span>C.    维持内部和外部的一致性</span></p><p><span>D.    保障数据和程序安全</span></p><p>&nbsp;</p><p><span> </span></p><p><span>\11.  在 linux 系统中用哪个命令可以查看文件和目录，显示文件的属性？</span></p><p><span> </span></p><p><span>A.    cat</span></p><p><span>B.    mkdir</span></p><p><span>C.    ls</span></p><p><span>D.    ls –l</span></p><p><span> </span></p><p><span>\12.  在 linux 系统中磁盘分区用哪个命令？</span></p><p><span> </span></p><p><span>A.    parted</span></p><p><span>B.    mv</span></p><p><span>C.    du</span></p><p><span>D.    df</span></p><p><span> </span></p><p><span>\13.  当实施 IT 治理时，决定实施对象的优先级时,下列哪一项是最重要的考虑因素？</span></p><p><span> </span></p><p><span>A.    过程成熟度</span></p><p><span>B.    性能指标</span></p><p><span>C.    商业风险</span></p><p><span>D.    保证报告</span></p><p><span> </span></p><p><span>\14.  下列措施中哪项不是登录访问控制措施？</span></p><p><span> </span></p><p><span>A.    审计登录者信息</span></p><p><span>B.    密码失效时间</span></p><p><span>C.    密码长度</span></p><p><span>D.    登录失败次数限制</span></p><p><span> </span></p><p><span>\15.  下列项目中，哪个是专门用于用户身份识别的？</span></p><p><span> </span></p><p><span>A.    PIN</span></p><p><span>B.    电话号码</span></p><p><span>C.    IP 地址</span></p><p><span>D.    MAC 地址</span></p><p>&nbsp;</p><p><span> </span></p><p><strong><span>项目</span></strong><span> 2.   </span><strong><span>网络安全</span></strong></p><p><span> </span></p><p><span>\16.  以下哪一种 Data Backup 方式在时间上最快？</span></p><p><span> </span></p><p><span>A.    增量 Data Backup</span></p><p><span>B.    差异 Data Backup</span></p><p><span>C.    完全 Data Backup</span></p><p><span>D.    磁盘镜像</span></p><p><span> </span></p><p><span>\17.  下面哪项不是 Electromagnetic radiation leakage 防护手段？</span></p><p><span> </span></p><p><span>A.    红黑电源</span></p><p><span>B.    屏蔽机房</span></p><p><span>C.    视频干扰器</span></p><p><span>D.    防静电服</span></p><p><span> </span></p><p><span>\18.  下面哪类恶意程序可以不接触任何介质，自主传播？</span></p><p><span> </span></p><p><span>A.    木马</span></p><p><span>B.    病毒</span></p><p><span>C.    蠕虫</span></p><p><span>D.    钓鱼程序</span></p><p><span> </span></p><p><span>\19.  下面那类设备常用于风险分析？</span></p><p><span> </span></p><p><span>A.    Firewall</span></p><p><span>B.    IDS</span></p><p><span>C.    漏洞扫描器</span></p><p><span>D.    UTM</span></p><p><span> </span></p><p><span>\20.  Windows 操作系统的注册表运行命令是：</span></p><p><span> </span></p><p><span>A.    Regsvr32</span></p><p><span>B.    Regegit</span></p><p><span>C.    Regedit.msc</span></p><p><span>D.    Regedit.mmc</span></p><p><span> </span></p><p><span>\21.  安装活动目录时会同时创建 DNS 的主要区域，区域记录不全会导致目录服务</span></p><p>&nbsp;</p><p><span> </span></p><p><span>异常，可通过重启 Windows 的（）来重写 DNS 区域？</span></p><p><span> </span></p><p><span>A.    Server 服务</span></p><p><span>B.    NetLogon 服务</span></p><p><span>C.    Messenger 服务</span></p><p><span>D.    NetworkDDE 服务</span></p><p><span> </span></p><p><span>\22.  关闭 Windows 网络共享功能需要关闭（）服务？</span></p><p><span> </span></p><p><span>A.    Server</span></p><p><span>B.    Workstation</span></p><p><span>C.    ServiceLayer</span></p><p><span>D.    Terminal Services</span></p><p><span> </span></p><p><span>\23.  AD 中的组策略不可以应用到？</span></p><p><span> </span></p><p><span>A.    域</span></p><p><span>B.    OU</span></p><p><span>C.    站点</span></p><p><span>D.    组</span></p><p><span> </span></p><p><span>\24.  EFS encryption 文件系统使用的 encryption 技术是（）。</span></p><p><span> </span></p><p><span>A.    DES</span></p><p><span>B.    3DES</span></p><p><span>C.    IDEA</span></p><p><span>D.    RSA</span></p><p><span> </span></p><p><span>\25.  下列哪种 IDS 将最有可能对正常网络活动产生错误警报？</span></p><p><span> </span></p><p><span>A.    基于统计</span></p><p><span>B.    基于数字 Signature</span></p><p><span>C.    神经网络</span></p><p><span>D.    基于主机</span></p><p><span> </span></p><p><span>\26.  一个长期的雇员具有很强的技术背景和管理经验，申请审计部门的一个职位。是否聘用他，应基于个人的经验和                  ?</span></p><p>&nbsp;</p><p><span> </span></p><p><span>A.    服务年限的长短，因为这将有助于确保技术能力。</span></p><p><span>B.    年龄，（年纪太大的话）在审计技术培训时可能不切实际。</span></p><p><span>C.    信息系统知识，因为这将加强审计的可信度</span></p><p><span>D.    能力，作为信息系统审计师，将独立于现有的信息系统</span></p><p><span> </span></p><p><span>\27.  一个组织使用 ERP，下列哪个是有效的访问控制？</span></p><p><span> </span></p><p><span>A.    用户级权限</span></p><p><span>B.    基于角色</span></p><p><span>C.    细粒度</span></p><p><span>D.    自主访问控制</span></p><p><span> </span></p><p><span>\28.  下列哪一项是预防 CC 攻击的有效手段?</span></p><p><span> </span></p><p><span>A.    删除可能存在 CC 攻击的页面</span></p><p><span>B.    提高服务器性能</span></p><p><span>C.    限制单个 IP 地址每秒访问服务器的次数</span></p><p><span>D.    使用 IDS 设备</span></p><p><span> </span></p><p><span>\29.  下列针对 Windows 主机安全说法最准确的是</span></p><p><span> </span></p><p><span>A.    系统重新安装后最安全</span></p><p><span>B.    系统安装了防病毒和 Firewall 就安全了</span></p><p><span>C.    把管理员密码长度修改的比较复杂安全</span></p><p><span>D.    经过专业的安全服务人员根据业务系统的需要进行评估，然后根据评估结果进行安全加固后比较安全</span></p><p><span> </span></p><p><span>\30.  下列哪一项安全机制是一个抽象机，不但确保主体拥有必要的访问权限，而且确保对客体不会有未经授权的访问以及破坏性的修改行为？</span></p><p><span> </span></p><p><span>A.    安全核心</span></p><p><span>B.    可信计算基</span></p><p><span>C.    引用监视器</span></p><p><span>D.    安全域</span></p><p><span> </span></p><p><span>\31.  下列对安全审计涉及的基本要素说法正确的是？</span></p><p><span> </span></p><p><span>A.    安全审计可分为实时入侵安全审计和事后审计检测两种</span></p><p>&nbsp;</p><p><span> </span></p><p><span>B.    安全审的基本要素是控制目标、安全漏洞、控制措施和控制测试</span></p><p><span>C.    安全审的基本要素是控制目标、安全漏洞、控制措施和检测</span></p><p><span>D.    安全审计可分为控制措施和检测控制</span></p><p><span> </span></p><p><span>\32.  下列对安全审计描述最完整的是？</span></p><p><span> </span></p><p><span>A.    安全审计系统可以对所有明文数据进行审计</span></p><p><span>B.    安全审计只能审计网站系统</span></p><p><span>C.    安全审计可以审计数据库</span></p><p><span>D.    安全审计可以审计网站论坛</span></p><p><span> </span></p><p><span>\33.  某公司在执行灾难恢复测试时，Information security professionals 注意到灾难恢复站点的服务器的运行速度缓慢，为了找到根本原因，他应该首先检查：</span></p><p><span> </span></p><p><span>A.    灾难恢复站点的错误事件报告</span></p><p><span>B.    灾难恢复测试计划</span></p><p><span>C.    灾难恢复计划(DRP)</span></p><p><span>D.    主站点和灾难恢复站点的配置文件</span></p><p><span> </span></p><p><span>\34.  为了达到组织灾难恢复的要求，备份时间间隔不能超过：</span></p><p><span> </span></p><p><span>A.    服务水平目标(SLO)</span></p><p><span>B.    恢复时间目标 (RTO)</span></p><p><span>C.    恢复点目标 (RPO)</span></p><p><span>D.    停用的最大可接受程度 (MAO)</span></p><p><span> </span></p><p><span>\35.  某公司正在进行 IT 系统灾难恢复测试，下列问题中的哪个最应该引起关注?</span></p><p><span> </span></p><p><span>A.    由于有限的测试时间窗，仅仅测试了最必须的系统，其他系统在今年的剩余时间里陆续单独测试</span></p><p><span>B.    在测试过程中，有些备份系统有缺陷或者不能正常工作，从而导致这些系统的测试失败</span></p><p><span>C.    在开启备份站点之前关闭和保护原生产站点的过程比计划需要多得多的时间</span></p><p><span>D.    每年都是由相同的员工执行此测试，由于所有的参与者都很熟悉每一个恢复步骤，因而没有使用灾难恢复计划（DRP）文档</span></p><p>&nbsp;</p><p><span> </span></p><p><strong><span>项目</span></strong><span> 3.   </span><strong><span>安全运营</span></strong></p><p><span> </span></p><p><span>\36.  Bell-LaPadula 安全模型主要关注安全的哪个方面?</span></p><p><span> </span></p><p><span>A.    可审计</span></p><p><span>B.    完整性</span></p><p><span>C.    机密性</span></p><p><span>D.    可用性</span></p><p><span> </span></p><p><span>\37.  下面哪类控制模型是基于安全标签实现的？</span></p><p><span> </span></p><p><span>A.    自主访问控制</span></p><p><span>B.    强制访问控制</span></p><p><span>C.    基于规则的访问控制</span></p><p><span>D.    基于身份的访问控制</span></p><p><span> </span></p><p><span>\38.  下面哪个角色对数据的安全负责？</span></p><p><span> </span></p><p><span>A.    数据拥有者</span></p><p><span>B.    数据监管人员</span></p><p><span>C.    用户</span></p><p><span>D.    安全管理员</span></p><p><span> </span></p><p><span>\39.  系统本身的，可以被黑客利用的安全弱点，被称为？</span></p><p><span> </span></p><p><span>A.    脆弱性</span></p><p><span>B.    风险</span></p><p><span>C.    威胁</span></p><p><span>D.    弱点</span></p><p><span> </span></p><p><span>\40.  系统的弱点被黑客利用的可能性，被称为？</span></p><p><span> </span></p><p><span>A.    风险</span></p><p><span>B.    残留风险</span></p><p><span>C.    暴露</span></p><p><span>D.    几率</span></p><p><span> </span></p><p><span>\41.  下列哪一项准确地描述了可信计算基（TCB）？</span></p><p>&nbsp;</p><p><span> </span></p><p><span>A.    TCB 只作用于固件（Firmware）</span></p><p><span>B.    TCB 描述了一个系统提供的安全级别</span></p><p><span>C.    TCB 描述了一个系统内部的保护机制</span></p><p><span>D.    TCB 通过安全标签来表示数据的敏感性</span></p><p><span> </span></p><p><span>\42.  安全模型明确了安全策略所需的数据结构和技术，下列哪一项最好地描述了安全模型中的“简单安全规则”？</span></p><p><span> </span></p><p><span>A.    Biba 模型中的不允许向上写</span></p><p><span>B.    Biba 模型中的不允许向下读</span></p><p><span>C.    Bell-LaPadula 模型中的不允许向下写</span></p><p><span>D.    Bell-LaPadula 模型中的不允许向上读</span></p><p><span> </span></p><p><span>\43.  为了防止授权用户不会对数据进行未经授权的修改，需要实施对数据的完整性保护，下列哪一项最好地描述了星或（*-）完整性原则？</span></p><p><span> </span></p><p><span>A.    Bell-LaPadula 模型中的不允许向下写</span></p><p><span>B.    Bell-LaPadula 模型中的不允许向上读</span></p><p><span>C.    Biba 模型中的不允许向上写</span></p><p><span>D.    Biba 模型中的不允许向下读</span></p><p><span> </span></p><p><span>\44.  某公司的业务部门用户需要访问业务数据，这些用户不能直接访问业务数据， 而只能通过外部程序来操作业务数据，这种情况属于下列哪种安全模型的一 部分？</span></p><p><span> </span></p><p><span>A.    Bell-LaPadula 模型</span></p><p><span>B.    Biba 模型</span></p><p><span>C.    信息流模型</span></p><p><span>D.    Clark-Wilson 模型</span></p><p><span> </span></p><p><span>\45.  作为一名信息安全专业人员，你正在为某公司设计信息资源的访问控制策略。由于该公司的人员流动性较大，你准备根据用户所属的组以及在公司中的职 责来确定对信息资源的访问权限，最应该采用下列哪一种访问控制模型？</span></p><p><span> </span></p><p><span>A.    自主访问控制（DAC）</span></p><p><span>B.    强制访问控制（MAC）</span></p><p><span>C.    基于角色访问控制（RBAC）</span></p><p><span>D.    最小特权（Least Privilege）</span></p><p>&nbsp;</p><p><span> </span></p><p><span>\46.  下列哪一种访问控制模型是通过访问控制矩阵来控制主体与客体之间的交互？</span></p><p><span> </span></p><p><span>A.    强制访问控制（MAC）</span></p><p><span>B.    集中式访问控制（Decentralized Access Control）</span></p><p><span>C.    分布式访问控制（Distributed Access Control）</span></p><p><span>D.    自主访问控制（DAC）</span></p><p><span> </span></p><p><span>\47.  下列哪种类型的IDS 能够监控网络流量中的行为特征，并能够创建新的数据库？</span></p><p><span> </span></p><p><span>A.    基于特征的 IDS</span></p><p><span>B.    基于神经网络的 IDS</span></p><p><span>C.    基于统计的 IDS</span></p><p><span>D.    基于主机的 IDS</span></p><p><span> </span></p><p><span>\48.  访问控制模型应遵循下列哪一项逻辑流程？</span></p><p><span> </span></p><p><span>A.    识别，授权，认证</span></p><p><span>B.    授权，识别，认证</span></p><p><span>C.    识别，认证，授权</span></p><p><span>D.    认证，识别，授权</span></p><p><span> </span></p><p><span>\49.  在对生物识别技术中的错误拒绝率（FRR）和错误接收率（FAR）的定义中， 下列哪一项的描述是最准确的？</span></p><p><span> </span></p><p><span>A.    FAR 属于类型 I 错误，FRR 属于类型 II 错误</span></p><p><span>B.    FAR 是指授权用户被错误拒绝的比率，FRR 属于类型 I 错误</span></p><p><span>C.    FRR 属于类型 I 错误，FAR 是指冒充者被拒绝的次数</span></p><p><span>D.    FRR 是指授权用户被错误拒绝的比率，FAR 属于类型 II 错误</span></p><p><span> </span></p><p><span>\50.  某单位在评估生物识别系统时，对安全性提出了非常高的要求。据此判断， 下列哪一项技术指标对于该单位来说是最重要的？</span></p><p><span> </span></p><p><span>A.    错误接收率（FAR）</span></p><p><span>B.    平均错误率（EER）</span></p><p><span>C.    错误拒绝率（FRR）</span></p><p><span>D.    错误识别率（FIR）</span></p><p>&nbsp;</p><p><span> </span></p><p><span>\51.  下列哪种方法最能够满足双因子认证的需求？</span></p><p><span> </span></p><p><span>A.    智能卡和用户 PIN</span></p><p><span>B.    用户 ID 与密码</span></p><p><span>C.    虹膜扫描和指纹扫描</span></p><p><span>D.    磁卡和用户 PIN</span></p><p><span> </span></p><p><span>\52.  在 Kerberos 结构中，下列哪一项会引起单点故障？</span></p><p><span> </span></p><p><span>A.    E-Mail 服务器</span></p><p><span>B.    客户工作站</span></p><p><span>C.    应用服务器</span></p><p><span>D.    密钥分发中心（KDC）</span></p><p><span> </span></p><p><span>\53.  在下列哪一项访问控制技术中，数据库是基于数据的敏感性来决定谁能够访问数据？</span></p><p><span> </span></p><p><span>A.    基于角色访问控制</span></p><p><span>B.    基于内容访问控制</span></p><p><span>C.    基于上下文访问控制</span></p><p><span>D.    自主访问控制</span></p><p><span> </span></p><p><span>\54.  数据库管理员在检查数据库时发现数据库的性能不理想，他准备通过对部分数据表实施去除规范化（denormanization）操作来提高数据库性能，这样做将增加下列哪项风险？</span></p><p><span> </span></p><p><span>A.    访问的不一致</span></p><p><span>B.    死锁</span></p><p><span>C.    对数据的非授权访问</span></p><p><span>D.    数据完整性的损害</span></p><p><span> </span></p><p><span>\55.  下列哪一项不是一种预防性物理控制？</span></p><p><span> </span></p><p><span>A.    安全警卫</span></p><p><span>B.    警犬</span></p><p><span>C.    访问登记表</span></p><p><span>D.    围栏</span></p><p>&nbsp;</p><p><span> </span></p><p><span>\56.  对于 Information security 特征,下列说法正确的有()。</span></p><p><span> </span></p><p><span>A.    Information security 是一个系统的安全</span></p><p><span>B.    Information security 是一个动态的安全</span></p><p><span>C.    Information security 是一个无边界的安全</span></p><p><span>D.    Information security 是一个非传统的安全</span></p><p><span> </span></p><p><span>\57.  Information security 的对象包括有()。</span></p><p><span> </span></p><p><span>A.    目标</span></p><p><span>B.    规则</span></p><p><span>C.    组织</span></p><p><span>D.    人员</span></p><p><span> </span></p><p><span>\58.  实施 Information security,需要保证()反映业务目标。</span></p><p><span> </span></p><p><span>A.    安全策略</span></p><p><span>B.    目标</span></p><p><span>C.    活动</span></p><p><span>D.    安全执行</span></p><p><span> </span></p><p><span>\59.  实 施 Information security, 需 要 有 一 种 与 组 织 文 化 保 持 一 致 的</span></p><p><span>(ABCD)Information security 的途 径。</span></p><p><span> </span></p><p><span>A.    实施</span></p><p><span>B.    维护</span></p><p><span>C.    监督</span></p><p><span>D.    改进</span></p><p><span> </span></p><p><span>\60.  实施 Information security 的关键成功因素包括()。</span></p><p><span> </span></p><p><span>A.    向所有管理者和员工有效地推广安全意识</span></p><p><span>B.    向所有管理者、员工及其他伙伴方分发 Information security 策略、指南和标准</span></p><p><span>C.    为 Information security 管理活动提供资金支持</span></p><p><span>D.    提供适当的培训和教育</span></p><p><span> </span></p><p><span>\61.  National security 组成要素包括()。</span></p><p>&nbsp;</p><p><span> </span></p><p><span>A.    Information security</span></p><p><span>B.    政治安全</span></p><p><span>C.    经济安全</span></p><p><span>D.    文化安全</span></p><p><span> </span></p><p><span>\62.  下列属于 assets 的有()。</span></p><p><span> </span></p><p><span>A.    信息</span></p><p><span>B.    信息载体</span></p><p><span>C.    人员</span></p><p><span>D.    公司的形象与名誉</span></p><p><span> </span></p><p><span>\63.  Security threats 的特征包括()。</span></p><p><span> </span></p><p><span>A.    不确定性</span></p><p><span>B.    确定性</span></p><p><span>C.    客观性</span></p><p><span>D.    主观性</span></p><p><span> </span></p><p><span>\64.  Manage risk 的方法,具体包括()。</span></p><p><span> </span></p><p><span>A.    行政方法</span></p><p><span>B.    技术方法</span></p><p><span>C.    管理方法</span></p><p><span>D.    法律方法</span></p><p><span> </span></p><p><span>\65.  Manage risk 的基本概念包括()。</span></p><p><span> </span></p><p><span>A.    资产</span></p><p><span>B.    脆弱性</span></p><p><span>C.    Security threats</span></p><p><span>D.    控制措施</span></p><p><span> </span></p><p><span>\66.  PDCA 循环的内容包括()。</span></p><p><span> </span></p><p><span>A.    计划</span></p><p><span>B.    实施</span></p><p>&nbsp;</p><p><span> </span></p><p><span>C.    检查</span></p><p><span>D.    行动</span></p><p><span> </span></p><p><span>\67.  Information security 实施细则中,安全方针的具体内容包括()。</span></p><p><span> </span></p><p><span>A.    分派责任</span></p><p><span>B.    约定 Information security 管理的范围</span></p><p><span>C.    对特定的原则、标准和遵守要求进行说明</span></p><p><span>D.    对报告可疑安全事件的过程进行说明</span></p><p><span> </span></p><p><span>\68.  Information security 实施细则中,Information security 内部组织的具体工作包括()。</span></p><p><span> </span></p><p><span>A.    Information security 的管理承诺</span></p><p><span>B.    Information security 协调</span></p><p><span>C.    Information security 职责的分配</span></p><p><span>D.    信息处理设备的授权过程</span></p><p><span> </span></p><p><span>\69.  Information security 事件分类包括()。</span></p><p><span> </span></p><p><span>A.    一般事件</span></p><p><span>B.    较大事件</span></p><p><span>C.    重大事件</span></p><p><span>D.    特别重大事件</span></p><p><span> </span></p><p><span>\70.  Information security 灾难恢复建设流程包括()。</span></p><p><span> </span></p><p><span>A.    目标及需求</span></p><p><span>B.    策略及方案</span></p><p><span>C.    演练与测评</span></p><p><span>D.    维护、审核、更新</span></p><p><span> </span></p><p><span>\71.  重要 Information security 管理过程中的技术管理要素包括()。</span></p><p><span> </span></p><p><span>A.    灾难恢复预案</span></p><p><span>B.    运行维护管理能力</span></p><p><span>C.    技术支持能力</span></p><p><span>D.    备用网络系统</span></p><p>&nbsp;</p><p><span> </span></p><p><span>\72.  Site safety 要考虑的因素有 ()</span></p><p><span> </span></p><p><span>A.    场地选址</span></p><p><span>B.    场地防火</span></p><p><span>C.    场地防水防潮</span></p><p><span>D.    场地温度控制</span></p><p><span>E.    场地电源供应</span></p><p><span> </span></p><p><span>\73.  64 Automatic fire alarm 部署应注意()</span></p><p><span> </span></p><p><span>A.    避开可能招致电磁干扰的区域或设备</span></p><p><span>B.    具有不间断的专用消防电源</span></p><p><span>C.    留备用电源</span></p><p><span>D.    具有自动和子动两种触发装置</span></p><p><span> </span></p><p><span>\74.  为了减小 Lightning loss，可以采取的措施有()</span></p><p><span> </span></p><p><span>A.    机房内应设等电位连接网络</span></p><p><span>B.    部署 UPS</span></p><p><span>C.    设置安全防护地与屏蔽地</span></p><p><span>D.    根据雷击在不同区域的电磁脉冲强度划分，不同的区域界面进行等电位连接</span></p><p><span>E.    信号处理电路</span></p><p><span> </span></p><p><span>\75.  会导致 Electromagnetic leakage 的有()</span></p><p><span> </span></p><p><span>A.    显示器</span></p><p><span>B.    开关电路及接地系统</span></p><p><span>C.    计算机系统的电源线</span></p><p><span>D.    机房内的电话线</span></p><p><span>E.    信号处理电路</span></p><p><span> </span></p><p><span>\76.  Computer information system security 的目标包括（）</span></p><p><span> </span></p><p><span>A.    信息机密性</span></p><p><span>B.    信息完整性</span></p><p><span>C.    服务可用性</span></p><p>&nbsp;</p><p><span> </span></p><p><span>D.    可审查性</span></p><p><span> </span></p><p><span>\77.  Computer information system security 保护的目标是要保护计算机信息系统的</span></p><p><span>()</span></p><p><span> </span></p><p><span>A.    实体安全</span></p><p><span>B.    运行安全</span></p><p><span>C.    Information security</span></p><p><span>D.    人员安全</span></p><p><span> </span></p><p><span>\78.  Computer information system security 包括()</span></p><p><span> </span></p><p><span>A.    系统风险管理</span></p><p><span>B.    审计跟踪</span></p><p><span>C.    备份与恢复</span></p><p><span>D.    电磁信息泄漏</span></p><p><span> </span></p><p><span>\79.  Computer information system security protection 的措施包括()</span></p><p><span> </span></p><p><span>A.    安全法规</span></p><p><span>B.    安全管理</span></p><p><span>C.    组织建设</span></p><p><span>D.    制度建设</span></p><p><span> </span></p><p><span> </span></p><p><strong><span>项目</span></strong><span> 4.   </span><strong><span>应急响应</span></strong></p><p><span> </span></p><p><span>\80.  Computer information system security management 包括()</span></p><p><span> </span></p><p><span>A.    组织建设</span></p><p><span>B.    事前检查</span></p><p><span>C.    制度建设</span></p><p><span>D.    人员意识</span></p><p><span> </span></p><p><span>\81.  Public information network security supervision 工作的性质()</span></p><p><span> </span></p><p><span>A.    是公安工作的一个重要组成部分</span></p><p><span>B.    是预防各种危害的重要手段</span></p><p><span>C.    是行政管理的重要手段</span></p><p>&nbsp;</p><p><span> </span></p><p><span>D.    是打击犯罪的重要手段</span></p><p><span> </span></p><p><span>\82.  Public information network security supervision 工作的一般原则()</span></p><p><span> </span></p><p><span>A.    预防与打击相结合的原则</span></p><p><span>B.    专门机关监管与社会力量相结合的原则</span></p><p><span>C.    纠正与制裁相结合的原则</span></p><p><span>D.    教育和处罚相结合的原则</span></p><p><span> </span></p><p><span>\83.  Information security officer 应具备的条件:()</span></p><p><span> </span></p><p><span>A.    具有一定的计算机网络专业技术知识</span></p><p><span>B.    经过计算机安全员培训，并考试合格</span></p><p><span>C.    具有大本以上学历</span></p><p><span>D.    无违法犯罪记录</span></p><p><span> </span></p><p><span>\84.  OS 应当提供哪些安全保障()</span></p><p><span> </span></p><p><span>A.    验证(Authentication)</span></p><p><span>B.    授权(Authorization)</span></p><p><span>C.    数据保密性(DataConfidentiality)</span></p><p><span>D.    数据一致性(DataIntegrity)</span></p><p><span> </span></p><p><span>\85.  Windows OS 的&quot;域&quot;控制机制具备哪些安全特性()</span></p><p><span> </span></p><p><span>A.    用户身份验证</span></p><p><span>B.    访问控制</span></p><p><span>C.    审计(Log)</span></p><p><span>D.    数据通讯的加密</span></p><p><span> </span></p><p><span>\86.  从系统整体看，Security vulnerabilities 包括哪些方面()</span></p><p><span> </span></p><p><span>A.    技术因素</span></p><p><span>B.    人的因素</span></p><p><span>C.    规划，策略和执行过程</span></p><p><span> </span></p><p><span>\87.  从系统整体看，下述那些问题属于系统 Security vulnerabilities()</span></p><p><span> </span></p><p><span>A.    产品缺少安全功能</span></p><p>&nbsp;</p><p><span> </span></p><p><span>B.    产品有 Bugs</span></p><p><span>C.    缺少足够的安全知识</span></p><p><span>D.    人为错误</span></p><p><span> </span></p><p><span>\88.  应对操作系统 Security vulnerabilities 的基本方法是什么()</span></p><p><span> </span></p><p><span>A.    对默认安装进行必要的调整</span></p><p><span>B.    给所有用户设置严格的口令</span></p><p><span>C.    及时安装最新的安全补丁</span></p><p><span>D.    更换到另一种操作系统</span></p><p><span> </span></p><p><span>\89.  造成操作系统 Security vulnerabilities 的原因()</span></p><p><span> </span></p><p><span>A.    不安全的编程语言</span></p><p><span>B.    不安全的编程习惯</span></p><p><span>C.    考虑不周的架构设计</span></p><p><span> </span></p><p><span>\90.  严格的 Password policy 应当包含哪些要素()</span></p><p><span> </span></p><p><span>A.    满足一定的长度，比如 4 位以上</span></p><p><span>B.    同时包含数字，字母和特殊字符</span></p><p><span>C.    系统强制要求定期更改口令</span></p><p><span>D.    用户可以设置空口令</span></p><p><span> </span></p><p><span>\91.  Computer security cases 包括以下几个方面()</span></p><p><span> </span></p><p><span>A.    重要安全技术的采用</span></p><p><span>B.    安全标准的贯彻</span></p><p><span>C.    安全制度措施的建设与实施</span></p><p><span>D.    重大安全隐患、违法违规的发现，事故的发生</span></p><p><span> </span></p><p><span>\92.  Computer security cases 包括以下几个内容()</span></p><p><span> </span></p><p><span>A.    违反国家法律的行为</span></p><p><span>B.    违反国家法规的行为</span></p><p><span>C.    危及、危害计算机信息系统安全的事件</span></p><p><span>D.    计算机硬件常见机械故障</span></p><p>&nbsp;</p><p><span> </span></p><p><span>\93.  重大 Computer security accident 可由   受理()</span></p><p><span> </span></p><p><span>A.    案发地市级公安机关公共信息网络安全监察部门</span></p><p><span>B.    案发地当地县级（区、市）公安机关治安部门</span></p><p><span>C.    案发地当地县级（区、市）公安机关公共信息网络安全监察部门</span></p><p><span>D.    案发地当地公安派出所</span></p><p><span> </span></p><p><span>\94.  Site investigation 主要包括以下几个环节   ()</span></p><p><span> </span></p><p><span>A.    对遭受破坏的计算机信息系统的软硬件的描述及被破坏程度</span></p><p><span>B.    现场现有电子数据的复制和修复</span></p><p><span>C.    电子痕迹的发现和提取，证据的固定与保全</span></p><p><span>D.    现场采集和扣押与事故或案件有关的物品</span></p><p><span> </span></p><p><span>\95.  Computer security accident 原因的认定和计算机案件的数据鉴定,                                                         ()</span></p><p><span> </span></p><p><span>A.    是一项专业性较强的技术工作</span></p><p><span>B.    必要时可进行相关的验证或侦查实验</span></p><p><span>C.    可聘请有关方面的专家，组成专家鉴定组进行分析鉴定</span></p><p><span>D.    可以由发生事故或计算机案件的单位出具鉴定报告</span></p><p><span> </span></p><p><span>\96.  只要选择一种最安全的操作系统，整个系统就可以保障安全。（）</span></p><p><span> </span></p><p><span>A.    正确</span></p><p><span>B.    错误</span></p><p><span> </span></p><p><span>\97.  Screen saver 的 Password 是需要分大小写的。（）</span></p><p><span> </span></p><p><span>A.    正确</span></p><p><span>B.    错误</span></p><p><span> </span></p><p><span>\98.  Password 学的基本规则是，你必须让 Password 分析者知道 Encryption 和解密所使用的方法。（）</span></p><p><span> </span></p><p><span>A.    正确</span></p><p><span>B.    错误</span></p><p><span> </span></p><p><span>\99.  Social engineering，冒充合法用户发送邮件或打电话给管理人员，以骗取用户口令和其他信息；垃圾搜索：Attacker 通过搜索被攻击者的废弃物，得到</span></p><p>&nbsp;</p><p><span> </span></p><p><span>与系统有关的信息，如果用户将口令写在纸上又随便丢弃，则很容易成为垃圾搜索的 Attack 对象。（）</span></p><p><span> </span></p><p><span>A.    正确</span></p><p><span>B.    错误</span></p><p><span> </span></p><p><span>\100.       安全管理从范畴上讲，涉及物理安全策略、访问控制策略、信息 Encryption</span></p><p><span>策略和 Network security management 策略。（）</span></p><p><span> </span></p><p><span>A.    正确</span></p><p><span>B.    错误</span></p><p>&nbsp;</p><p><span> </span></p><h1 id='第二阶段-安全运营'><span>第二阶段： 安全运营</span></h1><p><strong><span>背景：</span></strong><span>作为信息安全技术人员必须能够掌握操作系统加固与安全管控、防火墙一般配置、常见服务配置等相关技能，利用这些技能我们能够进一步保障重要业务平稳运行。</span></p><p><span>安全运营阶段题目主要包含：操作系统安全加固，iptables 防火墙配置，应用服务安全配置等内容。</span></p><p><span> </span></p><p><span> </span></p><p><strong><span>项目</span></strong><span> 1.   </span><strong><span>系统安全管控</span></strong></p><p><span> </span></p><p><strong><span>任务一</span></strong><span> Windows </span><strong><span>加固</span></strong></p><p><span> </span></p><p><span>你作为 A 公司的安全运营人员，当前有一部 Windows 系统电脑需要加固， 请按照下面要求完成相关操作，保障系统安全运行。</span></p><p><span>\1.    通过 wmic 工具将当前系统服务简要信息列出，并存储为 html 格式使用</span></p><p><span>的命令是；</span></p><p><span>\2.    通过 wmic 工具将当前系统用户详细信息列出，使用的命令是；</span></p><p><span>\3.    通过 sc 工具管理服务，启动 mysql 服务的命令是；</span></p><p><span>\4.    通过命令行 CMD 管理 Windows 防火墙，允许 192.168.1.100 连接所有端口的命令是；</span></p><p><span>\5.    通过命令行 CMD 配置 Windows 防火墙，阻断 tcp/3389 端口连接的命令是；</span></p><p><span>\6.    通过命令行 CMD 管理 Windows 用户，添加 skill 用户至 administrators 组的命令是。</span></p><p><span> </span></p><p><strong><span>任务二</span></strong><span> Linux </span><strong><span>加固</span></strong></p><p><span> </span></p><p><span>你作为 A 公司的安全运营人员，当前有一部 Linux 系统电脑需要加固，请按照下面要求完成相关操作，保障系统安全运行。</span></p><p><span>\1.    Linux 操作系统中存储实时内存信息文件的路径是；</span></p><p><span>\2.    Linux 操作系统中存储开机自动挂载磁盘信息的文件路径是；</span></p><p><span>\3.    Linux 操作系统 SSH 服务禁用 root 用户登陆要修改的配置是；</span></p><p><span>\4.    Linux 操作系统 SSH 服务开机端口网关需要修改的配置是；</span></p><p><span>\5.    Linux 操作系统 VSFTPD 服务默认的匿名用户名是；</span></p><p><span>\6.    Linux 操作系统 VSFTPD 服务禁用匿名需要进行的配置是。</span></p><p>&nbsp;</p><p><span> </span></p><p><strong><span>项目</span></strong><span> *</span><strong><span>2.</span><span>*</span></strong><span>   </span><strong><span>防火墙安全管控</span></strong></p><p><span> </span></p><p><strong><span>任务三 工作站防火墙配置</span></strong></p><p><span> </span></p><p><span>你作为 A 公司的安全运营人员，当前有一部 Linux 系统的工作站防火墙需要配置，请按照下面要求完成相关操作，保障系统安全运行。</span></p><p><span>\1.    使用 iptables 防火墙控制流量转发，需要操作的链是哪条；</span></p><p><span>\2.    使用 iptables 防火墙控制流量进入，限制进入流量 IP 地址使用的选项是；</span></p><p><span>\3.    使用 iptables 防火墙控制默认规则拒绝所有进入流量，需使用的命令是；</span></p><p><span>\4.    使用 iptables 防火墙配置工作站类型防火墙，出口方向一般执行什么操作；</span></p><p><span>\5.    使用 iptables 防火墙配置 tcp/22 端新建连接速度，需使用的命令是什么；</span></p><p><span>\6.    使用 iptables 防护墙配置 nat 地址转换需要操作哪张表；</span></p><p><span>\7.   使用iptables 防火墙配置放行从 192.168.1.100 至 192.168.3.100 需使用的命令是；</span></p><p><span>\8.    使用 iptables 防火墙配置工作站类型防火墙时，哪一接口流量应全部放行；</span></p><p><span>\9.    使用 iptables 防火墙配置工作站类型防火墙时，执行什么命令可以清除所有规则。</span></p><p><span> </span></p><p><span> </span></p><p><strong><span>项目</span></strong><span> 3.   </span><strong><span>应用服务安全</span></strong></p><p><span> </span></p><p><strong><span>任务四</span></strong><span> VSFTPD </span><strong><span>服务配置</span></strong></p><p><span> </span></p><p><span>你作为 A 公司的安全运营人员，当前有一部 Linux 系统的 VSFTPD 服务需要配置，请按照下面要求完成相关操作，保障系统安全运行。</span></p><p><span>\1.    配置启用 VSFTPD 虚拟用户的配置是；</span></p><p><span>\2.    配置启用 VSFTPD 虚拟用户文件，用户名 admin 密码 admin 用户文件中如何表示；</span></p><p><span>\3.    配置修改 VSFTPD 服务端口为 2200，firewalld 防火墙需要进行的操作是；</span></p><p><span>\4.    配置修改 VSFTPD 服务端口为 2200，selinux 需要进行的操作是；</span></p><p><span>\5.    配置修改 VSFTPD 服务公共文件夹至/srv/ftp/share，selinux 需要进行的配置是；</span></p><p><span>\6.    使用 hdyra 工具破解 vsftpd 服务密码的命令（用户名：admin 密码字典：</span></p><p><span>password.txt ）是；</span></p><p><span>\7.    使用 medusa 工具破解 vsftpd 服务密码的命令（用户名：admin 密码字典：</span></p><p><span>password.txt ）是。</span></p><p><span> </span></p><p><strong><span>任务五 文件共享服务配置</span></strong></p><p><span> </span></p><p><span>你作为 A 公司的安全运营人员，当前有一部 Linux 系统的文件共享服务需要</span></p><p>&nbsp;</p><p><span> </span></p><p><span>配置，请按照下面要求完成相关操作，保障文件共享系统安全运行。</span></p><p><span>\1.    Linux 操作系统使用 yum 包管理器安装文件共享服务的命令是；</span></p><p><span>\2.    Linux 操作系统配置文件共享目录在/srv/samba，selinux 需要进行的配置是；</span></p><p><span>\3.    Linux 操作系统配置文件共享服务用户的命令是；</span></p><p><span>\4.    Linux 操作系统配置文件共享服务用户，创建新用户 share 的命令是；</span></p><p><span>\5.    Linux 操作系统配置文件共享服务匿名用户访问配置是；</span></p><p><span>\6.    Linux 操作系统配置文件共享服务共享打印机，默认共享名是；</span></p><p><span>\7.    smbclient 工具查看服务器 192.168.1.100 下存在哪些共享目录使用的命令是。</span></p><p><span> </span></p><p><strong><span>任务六 证书管理服务配置</span></strong></p><p><span> </span></p><p><span>你作为 A 公司的安全运营人员，当前有一部 Linux 系统的证书管理服务需要配置，请按照下面要求完成相关操作，保障证书分发系统安全运行。</span></p><p><span>\1.  使用 cfssl 工具查看默认请求配置信息使用的命令是</span></p><p><span>\2.  使用 cfssl 工具初始化 CA 证书使用的命令是；</span></p><p><span>\3.  使用 cfssl 工具初始化服务器证书使用的命令是；</span></p><p><span>\4.  使用 cfssl 工具吊销 test 证书使用命令是；</span></p><p><span>\5.  使用 openssl 工具生成 rsa 密钥的命令是；</span></p><p><span>\6.  使用 openssl 工具查看证书信息的命令是。</span></p><p>&nbsp;</p><p><span> </span></p><h1 id='第三阶段-应急响应'><span>第三阶段： 应急响应</span></h1><p><strong><span>背景：</span></strong><span>作为信息安全技术人员必须能够掌握内容镜像分析、重要数据恢复、恶意文件分析等相关技能，利用这些技能我们能够第一时间分析相关恶意文件、分析蛛丝马迹帮助我们更好的完成应急响应工作。</span></p><p><span>应急响应阶段题目主要包含：Windows 内存镜像分析，Linux 内存镜像分析， 磁盘文件恢复，恶意程序分析等内容。</span></p><p><span> </span></p><p><span> </span></p><p><strong><span>项目</span></strong><span> 1.   </span><strong><span>内存镜像分析</span></strong></p><p><span> </span></p><p><strong><span>任务一</span></strong><span> Windows </span><strong><span>内存镜像分析</span></strong></p><p><span> </span></p><p><span>你作为 A 公司的应急响应人员，请分析提供的内存文件按照下面的要求找到相关关键信息，完成应急响应事件。</span></p><p><span>\1.    从内存中获取到用户admin 的密码并且破解密码，以Flag{admin,password}</span></p><p><span>形式提交(密码为 6 位)；</span></p><p><span>\2.    获取当前系统 ip 地址及主机名，以 Flag{ip:主机名}形式提交；</span></p><p><span>\3.    获取当前系统浏览器搜索过的关键词，作为 Flag 提交；</span></p><p><span>\4.    当前系统中存在挖矿进程，请获取指向的矿池地址，以 Flag{ip:端口}形式提交；</span></p><p><span>\5.    恶意进程在系统中注册了服务，请将服务名以 Flag{服务名}形式提交。</span></p><p><span> </span></p><p><span> </span></p><p><strong><span>项目</span></strong><span> *</span><strong><span>2.</span><span>*</span></strong><span>   </span><strong><span>机密数据恢复</span></strong></p><p><span> </span></p><p><strong><span>任务二 财务数据恢复</span></strong></p><p><span> </span></p><p><span>你作为 A 公司的应急响应人员，请分析提供的磁盘文件按照下面的要求找到相关关键信息，完成应急响应事件。</span></p><p><span>\1.    分析磁盘镜像中的文件系统，找到关键财务证据一</span></p><p><span>\2.    分析磁盘镜像中的文件系统，找到关键财务证据二</span></p><p><span>\3.    分析磁盘镜像中的文件系统，找到关键财务证据三</span></p><p><span>\4.    分析磁盘镜像中的文件系统，找到关键财务证据四</span></p><p><span>\5.    分析磁盘镜像中的文件系统，找到关键财务证据五</span></p><p><span>\6.    分析磁盘镜像中的文件系统，找到关键财务证据六</span></p><p><span>\7.    分析磁盘镜像中的文件系统，找到关键财务证据五</span></p><p><span>\8.    分析磁盘镜像中的文件系统，找到关键财务证据六</span></p><p>&nbsp;</p><p><span> </span></p><p><strong><span>任务三 快递运单信息恢复</span></strong></p><p><span> </span></p><p><span>你作为 A 公司的应急响应人员，请分析提供的流量包文件按照下面的要求找到相关关键信息，完成应急响应事件。</span></p><p><span>\1.    分析提供的流量包，找到系统运单信息相关数据一</span></p><p><span>\2.    分析提供的流量包，找到系统运单信息相关数据二</span></p><p><span>\3.    分析提供的流量包，找到系统运单信息相关数据三</span></p><p><span>\4.    分析提供的流量包，找到系统运单信息相关数据四</span></p><p><span>\5.    分析找到的运单系统管理员的密码库，尝试破解密码一</span></p><p><span>\6.    分析找到的运单系统管理员的密码库，尝试破解密码二</span></p><p><span>\7.    分析找到的运单系统管理数据，找到关键运单记录一</span></p><p><span>\8.    分析找到的运单系统管理数据，找到关键运单记录二</span></p><p><span> </span></p><p><strong><span>任务四 加密系统破解</span></strong></p><p><span> </span></p><p><span>你作为 A 公司的应急响应人员，请分析提供的残缺脚步文件按照下面的要求找到相关关键信息，完成应急响应事件。</span></p><p><span>\1.    编辑 Python 程序 ssh_brute_force.py 文件，利用 superdic.txt 密码字典文件，使该程序实现暴力破解服务器场景 SSH 服务登录密码的功能，填写该文件当中空缺的 F1 字符串，将该字符串通过 SHA256 运算后返回哈希值的十六进制结果作为 Flag 值（形式：十六进制字符串）提交；</span></p><p><span>\2.    编辑 Python 程序 ssh_brute_force.py 文件，利用 superdic.txt 密码字典文件，使该程序实现暴力破解服务器场景 SSH 服务登录密码的功能，填写该文件当中空缺的 F2 字符串，将该字符串通过 SHA256 运算后返回哈希值的十六进制结果作为 Flag 值（形式：十六进制字符串）提交；</span></p><p><span>\3.    编辑 Python 程序 ssh_brute_force.py 文件，利用 superdic.txt 密码字典文件，使该程序实现暴力破解服务器场景 SSH 服务登录密码的功能，填写该文件当中空缺的 F3 字符串，将该字符串通过 SHA256 运算后返回哈希值的十六进制结果作为 Flag 值（形式：十六进制字符串）提交；</span></p><p><span>\4.    编辑 Python 程序 ssh_brute_force.py 文件，利用 superdic.txt 密码字典文件，使该程序实现暴力破解服务器场景 SSH 服务登录密码的功能，填写该文件当中空缺的 F4 字符串，将该字符串通过 SHA256 运算后返回哈希值的十六进制结果作为 Flag 值（形式：十六进制字符串）提交；</span></p><p><span>\5.    编辑 Python 程序 ssh_brute_force.py 文件，利用 superdic.txt 密码字典文件，使该程序实现暴力破解服务器场景SSH 服务登录密码的功能，填写该文件当中空缺的 F5 字符串，将该字符串通过 SHA256 运算后返回哈希值的十六进制结果作为 Flag 值（形式：十六进制字符串）提交；</span></p><p><span>\6.    编辑 Python 程序 ssh_brute_force.py 文件，利用 superdic.txt 密码字典文件，使该程序实现暴力破解服务器场景 SSH 服务登录密码的功能，填写该文件当中空缺的 F6 字符串，将该字符串通过 SHA256 运算后返回哈希值的十六进制结果作为 Flag 值（形式：十六进制字符串）提交；</span></p><p><span>\7.    编辑 Python 程序 ssh_brute_force.py 文件，利用 superdic.txt 密码字典文件，使该程序实现暴力破解服务器场景 SSH 服务登录密码的功能，填写该文件当中空缺的 F7 字符串，将该字符串通过 SHA256 运算后返回哈希值的十六进制结果作为 Flag 值（形式：十六进制字符串）提交；</span></p><p>&nbsp;</p><p><span> </span></p><p><span>\8.    编辑 Python 程序 ssh_brute_force.py 文件，利用 superdic.txt 密码字典文件，使该程序实现暴力破解服务器场景 SSH 服务登录密码的功能，填写该文件当中空缺的 F8 字符串，将该字符串通过 SHA256 运算后返回哈希值的十六进制结果作为 Flag 值（形式：十六进制字符串）提交；</span></p><p><span>\9.    编辑 Python 程序 ssh_brute_force.py 文件，利用 superdic.txt 密码字典文件，使该程序实现暴力破解服务器场景 SSH 服务登录密码的功能，填写该文件当中空缺的 F9 字符串，将该字符串通过 SHA256 运算后返回哈希值的十六进制结果作为 Flag 值（形式：十六进制字符串）提交；</span></p><p><span>\10.  编辑 Python 程序 ssh_brute_force.py 文件，利用 superdic.txt 密码字典文件，使该程序实现暴力破解服务器场景 SSH 服务登录密码的功能，运行该程序，将程序运行后得到的正确密码通过 SHA256 运算后返回哈希值的十六进制结果作为 Flag 值（形式：十六进制字符串）提交。</span></p><p><span> </span></p><p><span> </span></p><p><strong><span>项目</span></strong><span> 3.   APT </span><strong><span>攻击溯源</span></strong></p><p><span> </span></p><p><strong><span>任务五 攻击流量溯源</span></strong></p><p><span> </span></p><p><span>你作为 A 公司的应急响应人员，公司内某重要部门操作 APT 攻击，现捕获到相关流量请你按照下面的要求找到关键信息，完成应急响应事件。</span></p><p><span>\1.    使用Wireshark 查看并分析服务器场景桌面下的login.pcapng 数据包文件， 通过分析数据包 login.pcapng 的第 130 号报文，找出黑客提交的有效命令，并将该有效命令作为 FLAG（形式：[命令]）提交；</span></p><p><span>\2.    继续查看数据包文件 login.pacapng，分析出黑客又执行了什么命令，并将该有效命令作为 FLAG（形式：[命令]）提交；</span></p><p><span>\3.    继续查看数据包文件 login.pacapng 分析出黑客执行上述命令后，得到的结果中的多个 IP 地址作为 FLAG（形式：[IP 地址 1:IP 地址 2:IP 地址 n]） 提交；</span></p><p><span>\4.    继续查看数据包文件 login.pacapng 分析出黑客执行上述命令后，得到的结果中的最后 1 个物理地址作为 FLAG（形式：[物理地址]）提交；</span></p><p><span>\5.    继续查看数据包文件login.pacapng 分析出黑客建立映射使用的有效命令， 并将该命令中的 IP 地址作为 FLAG（形式：[IP 地址]）提交；</span></p><p><span>\6.    继续查看数据包文件login.pacapng 分析出黑客建立映射使用的有效命令， 并将该命令中的用户名作为 FLAG（形式：[用户名]）提交；</span></p><p><span>\7.    继续查看数据包文件login.pacapng 分析出黑客建立映射使用的有效命令， 并将该命令中的密码作为 FLAG（形式：[密码]）提交。</span></p><p><span> </span></p><p><strong><span>任务六 服务器日志分析</span></strong></p><p><span> </span></p><p><span>你作为 A 公司的应急响应人员，公司内一重要服务器遭到攻击，被攻击时捕获到该流量包请按照下面的要求获取关键信息，完成应急响应事件。</span></p><p><span>\1.    使用Wireshark 查看并分析服务器场景桌面下的logs.pcapng 数据包文件， 通过分析数据包 logs.pcapng 找出恶意用户目录扫描的第 9 个文件，并将该文件名作为 FLAG（形式：[robots.txt]）提交；</span></p><p>&nbsp;</p><p><span> </span></p><p><span>\2.    继续查看数据包文件 logs.pcapng，分析出恶意用户扫描了哪些端口，并将全部的端口作为 FLAG（形式：[端口名 1，端口名 2，端口名 3…，端口名 n]）从低到高提交；</span></p><p><span>\3.    继续查看数据包文件logs.pcapng 分析出恶意用户读取服务器的文件名是什么，并将该文件名作为 FLAG（形式：[robots.txt]）提交；</span></p><p><span>\4.    继续查看数据包文件logs.pcapng 分析出恶意用户写入一句话木马的路径是什么，并将该路径作为 FLAG（形式：[/root/whoami/]）提交；</span></p><p><span>\5.    继续查看数据包文件logs.pcapng 分析出恶意用户连接一句话木马的密码是什么，并将一句话密码作为 FLAG（形式：[一句话密码]）提交；</span></p><p><span>\6.    继续查看数据包文件 logs.pcapng 分析出恶意用户下载了什么文件，并将文件名及后缀作为 FLAG（形式：[文件名.后缀名]）提交；</span></p><p><span>\7.    继续查看数包文件 logs.pcapng 将恶意用户下载的文件里面的内容作为</span></p><p><span>FLAG（形式：[文件内容]）提交。</span></p><p>&nbsp;</p><p><span> </span></p><p><span> </span></p><p><strong><span>第四阶段：</span></strong><span> CTF </span><strong><span>夺旗</span></strong></p><p><strong><span>背景：</span></strong><span>作为信息安全技术人员，除了要掌握安全运营、应急响应这些方面安 全内容还应该经常参与 CTF 夺旗实战，通过夺旗赛能够进一步提升实战技术能力， 磨练选手的耐心，增强选手的学习能力。</span></p><p><span>CTF 夺旗阶段题目主要包含：注入攻击，模版逃逸，序列化漏洞，服务漏洞等相关内容。</span></p><p><span> </span></p><p><span> </span></p><p><strong><span>项目</span></strong><span> 1.   </span><strong><span>注入攻击</span></strong></p><p><span> </span></p><p><strong><span>任务一 命令注入</span></strong></p><p><span> </span></p><p><span>\1.    打开渗透机上的火狐浏览器，在地址栏输入靶机服务器的 IP 地址访问网页，使用默认用户名 admin 密码 password 登录，在登陆后的 DVWA 页面点击左边导航栏的“DVWA Security”按钮，修改难易程度为“low”，然后点击“Submit” 提交。点击“Command Injection”输入靶机服务器 IP， 可以看到正常返回数据，将返回数据的最后一行的第 1 个单词作为 Flag 值提交。</span></p><p><span>\2.    构造语句用于显示操作系统中的用户，将构造语句中除 IP 地址以外的部分作为 Flag 值提交。</span></p><p><span>\3.    在 DVWA 页面点击“DVWA Security” 选择难易程度为“medium”，然后点击“Submit” 提交，再次利用上述构造语句用于显示系统中的用户， 发现报错，将返回结果的倒数第 2 个单词作为 Flag 值提交。</span></p><p><span>\4.    点击“view_source”查看源代码，将源码中用于防御注入的过滤内容以</span></p><p><span>F1.F2 形式作为 Flag 值提交。</span></p><p><span>\5.    重新构造语句用于显示操作系统中的用户，可以看到正常返回数据，将重新构造语句中除 IP 地址以外的部分作为 Flag 值提交。</span></p><p><span>\6.    在 DVWA 页面点击“DVWA Security” 选择难易程度为“high”，然后点击“Submit”提交，将上一步中重新构造的语句重新进行提交，发现报错，点击“view_source”查看源代码，发现服务器端对 IP 参数进一步做了一定过滤，将源码中第 3 个过滤的内容作为 Flag 值提交。</span></p><p><span>\7.    再次构造语句用于显示操作系统中的用户，可以看到正常返回数据，将再次构造语句中除 IP 地址以外的部分作为 Flag 值提交。</span></p><p><span>\8.    再次构造语句用于显示操作系统中的用户，可以看到正常返回数据，将返回的用户列表中的最后一个用户名作为 Flag 值提交。</span></p><p><span> </span></p><p><strong><span>任务二</span></strong><span> SQL </span><strong><span>注入</span></strong></p><p><span> </span></p><p><span>\1.    该系统存在漏洞，登陆系统找到隐藏信息，并将 flag 提交;</span></p><p><span>\2.    该系统存在漏洞，找到当前 WEB 系统所使用的数据库用户名;</span></p><p>&nbsp;</p><p><span> </span></p><p><span>\3.    该系统存在漏洞，找到数据库中的隐藏信息，并将 flag 提交。</span></p><p><span> </span></p><p><span> </span></p><p><strong><span>项目</span></strong><span> *</span><strong><span>2.</span><span>*</span></strong><span>   </span><strong><span>序列化漏洞</span></strong></p><p><span> </span></p><p><strong><span>任务三 序列化链式利用</span></strong></p><p><span> </span></p><p><span>\1.    访问靶机地址，将靶机 PHP 环境中的 PHP_SHA256 值作为 flag 提交；</span></p><p><span>\2.    访问靶机地址，将完成题目需要提交的通过 GET 方式发送的变量 content</span></p><p><span>前 6 位作为 flag 提交；</span></p><p><span>\3.    访问靶机地址，将完成题目需要配置的特殊 HTTP 头变量的名字做为 flag</span></p><p><span>提交；</span></p><p><span>\4.    访问靶机地址，将完成题目需要绕过的函数名作为 flag 提交；</span></p><p><span>\5.    访问靶机地址，将完成题目需要使用的请求方式作为 flag 提交；</span></p><p><span>\6.    访问靶机地址，利用题目中的反序列化漏洞将靶机环境中的 flag 提交。</span></p><p><span> </span></p><p><strong><span>任务四 序列化字符串逃逸</span></strong></p><p><span> </span></p><p><span>\1.    访问靶机 8081 端口，将通过伪协议查看 index.php 文件的 payload 作为</span></p><p><span>flag 提交；</span></p><p><span>\2.    将完成发序列化字符串逃逸所得到的结果作为 flag 提交；</span></p><p><span>\3.    完成 POP 链式反序列化并将得到的文件名作为 flag 提交；</span></p><p><span>\4.    破解上一题目找到的文件，将找到的文件名作为 flag 提交；</span></p><p><span>\5.    破解上一题目找到的文件，将找到的文件名作为 flag 并提交；</span></p><p><span>\6.    利用找到的信息登录系统完成提权，获得最终 flag 并提交。</span></p><p><span> </span></p><p><span> </span></p><p><strong><span>项目</span></strong><span> 3.   </span><strong><span>服务漏洞</span></strong></p><p><span> </span></p><p><strong><span>任务五 文件上传</span></strong></p><p><span> </span></p><p><span>访问靶机地址 9000 端口并将页面中用户显示代码的函数名称，作为 flag 提交；</span></p><p><span>将程序中 session 的类型作为 flag 提交；</span></p><p><span>将获得 admin 用户权限需要设置的 PHPSSID 作为 flag 提价； 将完成题目需要上传的文件名前四位作为 flag 提交；</span></p><p><span>将题目环境中 session 文件保存位置作为 flag 提交； 将下载到的 session 文件的最后 9 位最为 flag 提交； 将/app/session/success.txt 类型作为 flag 提交；</span></p><p><span>完成题目，将最后获得的 flag 值作为 flag 提交。</span></p><p>&nbsp;</p><p><span> </span></p><p><strong><span>任务六 缓冲区溢出漏洞</span></strong></p><p><span> </span></p><p><span>\1.    从靶机服务器的 FTP 上下载 flag0001.exe，分析该文件，请提交程序使用的加密函数；</span></p><p><span>\2.    请提交程序正常运行使用的 Key 值；</span></p><p><span>\3.    请提交溢出点地址；</span></p><p><span>\4.    请提交加密算法使用的秘钥；</span></p><p><span>\5.    请提交最终 flag 的值。</span></p></div></div>
+
+<script>(function(){var e=document.body.parentElement,t=[],n=null,i=document.body.classList.contains("typora-export-collapse-outline"),r=function(e,t,n){document.addEventListener(e,function(e){if(!e.defaultPrevented)for(var i=e.target;i&&i!=this;i=i.parentNode)if(i.matches(t)){!1===n.call(i,e)&&(e.preventDefault(),e.stopPropagation());break}},!1)};function o(){return e.scrollTop}r("click",".outline-expander",function(e){var t=this.closest(".outline-item-wrapper").classList;return t.contains("outline-item-open")?t.remove("outline-item-open"):t.add("outline-item-open"),d(),!1}),r("click",".outline-item",function(e){var t=this.querySelector(".outline-label");if(location.hash="#"+t.getAttribute("href"),i){var n=this.closest(".outline-item-wrapper").classList;n.contains("outline-item-open")||n.add("outline-item-open"),c(),n.add("outline-item-active")}});var a,s,l=function(){var e=o();n=null;for(var i=0;i<t.length&&t[i][1]-e<60;i++)n=t[i]},c=function(){document.querySelectorAll(".outline-item-active").forEach(e=>e.classList.remove("outline-item-active")),document.querySelectorAll(".outline-item-single.outline-item-open").forEach(e=>e.classList.remove("outline-item-open"))},d=function(){if(n){c();var e=document.querySelector('.outline-label[href="#'+(CSS.escape?CSS.escape(n[0]):n[0])+'"]');if(e)if(i){var t=e.closest(".outline-item-open>ul>.outline-item-wrapper");if(t)t.classList.add("outline-item-active");else{for(var r=(e=e.closest(".outline-item-wrapper")).parentElement.closest(".outline-item-wrapper");r;)r=(e=r).parentElement.closest(".outline-item-wrapper");e.classList.add("outline-item-active")}}else e.closest(".outline-item-wrapper").classList.add("outline-item-active")}};window.addEventListener("scroll",function(e){a&&clearTimeout(a),a=setTimeout(function(){l(),d()},300)});var u=function(){s=setTimeout(function(){!function(){t=[];var e=o();document.querySelector("#write").querySelectorAll("h1, h2, h3, h4, h5, h6").forEach(n=>{var i=n.getAttribute("id");t.push([i,e+n.getBoundingClientRect().y])})}(),l(),d()},300)};window.addEventListener("resize",function(e){s&&clearTimeout(s),u()}),u()})();</script></body>
+</html>

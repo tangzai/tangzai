@@ -1,0 +1,1525 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+
+<link href='https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap' rel='stylesheet' type='text/css' /><style type='text/css'>html {overflow-x: initial !important;}:root { --bg-color:#ffffff; --text-color:#333333; --select-text-bg-color:#B5D6FC; --select-text-font-color:auto; --monospace:"Lucida Console",Consolas,"Courier",monospace; --title-bar-height:20px; }
+.mac-os-11 { --title-bar-height:28px; }
+html { font-size: 14px; background-color: var(--bg-color); color: var(--text-color); font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+body { margin: 0px; padding: 0px; height: auto; inset: 0px; font-size: 1rem; line-height: 1.42857; overflow-x: hidden; background: inherit; tab-size: 4; }
+iframe { margin: auto; }
+a.url { word-break: break-all; }
+a:active, a:hover { outline: 0px; }
+.in-text-selection, ::selection { text-shadow: none; background: var(--select-text-bg-color); color: var(--select-text-font-color); }
+#write { margin: 0px auto; height: auto; width: inherit; word-break: normal; overflow-wrap: break-word; position: relative; white-space: normal; overflow-x: visible; padding-top: 36px; }
+#write.first-line-indent p { text-indent: 2em; }
+#write.first-line-indent li p, #write.first-line-indent p * { text-indent: 0px; }
+#write.first-line-indent li { margin-left: 2em; }
+.for-image #write { padding-left: 8px; padding-right: 8px; }
+body.typora-export { padding-left: 30px; padding-right: 30px; }
+.typora-export .footnote-line, .typora-export li, .typora-export p { white-space: pre-wrap; }
+.typora-export .task-list-item input { pointer-events: none; }
+@media screen and (max-width: 500px) {
+  body.typora-export { padding-left: 0px; padding-right: 0px; }
+  #write { padding-left: 20px; padding-right: 20px; }
+  .CodeMirror-sizer { margin-left: 0px !important; }
+  .CodeMirror-gutters { display: none !important; }
+}
+#write li > figure:last-child { margin-bottom: 0.5rem; }
+#write ol, #write ul { position: relative; }
+img { max-width: 100%; vertical-align: middle; image-orientation: from-image; }
+button, input, select, textarea { color: inherit; font: inherit; }
+input[type="checkbox"], input[type="radio"] { line-height: normal; padding: 0px; }
+*, ::after, ::before { box-sizing: border-box; }
+#write h1, #write h2, #write h3, #write h4, #write h5, #write h6, #write p, #write pre { width: inherit; }
+#write h1, #write h2, #write h3, #write h4, #write h5, #write h6, #write p { position: relative; }
+p { line-height: inherit; }
+h1, h2, h3, h4, h5, h6 { break-after: avoid-page; break-inside: avoid; orphans: 4; }
+p { orphans: 4; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.8rem; }
+h3 { font-size: 1.6rem; }
+h4 { font-size: 1.4rem; }
+h5 { font-size: 1.2rem; }
+h6 { font-size: 1rem; }
+.md-math-block, .md-rawblock, h1, h2, h3, h4, h5, h6, p { margin-top: 1rem; margin-bottom: 1rem; }
+.hidden { display: none; }
+.md-blockmeta { color: rgb(204, 204, 204); font-weight: 700; font-style: italic; }
+a { cursor: pointer; }
+sup.md-footnote { padding: 2px 4px; background-color: rgba(238, 238, 238, 0.7); color: rgb(85, 85, 85); border-radius: 4px; cursor: pointer; }
+sup.md-footnote a, sup.md-footnote a:hover { color: inherit; text-transform: inherit; text-decoration: inherit; }
+#write input[type="checkbox"] { cursor: pointer; width: inherit; height: inherit; }
+figure { overflow-x: auto; margin: 1.2em 0px; max-width: calc(100% + 16px); padding: 0px; }
+figure > table { margin: 0px; }
+tr { break-inside: avoid; break-after: auto; }
+thead { display: table-header-group; }
+table { border-collapse: collapse; border-spacing: 0px; width: 100%; overflow: auto; break-inside: auto; text-align: left; }
+table.md-table td { min-width: 32px; }
+.CodeMirror-gutters { border-right: 0px; background-color: inherit; }
+.CodeMirror-linenumber { user-select: none; }
+.CodeMirror { text-align: left; }
+.CodeMirror-placeholder { opacity: 0.3; }
+.CodeMirror pre { padding: 0px 4px; }
+.CodeMirror-lines { padding: 0px; }
+div.hr:focus { cursor: none; }
+#write pre { white-space: pre-wrap; }
+#write.fences-no-line-wrapping pre { white-space: pre; }
+#write pre.ty-contain-cm { white-space: normal; }
+.CodeMirror-gutters { margin-right: 4px; }
+.md-fences { font-size: 0.9rem; display: block; break-inside: avoid; text-align: left; overflow: visible; white-space: pre; background: inherit; position: relative !important; }
+.md-fences-adv-panel { width: 100%; margin-top: 10px; text-align: center; padding-top: 0px; padding-bottom: 8px; overflow-x: auto; }
+#write .md-fences.mock-cm { white-space: pre-wrap; }
+.md-fences.md-fences-with-lineno { padding-left: 0px; }
+#write.fences-no-line-wrapping .md-fences.mock-cm { white-space: pre; overflow-x: auto; }
+.md-fences.mock-cm.md-fences-with-lineno { padding-left: 8px; }
+.CodeMirror-line, twitterwidget { break-inside: avoid; }
+.footnotes { opacity: 0.8; font-size: 0.9rem; margin-top: 1em; margin-bottom: 1em; }
+.footnotes + .footnotes { margin-top: 0px; }
+.md-reset { margin: 0px; padding: 0px; border: 0px; outline: 0px; vertical-align: top; background: 0px 0px; text-decoration: none; text-shadow: none; float: none; position: static; width: auto; height: auto; white-space: nowrap; cursor: inherit; -webkit-tap-highlight-color: transparent; line-height: normal; font-weight: 400; text-align: left; box-sizing: content-box; direction: ltr; }
+li div { padding-top: 0px; }
+blockquote { margin: 1rem 0px; }
+li .mathjax-block, li p { margin: 0.5rem 0px; }
+li blockquote { margin: 1rem 0px; }
+li { margin: 0px; position: relative; }
+blockquote > :last-child { margin-bottom: 0px; }
+blockquote > :first-child, li > :first-child { margin-top: 0px; }
+.footnotes-area { color: rgb(136, 136, 136); margin-top: 0.714rem; padding-bottom: 0.143rem; white-space: normal; }
+#write .footnote-line { white-space: pre-wrap; }
+@media print {
+  body, html { border: 1px solid transparent; height: 99%; break-after: avoid; break-before: avoid; font-variant-ligatures: no-common-ligatures; }
+  #write { margin-top: 0px; padding-top: 0px; border-color: transparent !important; }
+  .typora-export * { -webkit-print-color-adjust: exact; }
+  .typora-export #write { break-after: avoid; }
+  .typora-export #write::after { height: 0px; }
+  .is-mac table { break-inside: avoid; }
+  .typora-export-show-outline .typora-export-sidebar { display: none; }
+}
+.footnote-line { margin-top: 0.714em; font-size: 0.7em; }
+a img, img a { cursor: pointer; }
+pre.md-meta-block { font-size: 0.8rem; min-height: 0.8rem; white-space: pre-wrap; background: rgb(204, 204, 204); display: block; overflow-x: hidden; }
+p > .md-image:only-child:not(.md-img-error) img, p > img:only-child { display: block; margin: auto; }
+#write.first-line-indent p > .md-image:only-child:not(.md-img-error) img { left: -2em; position: relative; }
+p > .md-image:only-child { display: inline-block; width: 100%; }
+#write .MathJax_Display { margin: 0.8em 0px 0px; }
+.md-math-block { width: 100%; }
+.md-math-block:not(:empty)::after { display: none; }
+.MathJax_ref { fill: currentcolor; }
+[contenteditable="true"]:active, [contenteditable="true"]:focus, [contenteditable="false"]:active, [contenteditable="false"]:focus { outline: 0px; box-shadow: none; }
+.md-task-list-item { position: relative; list-style-type: none; }
+.task-list-item.md-task-list-item { padding-left: 0px; }
+.md-task-list-item > input { position: absolute; top: 0px; left: 0px; margin-left: -1.2em; margin-top: calc(1em - 10px); border: none; }
+.math { font-size: 1rem; }
+.md-toc { min-height: 3.58rem; position: relative; font-size: 0.9rem; border-radius: 10px; }
+.md-toc-content { position: relative; margin-left: 0px; }
+.md-toc-content::after, .md-toc::after { display: none; }
+.md-toc-item { display: block; color: rgb(65, 131, 196); }
+.md-toc-item a { text-decoration: none; }
+.md-toc-inner:hover { text-decoration: underline; }
+.md-toc-inner { display: inline-block; cursor: pointer; }
+.md-toc-h1 .md-toc-inner { margin-left: 0px; font-weight: 700; }
+.md-toc-h2 .md-toc-inner { margin-left: 2em; }
+.md-toc-h3 .md-toc-inner { margin-left: 4em; }
+.md-toc-h4 .md-toc-inner { margin-left: 6em; }
+.md-toc-h5 .md-toc-inner { margin-left: 8em; }
+.md-toc-h6 .md-toc-inner { margin-left: 10em; }
+@media screen and (max-width: 48em) {
+  .md-toc-h3 .md-toc-inner { margin-left: 3.5em; }
+  .md-toc-h4 .md-toc-inner { margin-left: 5em; }
+  .md-toc-h5 .md-toc-inner { margin-left: 6.5em; }
+  .md-toc-h6 .md-toc-inner { margin-left: 8em; }
+}
+a.md-toc-inner { font-size: inherit; font-style: inherit; font-weight: inherit; line-height: inherit; }
+.footnote-line a:not(.reversefootnote) { color: inherit; }
+.md-attr { display: none; }
+.md-fn-count::after { content: "."; }
+code, pre, samp, tt { font-family: var(--monospace); }
+kbd { margin: 0px 0.1em; padding: 0.1em 0.6em; font-size: 0.8em; color: rgb(36, 39, 41); background: rgb(255, 255, 255); border: 1px solid rgb(173, 179, 185); border-radius: 3px; box-shadow: rgba(12, 13, 14, 0.2) 0px 1px 0px, rgb(255, 255, 255) 0px 0px 0px 2px inset; white-space: nowrap; vertical-align: middle; }
+.md-comment { color: rgb(162, 127, 3); opacity: 0.6; font-family: var(--monospace); }
+code { text-align: left; vertical-align: initial; }
+a.md-print-anchor { white-space: pre !important; border-width: initial !important; border-style: none !important; border-color: initial !important; display: inline-block !important; position: absolute !important; width: 1px !important; right: 0px !important; outline: 0px !important; background: 0px 0px !important; text-decoration: initial !important; text-shadow: initial !important; }
+.os-windows.monocolor-emoji .md-emoji { font-family: "Segoe UI Symbol", sans-serif; }
+.md-diagram-panel > svg { max-width: 100%; }
+[lang="flow"] svg, [lang="mermaid"] svg { max-width: 100%; height: auto; }
+[lang="mermaid"] .node text { font-size: 1rem; }
+table tr th { border-bottom: 0px; }
+video { max-width: 100%; display: block; margin: 0px auto; }
+iframe { max-width: 100%; width: 100%; border: none; }
+.highlight td, .highlight tr { border: 0px; }
+mark { background: rgb(255, 255, 0); color: rgb(0, 0, 0); }
+.md-html-inline .md-plain, .md-html-inline strong, mark .md-inline-math, mark strong { color: inherit; }
+.md-expand mark .md-meta { opacity: 0.3 !important; }
+mark .md-meta { color: rgb(0, 0, 0); }
+@media print {
+  .typora-export h1, .typora-export h2, .typora-export h3, .typora-export h4, .typora-export h5, .typora-export h6 { break-inside: avoid; }
+}
+.md-diagram-panel .messageText { stroke: none !important; }
+.md-diagram-panel .start-state { fill: var(--node-fill); }
+.md-diagram-panel .edgeLabel rect { opacity: 1 !important; }
+.md-fences.md-fences-math { font-size: 1em; }
+.md-fences-advanced:not(.md-focus) { padding: 0px; white-space: nowrap; border: 0px; }
+.md-fences-advanced:not(.md-focus) { background: inherit; }
+.typora-export-show-outline .typora-export-content { max-width: 1440px; margin: auto; display: flex; flex-direction: row; }
+.typora-export-sidebar { width: 300px; font-size: 0.8rem; margin-top: 80px; margin-right: 18px; }
+.typora-export-show-outline #write { --webkit-flex:2; flex: 2 1 0%; }
+.typora-export-sidebar .outline-content { position: fixed; top: 0px; max-height: 100%; overflow: hidden auto; padding-bottom: 30px; padding-top: 60px; width: 300px; }
+@media screen and (max-width: 1024px) {
+  .typora-export-sidebar, .typora-export-sidebar .outline-content { width: 240px; }
+}
+@media screen and (max-width: 800px) {
+  .typora-export-sidebar { display: none; }
+}
+.outline-content li, .outline-content ul { margin-left: 0px; margin-right: 0px; padding-left: 0px; padding-right: 0px; list-style: none; }
+.outline-content ul { margin-top: 0px; margin-bottom: 0px; }
+.outline-content strong { font-weight: 400; }
+.outline-expander { width: 1rem; height: 1.42857rem; position: relative; display: table-cell; vertical-align: middle; cursor: pointer; padding-left: 4px; }
+.outline-expander::before { content: ""; position: relative; font-family: Ionicons; display: inline-block; font-size: 8px; vertical-align: middle; }
+.outline-item { padding-top: 3px; padding-bottom: 3px; cursor: pointer; }
+.outline-expander:hover::before { content: ""; }
+.outline-h1 > .outline-item { padding-left: 0px; }
+.outline-h2 > .outline-item { padding-left: 1em; }
+.outline-h3 > .outline-item { padding-left: 2em; }
+.outline-h4 > .outline-item { padding-left: 3em; }
+.outline-h5 > .outline-item { padding-left: 4em; }
+.outline-h6 > .outline-item { padding-left: 5em; }
+.outline-label { cursor: pointer; display: table-cell; vertical-align: middle; text-decoration: none; color: inherit; }
+.outline-label:hover { text-decoration: underline; }
+.outline-item:hover { border-color: rgb(245, 245, 245); background-color: var(--item-hover-bg-color); }
+.outline-item:hover { margin-left: -28px; margin-right: -28px; border-left: 28px solid transparent; border-right: 28px solid transparent; }
+.outline-item-single .outline-expander::before, .outline-item-single .outline-expander:hover::before { display: none; }
+.outline-item-open > .outline-item > .outline-expander::before { content: ""; }
+.outline-children { display: none; }
+.info-panel-tab-wrapper { display: none; }
+.outline-item-open > .outline-children { display: block; }
+.typora-export .outline-item { padding-top: 1px; padding-bottom: 1px; }
+.typora-export .outline-item:hover { margin-right: -8px; border-right: 8px solid transparent; }
+.typora-export .outline-expander::before { content: "+"; font-family: inherit; top: -1px; }
+.typora-export .outline-expander:hover::before, .typora-export .outline-item-open > .outline-item > .outline-expander::before { content: "−"; }
+.typora-export-collapse-outline .outline-children { display: none; }
+.typora-export-collapse-outline .outline-item-open > .outline-children, .typora-export-no-collapse-outline .outline-children { display: block; }
+.typora-export-no-collapse-outline .outline-expander::before { content: "" !important; }
+.typora-export-show-outline .outline-item-active > .outline-item .outline-label { font-weight: 700; }
+.md-inline-math-container mjx-container { zoom: 0.95; }
+
+
+.CodeMirror { height: auto; }
+.CodeMirror.cm-s-inner { background: inherit; }
+.CodeMirror-scroll { overflow: auto hidden; z-index: 3; }
+.CodeMirror-gutter-filler, .CodeMirror-scrollbar-filler { background-color: rgb(255, 255, 255); }
+.CodeMirror-gutters { border-right: 1px solid rgb(221, 221, 221); background: inherit; white-space: nowrap; }
+.CodeMirror-linenumber { padding: 0px 3px 0px 5px; text-align: right; color: rgb(153, 153, 153); }
+.cm-s-inner .cm-keyword { color: rgb(119, 0, 136); }
+.cm-s-inner .cm-atom, .cm-s-inner.cm-atom { color: rgb(34, 17, 153); }
+.cm-s-inner .cm-number { color: rgb(17, 102, 68); }
+.cm-s-inner .cm-def { color: rgb(0, 0, 255); }
+.cm-s-inner .cm-variable { color: rgb(0, 0, 0); }
+.cm-s-inner .cm-variable-2 { color: rgb(0, 85, 170); }
+.cm-s-inner .cm-variable-3 { color: rgb(0, 136, 85); }
+.cm-s-inner .cm-string { color: rgb(170, 17, 17); }
+.cm-s-inner .cm-property { color: rgb(0, 0, 0); }
+.cm-s-inner .cm-operator { color: rgb(152, 26, 26); }
+.cm-s-inner .cm-comment, .cm-s-inner.cm-comment { color: rgb(170, 85, 0); }
+.cm-s-inner .cm-string-2 { color: rgb(255, 85, 0); }
+.cm-s-inner .cm-meta { color: rgb(85, 85, 85); }
+.cm-s-inner .cm-qualifier { color: rgb(85, 85, 85); }
+.cm-s-inner .cm-builtin { color: rgb(51, 0, 170); }
+.cm-s-inner .cm-bracket { color: rgb(153, 153, 119); }
+.cm-s-inner .cm-tag { color: rgb(17, 119, 0); }
+.cm-s-inner .cm-attribute { color: rgb(0, 0, 204); }
+.cm-s-inner .cm-header, .cm-s-inner.cm-header { color: rgb(0, 0, 255); }
+.cm-s-inner .cm-quote, .cm-s-inner.cm-quote { color: rgb(0, 153, 0); }
+.cm-s-inner .cm-hr, .cm-s-inner.cm-hr { color: rgb(153, 153, 153); }
+.cm-s-inner .cm-link, .cm-s-inner.cm-link { color: rgb(0, 0, 204); }
+.cm-negative { color: rgb(221, 68, 68); }
+.cm-positive { color: rgb(34, 153, 34); }
+.cm-header, .cm-strong { font-weight: 700; }
+.cm-del { text-decoration: line-through; }
+.cm-em { font-style: italic; }
+.cm-link { text-decoration: underline; }
+.cm-error { color: red; }
+.cm-invalidchar { color: red; }
+.cm-constant { color: rgb(38, 139, 210); }
+.cm-defined { color: rgb(181, 137, 0); }
+div.CodeMirror span.CodeMirror-matchingbracket { color: rgb(0, 255, 0); }
+div.CodeMirror span.CodeMirror-nonmatchingbracket { color: rgb(255, 34, 34); }
+.cm-s-inner .CodeMirror-activeline-background { background: inherit; }
+.CodeMirror { position: relative; overflow: hidden; }
+.CodeMirror-scroll { height: 100%; outline: 0px; position: relative; box-sizing: content-box; background: inherit; }
+.CodeMirror-sizer { position: relative; }
+.CodeMirror-gutter-filler, .CodeMirror-hscrollbar, .CodeMirror-scrollbar-filler, .CodeMirror-vscrollbar { position: absolute; z-index: 6; display: none; outline: 0px; }
+.CodeMirror-vscrollbar { right: 0px; top: 0px; overflow: hidden; }
+.CodeMirror-hscrollbar { bottom: 0px; left: 0px; overflow: auto hidden; }
+.CodeMirror-scrollbar-filler { right: 0px; bottom: 0px; }
+.CodeMirror-gutter-filler { left: 0px; bottom: 0px; }
+.CodeMirror-gutters { position: absolute; left: 0px; top: 0px; padding-bottom: 10px; z-index: 3; overflow-y: hidden; }
+.CodeMirror-gutter { white-space: normal; height: 100%; box-sizing: content-box; padding-bottom: 30px; margin-bottom: -32px; display: inline-block; }
+.CodeMirror-gutter-wrapper { position: absolute; z-index: 4; background: 0px 0px !important; border: none !important; }
+.CodeMirror-gutter-background { position: absolute; top: 0px; bottom: 0px; z-index: 4; }
+.CodeMirror-gutter-elt { position: absolute; cursor: default; z-index: 4; }
+.CodeMirror-lines { cursor: text; }
+.CodeMirror pre { border-radius: 0px; border-width: 0px; background: 0px 0px; font-family: inherit; font-size: inherit; margin: 0px; white-space: pre; overflow-wrap: normal; color: inherit; z-index: 2; position: relative; overflow: visible; }
+.CodeMirror-wrap pre { overflow-wrap: break-word; white-space: pre-wrap; word-break: normal; }
+.CodeMirror-code pre { border-right: 30px solid transparent; width: fit-content; }
+.CodeMirror-wrap .CodeMirror-code pre { border-right: none; width: auto; }
+.CodeMirror-linebackground { position: absolute; inset: 0px; z-index: 0; }
+.CodeMirror-linewidget { position: relative; z-index: 2; overflow: auto; }
+.CodeMirror-wrap .CodeMirror-scroll { overflow-x: hidden; }
+.CodeMirror-measure { position: absolute; width: 100%; height: 0px; overflow: hidden; visibility: hidden; }
+.CodeMirror-measure pre { position: static; }
+.CodeMirror div.CodeMirror-cursor { position: absolute; visibility: hidden; border-right: none; width: 0px; }
+.CodeMirror div.CodeMirror-cursor { visibility: hidden; }
+.CodeMirror-focused div.CodeMirror-cursor { visibility: inherit; }
+.cm-searching { background: rgba(255, 255, 0, 0.4); }
+span.cm-underlined { text-decoration: underline; }
+span.cm-strikethrough { text-decoration: line-through; }
+.cm-tw-syntaxerror { color: rgb(255, 255, 255); background-color: rgb(153, 0, 0); }
+.cm-tw-deleted { text-decoration: line-through; }
+.cm-tw-header5 { font-weight: 700; }
+.cm-tw-listitem:first-child { padding-left: 10px; }
+.cm-tw-box { border-style: solid; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-color: inherit; border-top-width: 0px !important; }
+.cm-tw-underline { text-decoration: underline; }
+@media print {
+  .CodeMirror div.CodeMirror-cursor { visibility: hidden; }
+}
+
+
+/*
+ * Copyright (C) 2018 Drake, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * GitHub https://github.com/liangjingkanji/DrakeTyporaTheme
+ */
+@import url();
+@include-when-export url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+:root {
+    --text-color: rgba(255, 255, 255, 0.75);
+    --bg-color: rgb(26, 26, 26);
+    --control-text-color: var(--text-color);
+    --meta-content-color: var(--text-color);
+    --active-file-border-color: var(--drake-accent);
+    --rawblock-edit-panel-bd: var(--code-block-bg-color);
+    --item-hover-bg-color: #323232;
+    --active-file-bg-color: var(--item-hover-bg-color);
+    --mermaid-theme: night;
+
+    --blur-text-color: rgba(179, 190, 196, 0.5);
+    --md-char-color: #535455;
+    --side-bar-bg-color: var(--bg-color);
+    --search-select-bg-color: #ffffff;
+    --search-select-text-color: var(--bg-color);
+    --select-text-bg-color: #3473B068;
+    --window-border: 1px solid #282828;
+
+    --drake-accent: #42B883;
+    --drake-highlight: #AAC8E4;
+    --a-color: #42B883;
+    --variable-color: var(--drake-highlight);
+    --outline-active-color: var(--title-color);
+    --code-block-bg-color: #242424;
+    --code-block-color: #A6ACCD;
+    --title-color: rgba(255, 255, 255, 0.85);
+    --blockquote-border-color: transparent;
+    --blockquote-color: #EBEBEB99;
+    --blockquote-bg-color: #242424;
+    --strong-color: var(--title-color);
+    --h2-underline-color: var(--title-color);
+    --horizontal-divider-color: var(--title-color);
+    --height-light-color: var(--drake-accent);
+    --height-light-border-color: var(--drake-accent);
+    --yaml-color: #676773;
+    --yaml-bg-color: var(--code-block-bg-color);
+    --footnotes-bg-color: var(--item-hover-bg-color);
+    --footnotes-highlight: #FFD760;
+    --table-border-color: var(--item-hover-bg-color);
+    --table-header-bg-color: #242424;
+    --table-bg-color: var(--bg-color);
+    --table-n2-bg-color: var(--table-header-bg-color);
+    --input-bg-color: var(--item-hover-bg-color);
+    --btn-hover-bg-color: var(--item-hover-bg-color);
+    --checkbox-checked: url("data:image/svg+xml,%3Csvg class='icon' viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cpath d='M425.984 726.016l384-384-59.99-61.995-324.01 324.011-152.021-152.021L213.973 512zm384-598.016q36.01 0 61.013 25.984T896 213.974v596.01q0 34.005-25.003 59.99t-61.013 25.983h-596.01q-36.011 0-61.014-25.984t-25.003-59.989v-596.01q0-34.006 25.003-59.99T213.973 128h596.011z' fill='%2342B883'/%3E%3C/svg%3E");
+    --checkbox-unchecked: url("data:image/svg+xml,%3Csvg class='icon' viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cpath d='M810.667 213.333v597.334H213.333V213.333h597.334m0-85.333H213.333C166.4 128 128 166.4 128 213.333v597.334C128 857.6 166.4 896 213.333 896h597.334C857.6 896 896 857.6 896 810.667V213.333C896 166.4 857.6 128 810.667 128z' fill='%23acb7c4'/%3E%3C/svg%3E");
+}
+
+html {
+    font-size: var(--text-size);
+}
+
+body {
+    font-family: var(--text-font) !important;
+    color: var(--text-color);
+    -webkit-font-feature-settings: "liga" on, "calt" on;
+    -webkit-font-smoothing: subpixel-antialiased;
+    text-rendering: optimizeLegibility;
+    letter-spacing: 0;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+p {
+    line-height: var(--text-line-height);
+}
+
+/*code block*/
+.md-fences {
+    font-size: 1rem;
+    padding: 0.5rem !important;
+    border-radius: 8px;
+    word-wrap: normal;
+    background-color: var(--code-block-bg-color);
+    color: var(--code-block-color);
+    border: none;
+    line-height: var(--code-line-height);
+}
+
+/*inline latex*/
+.MathJax {
+    font-size: 120% !important;
+}
+.MathJax text, .MathJax use {
+    font-family: var(--latex-font);
+}
+/*math-block latex*/
+.md-math-block .MathJax {
+    font-size: 130% !important;
+}
+
+/*mermaid*/
+[id^=mermaidChart] .cluster rect {
+    fill: var(--table-n2-bg-color) !important;
+    stroke: var(--table-border-color) !important;
+}
+[id^=mermaidChart] .clusters span.nodeLabel {
+    color: var(--text-color) !important;
+    line-height: 1.8rem;
+}
+[mermaid-type="journey"] line {
+    stroke: #7a7a7a !important;
+}
+[mermaid-type="journey"] .label {
+    color: #333 !important;
+}
+[id^=mermaidChart] .relationshipLabelBox {
+    fill: var(--bg-color) !important;
+    opacity: 1 !important;
+    background-color: var(--bg-color) !important;
+}
+[id^=mermaidChart] .legend {
+    fill: var(--text-color) !important;
+}
+[id^=mermaidChart] g.label {
+    font-size: 1rem !important;
+}
+[id^=mermaidChart] line.divider {
+    stroke: var(--table-border-color) !important;
+}
+[id^=mermaidChart] span.nodeLabel {
+    color: var(--code-block-color) !important;
+    line-height: 1.8rem;
+}
+tspan {
+    color: var(--text-color)
+}
+[id^=mermaidChart] .entityLabel {
+    fill: var(--code-block-color) !important;
+}
+[id^=mermaidChart] {
+    fill: var(--text-color) !important;
+}
+[id^=mermaidChart] rect.rect {
+    fill: rgba(175, 255, 212, 0.3) !important;
+}
+.md-diagram-panel-preview text.actor > tspan { /*方块文字*/
+    fill: var(--code-block-color) !important;
+    stroke: none !important;
+    font-family: var(--text-font) !important;
+    font-size: 1rem !important;
+}
+.md-diagram-panel-preview .actor, .md-diagram-panel-preview .entityBox { /*方块*/
+    stroke: var(--table-border-color) !important;
+    fill: var(--code-block-bg-color) !important;
+}
+.md-diagram-panel-preview .actor-line { /*竖线*/
+    stroke: var(--text-color) !important;
+    stroke-width: 1px;
+}
+.md-diagram-panel-preview .messageLine0 { /*横线*/
+    stroke-width: 1.5;
+    stroke-dasharray: none;
+    stroke: var(--text-color) !important;
+}
+.md-diagram-panel-preview .messageLine1 { /*虚线*/
+    stroke-width: 1.5 !important;
+    stroke-dasharray: 2, 2 !important;
+    stroke: var(--text-color) !important;
+}
+.md-diagram-panel-preview .messageText { /*描述文字*/
+    fill: var(--text-color) !important;
+    font-family: var(--text-font) !important;
+    font-size: 1rem !important;
+}
+.md-diagram-panel-preview .activation0 { /*长方形*/
+    fill: #e6e6e6 !important;
+    stroke: var(--text-color) !important;
+}
+.md-diagram-panel-preview .labelText, .md-diagram-panel-preview .labelText > tspan { /*循环标记*/
+    fill: var(--code-block-color) !important;
+    font-family: var(--text-font) !important;
+    font-size: 1rem !important;
+    dominant-baseline: unset;
+    alignment-baseline: unset;
+}
+.md-diagram-panel-preview .labelBox { /*循环标记背景*/
+    stroke: var(--table-border-color) !important;
+    fill: var(--code-block-bg-color) !important;
+}
+.md-diagram-panel-preview .loopLine { /*循环标记虚线*/
+    stroke: var(--text-color) !important;
+}
+.md-diagram-panel-preview .loopText, .md-diagram-panel-preview .loopText > tspan { /*循环名称*/
+    fill: var(--text-color) !important;
+    font-size: 1rem !important;
+}
+.md-diagram-panel-preview .sequenceNumber { /*序号*/
+    fill: var(--bg-color) !important;
+}
+pre.md-fences-advanced.md-focus .md-fences-adv-panel {
+    border: none;
+}
+.md-diagram-panel-preview .edgePath .path { /*箭头*/
+    stroke: var(--text-color) !important;
+}
+.md-diagram-panel-preview .edgeLabel rect { /*条件文字背景*/
+    fill: var(--bg-color) !important;
+}
+.md-diagram-panel-preview .edgeLabel span { /*条件文字*/
+    color: var(--text-color) !important;
+    background: var(--bg-color) !important;
+}
+.md-diagram-panel-preview .node rect,
+.md-diagram-panel-preview .node circle,
+.md-diagram-panel-preview .node ellipse,
+.md-diagram-panel-preview .node polygon,
+.md-diagram-panel-preview .node path { /*形状*/
+    stroke: var(--table-border-color) !important;
+    fill: var(--code-block-bg-color) !important;
+}
+#write .md-diagram-panel .md-diagram-panel-preview div { /*形状内文字*/
+    color: var(--code-block-color);
+    font-family: var(--text-font) !important;
+    font-size: 1rem !important;
+}
+
+/*code snippet*/
+#write code, tt {
+    margin: 0 2px;
+    color: var(--drake-highlight);
+    background-color: #2F2F2F;
+    padding: .15em 0.5em;
+    border-radius: 4px;
+}
+
+/*variable*/
+var {
+    color: var(--variable-color);
+    font-weight: bold;
+}
+
+/*raw block*/
+.md-rawblock-control:not(.md-rawblock-tooltip) {
+    border-radius: 2px 0 2px 2px;
+    padding: 0.2rem !important;
+}
+.md-rawblock:hover > .md-rawblock-container {
+    background: none;
+}
+.md-rawblock-input {
+    font-size: 1rem;
+}
+.md-rawblock-tooltip-btn:hover {
+    background: none;
+}
+.md-rawblock:hover > .md-rawblock-tooltip {
+    border-radius: 2px 2px 0 0;
+    margin-bottom: 2px !important;
+}
+.md-rawblock-tooltip.md-rawblock-control {
+    border-radius: 2px 2px 0 0;
+    color: var(--code-block-color);
+}
+.md-rawblock-tooltip-name {
+    color: var(--code-block-color);
+    opacity: 1;
+}
+
+/*quote block*/
+blockquote:before {
+    display: block;
+    position: absolute;
+    content: '';
+    width: 4px;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background-color: var(--blockquote-border-color);
+    border-radius: 2px;
+}
+
+blockquote {
+    color: var(--blockquote-color);
+    border-radius: 8px;
+    padding: 20px;
+    background-color: var(--blockquote-bg-color);
+    position: relative;
+    border: 1px solid #42b883;
+}
+
+#write strong {
+    color: var(--strong-color);
+    font-weight: bold;
+}
+#write blockquote strong {
+    color: var(--blockquote-color);
+}
+
+/*link*/
+#write a {
+    color: var(--a-color);
+    text-decoration: none;
+}
+[md-inline=link] a {
+    margin: 0 .2rem;
+}
+a:any-link {
+    color: var(--a-color);
+}
+
+img {
+    border-left: none;
+    border-right: none;
+    vertical-align: baseline;
+    border-radius: 2px;
+}
+
+#write {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 30px 100px;
+}
+#typora-source .CodeMirror-lines {
+    max-width: 1200px;
+}
+
+#write > ul:first-child,
+#write > ol:first-child {
+    margin-top: 30px;
+}
+
+body > *:first-child {
+    margin-top: 0 !important;
+}
+
+body > *:last-child {
+    margin-bottom: 0 !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--title-font);
+    position: relative;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    line-height: 1.4;
+    cursor: text;
+    color: var(--title-color);
+}
+
+h3.md-focus:before, h4.md-focus:before, h5.md-focus:before, h6.md-focus:before {
+    visibility: hidden;
+}
+
+h1 {
+    font-size: 2rem;
+    text-align: center;
+    margin-top: 0;
+}
+
+h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.on-focus-mode h2.md-end-block.md-heading:not(.md-focus):not(.md-focus-container):after {
+    background-color: var(--blur-text-color) !important;
+}
+
+h3 {
+    font-size: 1.4rem;
+}
+
+h4 {
+    font-size: 1.2rem;
+}
+
+h5 {
+    font-size: 1rem;
+}
+
+h6 {
+    font-size: 1rem;
+}
+
+h1:hover a.anchor,
+h2:hover a.anchor,
+h3:hover a.anchor,
+h4:hover a.anchor,
+h5:hover a.anchor,
+h6:hover a.anchor {
+    text-decoration: none;
+}
+
+h1 tt,
+h1 code {
+    font-size: inherit !important;
+}
+
+h2 tt,
+h2 code {
+    font-size: inherit !important;
+}
+
+h3 tt,
+h3 code {
+    font-size: inherit !important;
+}
+
+h4 tt,
+h4 code {
+    font-size: inherit !important;
+}
+
+h5 tt,
+h5 code {
+    font-size: inherit !important;
+}
+
+h6 tt,
+h6 code {
+    font-size: inherit !important;
+}
+
+p, blockquote, ul, ol, dl, table {
+    margin: var(--p-spacing) 0;
+}
+
+li > ol,
+li > ul {
+    margin: 0 0;
+}
+li {
+    margin: 0.5em 0;
+}
+ul > li {
+    list-style: none;
+}
+#write ul > li:before {
+    content: "";
+    position: absolute;
+    width: 0.4em;
+    height: 0.4em;
+    border-radius: 50%;
+    background-color: #EBEBEB61;
+    transition: background-color .5s;
+    left: -1.25rem;
+    top: 0.55rem;
+}
+#write ul > .task-list-item:before {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    transition: background-color .5s;
+    border: none;
+    left: 0;
+    top: 0;
+}
+hr {
+    height: 2px;
+    padding: 0;
+    margin: 16px 0;
+    background-color: var(--horizontal-divider-color);
+    border: 0 none;
+    overflow: hidden;
+    box-sizing: content-box;
+}
+
+body > h2:first-child {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+body > h1:first-child {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+body > h1:first-child + h2 {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+body > h3:first-child,
+body > h4:first-child,
+body > h5:first-child,
+body > h6:first-child {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+a:first-child h1,
+a:first-child h2,
+a:first-child h3,
+a:first-child h4,
+a:first-child h5,
+a:first-child h6 {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+h1 p,
+h2 p,
+h3 p,
+h4 p,
+h5 p,
+h6 p {
+    margin-top: 0;
+}
+
+li p.first {
+    display: inline-block;
+}
+
+ul, ol {
+    padding-inline-start: 2em;
+}
+
+ul:first-child,
+ol:first-child {
+    margin-top: 0;
+}
+
+ul:last-child,
+ol:last-child {
+    margin-bottom: 0;
+}
+
+.ty-table-edit {
+    margin-top: -1rem !important;
+}
+#write table {
+    margin-top: 1rem;
+    word-break: initial;
+    background-color: var(--table-bg-color);
+}
+table tr {
+    border-top: .1em solid var(--table-border-color);
+    margin: 0;
+    padding: 0;
+}
+table th {
+    font-weight: bold;
+    border: .1em solid var(--table-border-color);
+    border-bottom: 0;
+    margin: 0;
+    padding: 13px 13px;
+}
+table td {
+    border: .1em solid var(--table-border-color);
+    margin: 0;
+    padding: 13px 13px;
+}
+table thead {
+    background-color: var(--table-header-bg-color);
+}
+table tr:nth-child(2n) {
+    background-color: var(--table-n2-bg-color);
+}
+table tr th:first-child,
+table tr td:first-child {
+    margin-top: 0;
+}
+table tr th:last-child,
+table tr td:last-child {
+    margin-bottom: 0;
+}
+
+#write em {
+    padding: 0 5px 0 2px;
+}
+
+#write table thead th {
+    background-color: var(--table-header-bg-color);
+}
+
+/* height light */
+#write mark {
+    border: .1em solid var(--height-light-border-color);
+    color: var(--height-light-color);
+    background-color: transparent;
+    padding: .1rem .5rem;
+    border-radius: 2rem;
+    margin: 0 .2rem;
+    font-size: .95rem;
+}
+
+/*shortcut*/
+kbd {
+    border: .1em solid #5b5b5e;
+    background: transparent;
+    color: var(--text-color);
+    margin: 0 .4rem;
+    font-family: var(--text-font) !important;
+    font-size: .95rem;
+    padding: .3em .4em;
+    border-radius: .4em;
+    box-shadow: .1em .1em .2em rgba(0, 0, 0, 0.3);
+}
+
+#write del {
+    padding: 1px 2px;
+}
+
+.md-task-list-item > input {
+    margin-left: -1.3em;
+}
+
+@media print {
+    html {
+        font-size: 12px;
+    }
+
+    table,
+    pre {
+        page-break-inside: avoid;
+    }
+
+    pre {
+        word-wrap: break-word;
+    }
+}
+
+/*YAML*/
+#write pre.md-meta-block {
+    padding: 1rem;
+    font-size: 1rem;
+    line-height: 1.45;
+    background-color: var(--yaml-bg-color);
+    border: 0;
+    border-radius: 2px;
+    color: var(--yaml-color);
+    margin-top: 0 !important;
+}
+
+.mathjax-block > .code-tooltip {
+    bottom: .375rem;
+}
+
+#write > h3.md-focus:before {
+    left: -1.5625rem;
+    top: .375rem;
+}
+
+#write > h4.md-focus:before {
+    left: -1.5625rem;
+    top: .285714286rem;
+}
+
+#write > h5.md-focus:before {
+    left: -1.5625rem;
+    top: .285714286rem;
+}
+
+#write > h6.md-focus:before {
+    left: -1.5625rem;
+    top: .285714286rem;
+}
+
+.md-image > .md-meta {
+    border-radius: 2px;
+    font-family: initial;
+    padding: 2px 0 0 4px;
+    color: inherit;
+}
+
+.md-tag {
+    color: inherit;
+}
+
+.md-toc {
+    margin-top: 20px;
+    padding-bottom: 20px;
+}
+
+.typora-quick-open-item {
+    font-size: 1rem !important;
+    height: 50px;
+    padding-left: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+#typora-quick-open {
+    box-shadow: 0 0 8px #00000045;
+    padding: 0;
+}
+
+.ty-quick-open-category.ty-has-prev .ty-quick-open-category-title {
+    border-top: none;
+}
+
+#typora-quick-open-input {
+    margin: 8px;
+    box-shadow: none;
+    border-radius: 2px;
+}
+
+#typora-quick-open-input input {
+    font-size: 1rem;
+    box-shadow: none;
+    padding-top: 2px;
+    padding-left: 10px;
+    padding-right: 10px;
+    line-height: 32px;
+    max-height: 32px;
+    border: none;
+}
+
+.modal-dialog#typora-quick-open {
+    border-radius: 8px;
+}
+
+.ty-quick-open-category-title {
+    padding-left: 8px;
+    color: #BEBEBE;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+}
+
+.typora-quick-open-item-path {
+    font-size: 0.8rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 1px;
+}
+
+/*search input*/
+.form-control {
+    border: none;
+    border-radius: 2px;
+    box-shadow: none;
+}
+
+#md-searchpanel .btn {
+    border-radius: 2px;
+}
+
+#search-panel-replaceall-btn {
+    padding-right: 5px !important;
+    text-align: center !important;
+}
+
+#search-panel-replace-btn {
+    text-align: center !important;
+}
+
+#md-searchpanel input {
+    background: var(--input-bg-color);
+    border-radius: 2px;
+}
+
+.searchpanel-search-option-btn {
+    border-radius: 2px;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+}
+
+.searchpanel-search-option-btn.active {
+    background: var(--text-color);
+    color: var(--bg-color);
+}
+
+.form-control:focus {
+    box-shadow: none;
+}
+
+#md-notification:before {
+    top: 10px;
+}
+
+/** focus mode */
+.on-focus-mode blockquote {
+    border-left-color: rgba(85, 85, 85, 0.12);
+}
+
+header,
+.context-menu,
+.megamenu-content,
+footer {
+    font-family: initial;
+}
+
+/*sidebar*/
+.file-node-content:hover .file-node-icon,
+.file-node-content:hover .file-node-open-state {
+    visibility: visible;
+}
+.file-node-content {
+    display: flex;
+    align-items: center;
+}
+.file-node-open-state {
+    margin-right: .5rem;
+}
+.file-node-icon {
+    margin-right: .5rem;
+}
+
+#typora-sidebar {
+    font-size: inherit;
+    font-family: var(--title-font);
+    color: #EBEBEB99;
+}
+
+.sidebar-tabs {
+    border-bottom: none;
+}
+
+.file-list-item-summary, .file-list-item-parent-loc, .file-list-item-time, .file-list-item-summary {
+    font-size: 0.9rem !important;
+    font-family: var(--text-font);
+}
+
+.file-list-item-file-ext-part {
+    display: none;
+}
+
+.outline-item {
+    font-size: 1rem;
+}
+
+/*footnotes mark*/
+#write .md-footnote {
+    background-color: inherit;
+    color: var(--drake-highlight);
+    font-size: 0.9rem;
+    border-radius: 0.9rem;
+    padding-left: 0;
+}
+
+#write .md-footnote:before {
+    content: "[";
+}
+
+#write .md-footnote:after {
+    content: "]";
+}
+
+/*footnotes content*/
+.md-hover-tip .code-tooltip-content {
+    border-radius: 2px;
+}
+
+/*footnotes title*/
+span.md-def-name {
+    padding-right: 3ch;
+    padding-left: 0;
+    position: relative;
+    font-weight: normal;
+}
+
+/*footnotes desc*/
+.footnotes {
+    font-size: 1rem;
+    font-weight: normal;
+    color: var(--text-color);
+    position: relative;
+}
+
+/*footnotes tooltip text*/
+.code-tooltip-content .md-plain {
+    font-size: 0.9rem;
+    font-family: inherit;
+}
+
+.code-tooltip-content code {
+    padding: 0 2px;
+    font-family: inherit;
+    color: var(--footnotes-highlight);
+    background-color: inherit;
+}
+
+.code-tooltip-content a {
+    color: var(--footnotes-highlight);
+}
+
+div.code-tooltip-content {
+    box-shadow: 0 0 8px #00000045;
+    background: var(--footnotes-bg-color);
+}
+
+.footnotes {
+    opacity: 1;
+}
+
+.md-def-name:after {
+    content: ". ^";
+    color: var(--text-color);
+}
+
+.md-def-footnote .md-def-name:before {
+    content: "";
+    color: var(--text-color);
+    position: absolute;
+}
+
+.md-def-name:before {
+    content: "";
+    color: var(--text-color);
+    position: absolute;
+}
+
+.md-content.md-url, .md-def-content.md-def-url.md-auto-disp {
+    text-decoration: none;
+    border-bottom: .1rem solid var(--text-color);
+}
+
+.CodeMirror-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.file-list-item-summary {
+    font-size: 1em;
+}
+
+.pin-outline #outline-content .outline-active strong, .pin-outline .outline-active {
+    font-weight: 500;
+    color: var(--outline-active-color);
+}
+
+.file-list-item.active {
+    border-left: 4px solid var(--drake-accent);
+}
+
+#md-searchpanel .btn:not(.close-btn):hover {
+    box-shadow: none;
+    background: var(--btn-hover-bg-color);
+}
+
+/*checkbox*/
+#write input[type=checkbox] {
+    opacity: 0;
+    height: 1.6rem;
+    width: 1.6rem;
+    margin-left: -2em;
+    margin-top: 0;
+    top: 0;
+}
+
+#write .ul-list li.md-task-list-item.task-list-done::before {
+    content: "";
+    background: var(--checkbox-checked) 0 0 no-repeat;
+    background-size: 100%;
+    display: inline-block;
+    position: absolute;
+    height: 1.6rem;
+    width: 1.6rem;
+    margin-left: -2em;
+}
+#write .ul-list li.md-task-list-item.task-list-not-done::before {
+    content: "";
+    background: var(--checkbox-unchecked) 0 0 no-repeat;
+    background-size: 100%;
+    display: inline-block;
+    position: absolute;
+    height: 1.6rem;
+    width: 1.6rem;
+    margin-left: -2em;
+}
+.task-list-item p {
+    line-height: 1.6rem;
+}
+
+/*insert table*/
+.btn {
+    border-radius: 2px;
+}
+
+.modal-content {
+    border-radius: 8px;
+}
+
+.btn-primary:hover, .btn-primary:active {
+    background-color: var(--btn-hover-bg-color);
+    color: var(--drake-highlight);
+}
+
+.btn-primary {
+    background-color: transparent;
+    color: var(--drake-highlight);
+}
+
+.btn-default {
+    background-color: transparent;
+}
+
+.btn:active {
+    box-shadow: none;
+    border-color: transparent;
+}
+
+.modal-footer {
+    border-top: none;
+}
+
+#table-insert-col, #table-insert-row {
+    background: var(--input-bg-color);
+    border-radius: 2px;
+}
+
+/*preference panel*/
+#megamenu-content {
+    background-image: none !important;
+    background-color: var(--bg-color);
+}
+#top-titlebar {
+    height: inherit;
+    background-color: var(--bg-color);
+}
+#megamenu-menu-sidebar {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+.long-btn {
+    width: inherit;
+    min-width: 300px;
+    border: 1px solid var(--text-color);
+    border-radius: 6px;
+}
+.megamenu-menu-panel h1 {
+    margin-bottom: 3rem;
+    text-align: left;
+}
+.megamenu-menu-panel h1, .megamenu-menu-panel h2 {
+    font-weight: normal;
+}
+#recent-file-panel-search-input {
+    height: 45px;
+    border: none;
+    border-bottom: 1px solid var(--text-color);
+    padding-left: 8px;
+}
+#recent-file-panel-search-input::placeholder {
+    color: var(--text-color);
+    opacity: .5;
+}
+.megamenu-menu-header {
+    border-bottom: none;
+}
+#recent-file-panel-action-btn {
+    background: none;
+    border: none;
+}
+#recent-file-panel-action-btn-container {
+    float: none;
+    display: inline-block;
+}
+#top-titlebar .toolbar-icon.btn.hover, #top-titlebar .toolbar-icon.btn:hover {
+    background-color: var(--btn-hover-bg-color);
+    color: var(--text-color);
+}
+.megamenu-menu-panel .btn:hover {
+    background-color: var(--btn-hover-bg-color) !important;
+    color: var(--text-color);
+}
+#recent-file-panel tbody tr:nth-child(2n-1),
+.megamenu-menu-panel table thead,
+.megamenu-menu-panel table tr {
+    background-color: transparent;
+}
+.megamenu-menu-panel table {
+    font-weight: normal;
+}
+#megamenu-back-btn {
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+}
+.megamenu-menu-header #megamenu-menu-header-title {
+    color: var(--text-color);
+}
+header, .context-menu, .megamenu-content, footer {
+    font-family: var(--text-font);
+}
+.ty-preferences select {
+    padding-left: 2px;
+}
+.preference-item-hint {
+    font-size: 14px;
+}
+a.ty-link {
+    color: var(--a-color);
+    margin: 0 .2rem;
+}
+
+/*
+  Name:       material
+  Author:     Mattia Astorino (http://github.com/equinusocio)
+  Website:    https://material-theme.site/
+*/
+.cm-s-inner.CodeMirror {
+    background: none;
+    color: var(--code-block-color);
+}
+.cm-s-inner .CodeMirror-gutters {
+    border-right: none;
+    border-radius: 2px;
+    padding-left: 0.5rem;
+    background: #212121;
+    color: #545454;
+}
+.cm-s-inner .CodeMirror-guttermarker,
+.cm-s-inner .CodeMirror-guttermarker-subtle,
+.cm-s-inner .CodeMirror-linenumber {
+    color: #545454;
+}
+.cm-s-inner .CodeMirror-line::selection,
+.cm-s-inner .CodeMirror-line > span::selection,
+.cm-s-inner .CodeMirror-line > span > span::selection {
+    background: rgba(128, 203, 196, 0.2);
+}
+.cm-s-inner .CodeMirror-line::-moz-selection,
+.cm-s-inner .CodeMirror-line > span::-moz-selection,
+.cm-s-inner .CodeMirror-line > span > span::-moz-selection {
+    background: rgba(128, 203, 196, 0.2);
+}
+.cm-s-inner .cm-keyword {
+    color: #C792EA;
+}
+.cm-s-inner .cm-operator {
+    color: #89DDFF;
+}
+.cm-s-inner .cm-variable-2 {
+    color: var(--code-block-color);
+}
+.cm-s-inner .cm-variable-3,
+.cm-s-inner .cm-type {
+    color: #f07178;
+}
+.cm-s-inner .cm-builtin {
+    color: #FFCB6B;
+}
+.cm-s-inner .cm-atom {
+    color: #F78C6C;
+}
+.cm-s-inner .cm-number {
+    color: #F07178;
+}
+.cm-s-inner .cm-def {
+    color: #82AAFF;
+}
+.cm-s-inner .cm-string {
+    color: #C3E88D;
+}
+.cm-s-inner .cm-string-2 {
+    color: #f07178;
+}
+.cm-s-inner .cm-comment {
+    color: #787878;
+}
+.cm-s-inner .cm-variable {
+    color: var(--code-block-color);
+}
+.cm-s-inner .cm-tag {
+    color: #F07178;
+}
+.cm-s-inner .cm-bracket {
+    color: #89DDFF;
+}
+.cm-s-inner .cm-meta {
+    color: #FFCB6B;
+}
+.cm-s-inner .cm-attribute {
+    color: #C792EA;
+}
+.cm-s-inner .cm-property {
+    color: #C792EA;
+}
+.cm-s-inner .cm-qualifier {
+    color: #DECB6B;
+}
+.cm-s-inner .cm-variable-3,
+.cm-s-inner .cm-type {
+    color: #DECB6B;
+}
+.cm-s-inner .cm-error {
+    color: rgba(255, 255, 255, 1.0);
+    background-color: #F07178;
+}
+.cm-s-inner .CodeMirror-matchingbracket {
+    text-decoration: underline;
+    color: white !important;
+}
+.cm-s-inner .CodeMirror-selected {
+    background: #214283 !important;
+}
+.cm-s-inner .CodeMirror-selectedtext {
+    background: #214283 !important;
+}
+.cm-s-typora-default .CodeMirror-selectedtext {
+    background: var(--select-text-bg-color) !important;
+}
+.cm-overlay.CodeMirror-selectedtext {
+    background: var(--select-text-bg-color) !important;
+}
+.cm-s-inner div.CodeMirror-cursor {
+    border-left: 1px solid var(--code-block-color);
+}
+.cm-s-inner .cm-header, .cm-s-inner.cm-header {
+    color: #FFD760;
+}
+
+
+</style><title>内网安全渗透测试v2-全栈安全进阶班</title>
+</head>
+<body class='typora-export os-windows typora-export-show-outline typora-export-collapse-outline'><div class='typora-export-content'>
+<div class="typora-export-sidebar"><div class="outline-content"><li class="outline-item-wrapper outline-h1"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#第一章-内网安全基础知识">第一章 内网安全基础知识‘</a></div><ul class="outline-children"><li class="outline-item-wrapper outline-h2 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#1-1-什么秘密是内网和外网">1-1 什么秘密是内网和外网</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h2"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#1-2-安全域划分">1-2 安全域划分</a></div><ul class="outline-children"><li class="outline-item-wrapper outline-h3 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#安全域划分">安全域划分</a></div><ul class="outline-children"></ul></li></ul></li><li class="outline-item-wrapper outline-h2 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#1-3-attck-框架">1-3 ATT&amp;CK 框架</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h2 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#1-4--什么是工作组">1-4  什么是工作组</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h2"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#1-4-域">1-4 域</a></div><ul class="outline-children"><li class="outline-item-wrapper outline-h3 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#域环境基础概念">域环境基础概念</a></div><ul class="outline-children"></ul></li></ul></li><li class="outline-item-wrapper outline-h2 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#1-5-活动目录-ad">1-5 活动目录 AD</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h2 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#1-6-dc于gc">1-6 DC于GC</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h2 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#1-7-域域树域林-林根介绍">1-7 域、域树、域林 、林根介绍</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h2 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#1-8-dns在域中的重要性">1-8 DNS在域中的重要性</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h2 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#1-9-域功能基础概念">1-9 域功能基础概念</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h2 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#1-10-fsmo角色功能">1-10 <strong>FSMO角色功能</strong></a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h2 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#1-11-操作主机故障影响">1-11 操作主机故障影响</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h2"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#1-12-只读域控制服务器">1-12 只读域控制服务器</a></div><ul class="outline-children"><li class="outline-item-wrapper outline-h3 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#rodc-优点">RODC 优点</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#rodc-缺点">RODC 缺点</a></div><ul class="outline-children"></ul></li></ul></li><li class="outline-item-wrapper outline-h2 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#1-13-活动目录数据库">1-13 活动目录数据库</a></div><ul class="outline-children"></ul></li></ul></li><li class="outline-item-wrapper outline-h1"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#第二章域环境搭建">第二章：域环境搭建</a></div><ul class="outline-children"><li class="outline-item-wrapper outline-h3 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#编辑虚拟网络编辑器">编辑虚拟网络编辑器</a></div><ul class="outline-children"></ul></li></ul></li><li class="outline-item-wrapper outline-h1"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#第三章权限提示技术">第三章：权限提示技术</a></div><ul class="outline-children"><li class="outline-item-wrapper outline-h2"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#linux-内核切换于cve-2021-3493">Linux 内核切换于CVE-2021-3493</a></div><ul class="outline-children"><li class="outline-item-wrapper outline-h3 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#ubantu内核切换-操作主机ubantu-2004">ubantu内核切换 操作主机：Ubantu 2004</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3 outline-item-single"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#cve-2021-3493-提权">CVE-2021-3493 提权</a></div><ul class="outline-children"></ul></li></ul></li></ul></li></div></div><div id='write'  class=' first-line-indent'><h1 id='第一章-内网安全基础知识'><span>第一章 内网安全基础知识‘</span></h1><h2 id='1-1-什么秘密是内网和外网'><span>1-1 什么秘密是内网和外网</span></h2><p><span>内网和外网有多种分类方法，内网可叫局域网，外网可叫广域网。也可以以私有IP和公有IP做划分</span></p><h2 id='1-2-安全域划分'><span>1-2 安全域划分</span></h2><p><span>安全域划分的目的是：将拥有相同安全等级的计算机啊划分到同一网络内，拥有相同的网络边界，在边界上使用防火墙等安全设备部署网络策略（ACL）</span></p><h3 id='安全域划分'><span>安全域划分</span></h3><p><span>通常防火墙会划分处5个区域</span></p><ul><li><code>untrust</code><span>不信任域：通常是外网（0）</span></li><li><code>DMZ</code><span>隔离区域：通常是允许外部网络访问的服务器放在该区域（50）</span></li><li><code>trust</code><span>信任区域：通常是内网（85）</span></li><li><code>local</code><span>本地区域：防火墙本身（100）</span></li><li><code>mmanageent</code><span>管理区域：管理防火墙的区域（100）</span></li></ul><h2 id='1-3-attck-框架'><span>1-3 ATT&amp;CK 框架</span></h2><blockquote><p><span>官网学习：</span><a href='https://attack.mitre.org/matrices/enterprise/' target='_blank' class='url'>https://attack.mitre.org/matrices/enterprise/</a></p><p><span>陈鑫杰B站：</span><a href='https://www.bilibili.com/video/BV1EV41117UJ/?spm_id_from=333.337.search-card.all.click&amp;vd_source=05abd235c4d932713bb7910dfa6ba067' target='_blank' class='url'>https://www.bilibili.com/video/BV1EV41117UJ/?spm_id_from=333.337.search-card.all.click&vd_source=05abd235c4d932713bb7910dfa6ba067</a></p></blockquote><h2 id='1-4--什么是工作组'><span>1-4  什么是工作组</span></h2><p><span>工作组中的计算机都是平等的，在同一工作组的计算机可以在网络上相互发现。但是工作组无法做到使用某一台计算机控制所有计算机这一操作，在中大型的网络中，维护起来会非常麻烦</span></p><h2 id='1-4-域'><span>1-4 域</span></h2><h3 id='域环境基础概念'><span>域环境基础概念</span></h3><ul><li><span>组织单元OU：组织单元（Organizational Unit，OU）是Windows域中的一个容器，可以将用户、组、计算机和其他组织单位放入其中。它是可以指派组策略设置或委派管理权限的最小作用域或单元</span></li><li><span>安全标识符SID：相当于计算机的身份证，用于标识该计算机的所有权限（s-1-5-21-D1-D2-D3-RID）</span></li><li><span>域是一个有安全边界的集合，同一个域中的计算机彼此之间建立信任关系，计算机之间允许互相访问。</span></li><li><span>单域环境中只使用一个DNS名字空间，例如book.com。域中的所有计算机账户和用户账户都是用同一个域后缀（DNS名称后缀）。</span></li></ul><h2 id='1-5-活动目录-ad'><span>1-5 活动目录 AD</span></h2><p><span>获得目录存储的是网络中所有资源的快捷方式，用户通过快捷方式来定位相应的资源；在一个域中，所有目录共享一个获得目录</span></p><p><span>获得目录特点：</span></p><ol start='' ><li><span>集中管理：管理员可以集中管理网络</span></li><li><span>便携的网络资源访问：活动目录允许用户一次登录网络，就可以访问所有用户有权限访问的资源。并且不需要知道资源存储的物理位置</span></li><li><span>可扩展性：目录可以随组织规模的扩展而扩展</span></li></ol><h2 id='1-6-dc于gc'><span>1-6 DC于GC</span></h2><p><span>DC 域控制器：在域中拥有最高权限，可用于管理整个域中的所有计算机</span></p><p><span>GC 全局编录：包含森林中所有对象信息的特殊目录数据库。全局编录是存储林中所有 Active Directory 对象的副本的域控制器。全局编录存储林中主持域的目录中所有对象的完全副本，以及林中所有其他域中所有对象的部分副本。全局编录中包含的所有域对象的部分副本是用户搜索操作中最常使用的部分。作为其架构定义的一部分，这些属性被标记为包含到全局编录中。在全局编录中存储所有域对象的最常搜索的属性，可以为用户提供高效的搜索，而不会以不必要的域控制器参考影响网络性能。在林中的初始域控制器上，会自动创建全局编录。可以向其他域控制器添加全局编录功能，或者将全局编录的默认位置更改到另一个域控制器上。</span></p><p>&nbsp;</p><h2 id='1-7-域域树域林-林根介绍'><span>1-7 域、域树、域林 、林根介绍</span></h2><p><span>域、域树、域林都是活动目录 (Active Directory)的逻辑单元。</span></p><ul><li><span>域：域是一种管理单元，也是一个管理边界，在同一个域内共享某些功能和参数。一个域可以有多台域控制器。</span></li><li><span>域树：共用一个连续的域名的windows域，比如：zpchcbd.com，a.zpchcbd.com，b.zpchcbd.com 这三个在同一个 域树 上，同时zpchcbd.com则被称为 树的根域 ，然后a.zpchcbd.com , b.zpchcbd.com 则被成为 子域 。</span></li><li><span>域林：域林是一个或多个不连续DNS名的域 (树)的集合。</span></li><li><span>林跟：在林中创建的第一个域控为林根，也可以叫做根域</span></li><li><img src="%E5%86%85%E7%BD%91%E5%AE%89%E5%85%A8%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95v2-%E5%85%A8%E6%A0%88%E5%AE%89%E5%85%A8%E8%BF%9B%E9%98%B6%E7%8F%AD.assets/%E5%9B%BE%E7%89%87140.png" referrerpolicy="no-referrer" alt="img"></li></ul><h2 id='1-8-dns在域中的重要性'><span>1-8 DNS在域中的重要性</span></h2><p><span>在实际业务中，域控制器和DNS服务器都会配置在同一台计算机上，所以在实际的渗透测试中，我们可以通过寻找DNS服务器来定位域控制器</span></p><p><span>DNS 在Windows域环境中的重要性介绍</span></p><ol start='' ><li><p><span>名称解析：DNS用于将计算机名转换为IP地址，以便在网络上定位和访问其他计算机。在Windows域环境中，DNS是用于名称解析的主要机制，它可以帮助客户端找到域内其他计算机的IP地址，从而进行通信和数据交换。</span></p></li><li><p><span>域控制器发现：在Windows域环境中，域控制器是管理域中用户、计算机和资源的核心组件。客户端需要知道域控制器的名称和IP地址才能登录到域中，DNS提供了这些信息。域控制器在安装时会将自己的DNS信息注册到DNS服务器上，客户端可以通过DNS查询找到域控制器的信息。</span></p></li><li><p><span>动态更新：在Windows域环境中，DNS还支持动态DNS更新。当新计算机加入域时，它会将自己的DNS信息注册到DNS服务器上，以便其他计算机可以找到它。同样地，当计算机离开域时，它会将自己的DNS信息从DNS服务器上删除。这样可以保持DNS信息的最新状态，从而减少错误和故障。</span></p></li><li><p><span>Active Directory集成：在Windows域环境中，DNS与Active Directory密切集成。域控制器和其他Windows服务器使用DNS来定位Active Directory中的服务和资源。例如，在域中查找用户、组和计算机时，Active Directory使用DNS来查找它们的位置。</span></p><p>&nbsp;</p></li></ol><h2 id='1-9-域功能基础概念'><span>1-9 域功能基础概念</span></h2><ul><li><p><span>功能级别：功能级别定义了域或林中可以使用的高级功能。不同版本的Windows Server支持不同的功能级别。提高功能级别可以启用新功能，但会限制可以加入域或林的域控制器的操作系统版本。</span><strong><span>高功能级别普遍可以低兼容低安全级别，但是低安全级别无法兼容高功能级别</span></strong></p></li><li><p><span>信任关系：信任关系是在两个域或林之间建立的，允许一个域中的用户使用另一个域中的资源。信任关系可以是单向的或双向的，并且可以是显式创建的或隐式创建的（例如父子域之间的信任关系）。</span></p></li><li><p><span>全局编录服务器：全局编录服务器是存储林中所有Active Directory对象副本的域控制器。它包含了林中所有对象信息的特殊目录数据库。全局编录存储林中主持域的目录中所有对象的完全副本，以及林中所有其他域中所有对象的部分副本。</span></p></li><li><p><span>只读域控制器：只读域控制器（RODC）是一种特殊类型的域控制器，它存储Active Directory数据库的只读副本。RODC通常用于安全性较低或物理安全性无法保证的位置，因为它不存储用户凭据，因此即使被攻击也不会泄露敏感信息。</span></p><p>&nbsp;</p><p>&nbsp;</p></li></ul><h2 id='1-10-fsmo角色功能'><span>1-10 </span><strong><span>FSMO角色功能</span></strong></h2><ul><li><p><span>架构主机：控制活动目录整个林中所有对象和属性的定义，具有架构主机角色的DC是可以更新目录架构的唯一DC。这些架构更新会从架构主机复制到目录林中的所有其它域控制器中。 架构主机是基于目录林的，整个目录林中只有一个架构主机。</span></p></li><li><p><span>域命令主机：向目录林中添加新域。从目录林中删除现有的域。添加或删除描述外部目录的交叉引用对象。</span></p></li><li><p><span>PDC模拟器：向后兼容低级客户端和服务器，担任NT系统中PDC角色时间同步服务源，作为本域权威时间服务器，为本域中其它DC以及客户机提供时间同步服务，林中根域的PDC模拟器又为其它域PDC模拟器提供时间同步!密码最终验证服务器，当一用户在本地DC登录，而本地DC验证本地用户输入密码无效时，本地DC会查询PDC模拟器，询问密码是否正确。</span></p></li><li><p><span>主机角色：RID主机：分配SID，SID由域SID+序列号组合而成，后者称为“相对ID”(Relative ID,RID),在Win2003环境中，为保证整个域中每个DC所创建的安全主体对应的SID在整个域范围唯一性，设立该主机角色，负责向其它DC分配RID池(默认一次性分配512个)，所有非RID在创建安全实体时，都从分配给的RID池中分配RID，以保证SID不会发生冲突!</span></p></li><li><p><span>基础架构主机：基础结构主机的作用是负责对跨域对象引用进行更新，以确保所有域间操作对象的一致性。基础架构主机工作机制是定期会对没有保存在本机的引用对象信息，而对于GC来说，会保存当前林中所有对象信息。</span></p><p>&nbsp;</p></li></ul><h2 id='1-11-操作主机故障影响'><span>1-11 操作主机故障影响</span></h2><p><span>操作主机在Active Directory环境中，肩负着重要的作用，如果操作主机出现问题，将会出现以下问题：</span></p><p><span>当架构主机不可用时，不能对架构进行更改。在大多数网络环境中，对架构更改的频率很低，并且应提前进行规划，以便使架构主机的故障不至于产生任何直接的问题。</span></p><p><span>当域命名主机不可用时，不能通过运行DCPROMO向Active Directory中添加域，同时也不能从目录林中删除域，如果在域命名主机不可用时试图通过运行DCPROMO来删除域，那么就会收到一条&quot;RPC 服务器不可用&quot;的消息。</span></p><p><span>当RID主机不可用时，所遇到的主要问题是不能向域中添加任何新的安全对象，例如用户、组和计算机；如果试图添加，则会出现如下的错误消息：&quot;Windows 不能创建对象，因为：目录服务已经用完了相对标识号池&quot;。</span></p><p><span>当PDC主机不可用时，在本机模式环境中用户登录失败的可能性增大。如果重新设置用户密码，例如用户忘记密码，然后管理员在一台DC（不是验证DC）上重新设置密码，那么该用户就必须等到密码复制到验证DC之后才能登录。试图编辑组策略对象时出错。</span></p><p><span>当基础架构主机不可用时，结构主机故障对环境的影响是有限的。最终用户并不能感觉到它的影响，只对管理员执行大量组操作产生影响。这些组操作通常是添加用户和/或重新命名用户。在此情况下，结构主机故障只是会延迟通过Active Directory管理单元引用这些更改的时间。</span></p><p>&nbsp;</p><h2 id='1-12-只读域控制服务器'><span>1-12 只读域控制服务器</span></h2><p><span>只读域控制器（RODC）是Windows Server 2008 AD DS域服务之后提供的新域控制器类型，只读域控制器同样是域控制器，但是Active Directory数据具备“只读”属性，只能读取不能写入。只读域控制器主要用在企业分支机构</span></p><p><span>管理员不能直接对 RODC 进行更改，要修改数据，必须先修改域控制服务器，再将数据复制到只读域控制服务器中</span></p><p>&nbsp;</p><h3 id='rodc-优点'><span>RODC 优点</span></h3><ol start='' ><li><p><span>只读的 Active Directory 数据库</span></p></li><li><p><span>单向复制：数据只能从 DC 复制到 RODC</span></p></li><li><p><span>密码缓存</span></p></li><li><p><span>只读DNS</span></p></li><li><p><span>RODC管理：RODC允许一个普通的域用户称为RODC管理员</span></p></li><li><p><span>GC支持：RODC可以做GC（全局编录）服务器，但是RODC不能安装操作主控角色。</span></p><p>&nbsp;</p></li></ol><h3 id='rodc-缺点'><span>RODC 缺点</span></h3><p><span>对可读写的域控制器有很明显的依赖性！如果域控制器出错，那么RODC基本也会跟着出错</span></p><p>&nbsp;</p><h2 id='1-13-活动目录数据库'><span>1-13 活动目录数据库</span></h2><p><span>Active Directory数据库是一个事务处理数据库系统，通过日志文件支持</span><strong><span>回滚操作</span></strong><span>，从而确保事务提交到数据库中，与Active Directory 关联的文件包括：</span></p><ol start='' ><li><p><span>Ntfs.dit，Active Directory数据库文件：对数据进行任何更改都会首先写道当前日志文件中，然后入Active Directory 数据库文件；日志大小是固定10MB</span></p></li><li><p><span>Edgxxx.log，事务日志文件：对数据库进行操作后，会将操作写入Edb.log文件中，当Edb.log文件充满事务之后，被重新命名为Edbxxxxx.log。（从00001开始，并使用十六进制累加）</span></p></li><li><p><span>Res1.log和Res2.log，预留的日志文件，确保在此驱动器上预留最后的20MB磁盘空间，以确保日志文件有足够的空间写入</span></p></li><li><p><span>Edb.chk，检查点文件：Edb.chk是数据库检查点文件，检查点是标识数据库引擎需要重复播放日志的点，通常在恢复或初始化时验证数据库的一致性</span></p></li><li><p><span>Temp.edb，临时数据库维护文件：数据库维护时使用的临时文件，用于存储当前进程中处理的信息。</span></p></li><li><p><span>Edbtmp.log，日志暂存文件：当前日志文件（Edb.log）填满时的暂时日志填充文件</span></p><p><span>附：默认状态下，活动目录数据库文件位于“C:\Windows\NTDS”目录中。</span></p></li></ol><h1 id='第二章域环境搭建'><span>第二章：域环境搭建</span></h1><h3 id='编辑虚拟网络编辑器'><span>编辑虚拟网络编辑器</span></h3><p><span>按下面图示添加网络和更改IP地址，之后正常开机即可，如果win-2016无法上网，重启一下就好</span></p><p><img src="%E5%86%85%E7%BD%91%E5%AE%89%E5%85%A8%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95v2-%E5%85%A8%E6%A0%88%E5%AE%89%E5%85%A8%E8%BF%9B%E9%98%B6%E7%8F%AD.assets/image-20230517150428199.png" alt="image-20230517150428199" style="zoom:50%;" /></p><p><img src="%E5%86%85%E7%BD%91%E5%AE%89%E5%85%A8%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95v2-%E5%85%A8%E6%A0%88%E5%AE%89%E5%85%A8%E8%BF%9B%E9%98%B6%E7%8F%AD.assets/image-20230517150440731.png" alt="image-20230517150440731" style="zoom:50%;" /></p><p><img src="%E5%86%85%E7%BD%91%E5%AE%89%E5%85%A8%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95v2-%E5%85%A8%E6%A0%88%E5%AE%89%E5%85%A8%E8%BF%9B%E9%98%B6%E7%8F%AD.assets/image-20230517150450361.png" alt="image-20230517150450361" style="zoom:50%;" /></p><p><img src="%E5%86%85%E7%BD%91%E5%AE%89%E5%85%A8%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95v2-%E5%85%A8%E6%A0%88%E5%AE%89%E5%85%A8%E8%BF%9B%E9%98%B6%E7%8F%AD.assets/image-20230517150457255.png" alt="image-20230517150457255" style="zoom:50%;" /></p><p><img src="%E5%86%85%E7%BD%91%E5%AE%89%E5%85%A8%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95v2-%E5%85%A8%E6%A0%88%E5%AE%89%E5%85%A8%E8%BF%9B%E9%98%B6%E7%8F%AD.assets/image-20230517150505065.png" alt="image-20230517150505065" style="zoom:50%;" /></p><h1 id='第三章权限提示技术'><span>第三章：权限提示技术</span></h1><p><img src="%E5%86%85%E7%BD%91%E5%AE%89%E5%85%A8%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95v2-%E5%85%A8%E6%A0%88%E5%AE%89%E5%85%A8%E8%BF%9B%E9%98%B6%E7%8F%AD.assets/03-%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87.png" alt="03-权限提升" style="zoom:50%;" /></p><h2 id='linux-内核切换于cve-2021-3493'><span>Linux 内核切换于CVE-2021-3493</span></h2><h3 id='ubantu内核切换-操作主机ubantu-2004'><span>ubantu内核切换 操作主机：Ubantu 2004</span></h3><pre class="md-fences md-end-block md-fences-with-lineno ty-contain-cm modeLoaded" spellcheck="false" lang="bash" style="break-inside: unset;"><div class="CodeMirror cm-s-inner cm-s-null-scroll CodeMirror-wrap" lang="bash"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 9.42708px; left: 49px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 45px; margin-bottom: 0px; border-right-width: 0px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><span><span>​</span>x</span></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-code" role="presentation" style="text-rendering: auto;"><div class="CodeMirror-activeline" style="position: relative;"><div class="CodeMirror-activeline-background CodeMirror-linebackground"></div><div class="CodeMirror-gutter-background CodeMirror-activeline-gutter" style="left: -45px; width: 45px;"></div><div class="CodeMirror-gutter-wrapper CodeMirror-activeline-gutter" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 8px; width: 29px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment"># 查看当前内核版本</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">lonelyor@ubuntusrv2004:~<span class="cm-def">$ uname</span> <span class="cm-attribute">-r</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-number">4</span>.4.0-21-generic</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment"># 查看已安装内核版本</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">lonelyor@ubuntusrv2004:~<span class="cm-def">$ dpkg</span> <span class="cm-attribute">--get-selections</span> | <span class="cm-builtin">grep</span> linux-image</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">linux-image-4.15.0-91-generic &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; install</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">linux-image-4.4.0-21-generic &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  install</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">9</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">linux-image-5.4.0-105-generic &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; install</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 8px; width: 29px;">10</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">linux-image-unsigned-4.18.0-041800-generic &nbsp; &nbsp;  install</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">11</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">12</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment"># 查看当前可安装的内核版本</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">13</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">lonelyor@ubuntusrv2004:~<span class="cm-def">$ apt</span><span class="cm-attribute">-cache</span> search linux | <span class="cm-builtin">grep</span> linux-image</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">14</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">linux-image-4.4.0-21-generic <span class="cm-attribute">-</span> Linux kernel image <span class="cm-keyword">for</span> version <span class="cm-number">4</span>.4.0 on <span class="cm-number">64</span> bit x86 SMP</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">15</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">linux-image-4.4.0-21-lowlatency <span class="cm-attribute">-</span> Linux kernel image <span class="cm-keyword">for</span> version <span class="cm-number">4</span>.4.0 on <span class="cm-number">64</span> bit x86 SMP</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">16</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">linux-image-extra-4.4.0-21-generic <span class="cm-attribute">-</span> Linux kernel extra modules <span class="cm-keyword">for</span> version <span class="cm-number">4</span>.4.0 on <span class="cm-number">64</span> bit x86 SMP</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">17</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">.......</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">18</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">19</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment"># 安装需要的内核版本</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 8px; width: 29px;">20</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">lonelyor@ubuntusrv2004:~<span class="cm-def">$ apt</span><span class="cm-attribute">-cache</span> search linux | <span class="cm-builtin">grep</span> linux-image linux-image-4.4.0-21-generic</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">21</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">22</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment"># 查看内核启动顺序</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">23</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">lonelyor@ubuntusrv2004:~<span class="cm-def">$ cat</span> /boot/grub/grub.cfg | <span class="cm-builtin">grep</span> menuentry</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">24</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">if</span> [ x<span class="cm-string">"</span><span class="cm-def">${feature_menuentry_id}</span><span class="cm-string">"</span> <span class="cm-operator">=</span> xy ]; <span class="cm-keyword">then</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">25</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp;<span class="cm-def">menuentry_id_option</span><span class="cm-operator">=</span><span class="cm-string">"--id"</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">26</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp;<span class="cm-def">menuentry_id_option</span><span class="cm-operator">=</span><span class="cm-string">""</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">27</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">export</span> menuentry_id_option</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">28</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">menuentry <span class="cm-string">'Ubuntu'</span> <span class="cm-attribute">--class</span> ubuntu <span class="cm-attribute">--class</span> gnu-linux <span class="cm-attribute">--class</span> gnu <span class="cm-attribute">--class</span> os <span class="cm-def">$menuentry_id_option</span> <span class="cm-string">'gnulinux-simple-4418d962-00a0-48ed-baf2-c968984c67b7'</span> {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">29</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">submenu <span class="cm-string">'Advanced options for Ubuntu'</span> <span class="cm-def">$menuentry_id_option</span> <span class="cm-string">'gnulinux-advanced-4418d962-00a0-48ed-baf2-c968984c67b7'</span> {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 8px; width: 29px;">30</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp; &nbsp; &nbsp;  menuentry <span class="cm-string">'Ubuntu, with Linux 5.4.0-105-generic'</span> <span class="cm-attribute">--class</span> ubuntu <span class="cm-attribute">--class</span> gnu-linux <span class="cm-attribute">--class</span> gnu <span class="cm-attribute">--class</span> os <span class="cm-def">$menuentry_id_option</span> <span class="cm-string">'gnulinux-5.4.0-105-generic-advanced-4418d962-00a0-48ed-baf2-c968984c67b7'</span> {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">31</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp; &nbsp; &nbsp;  menuentry <span class="cm-string">'Ubuntu, with Linux 5.4.0-105-generic (recovery mode)'</span> <span class="cm-attribute">--class</span> ubuntu <span class="cm-attribute">--class</span> gnu-linux <span class="cm-attribute">--class</span> gnu <span class="cm-attribute">--class</span> os <span class="cm-def">$menuentry_id_option</span> <span class="cm-string">'gnulinux-5.4.0-105-generic-recovery-4418d962-00a0-48ed-baf2-c968984c67b7'</span> {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">32</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp; &nbsp; &nbsp;  menuentry <span class="cm-string">'Ubuntu, with Linux 4.18.0-041800-generic'</span> <span class="cm-attribute">--class</span> ubuntu <span class="cm-attribute">--class</span> gnu-linux <span class="cm-attribute">--class</span> gnu <span class="cm-attribute">--class</span> os <span class="cm-def">$menuentry_id_option</span> <span class="cm-string">'gnulinux-4.18.0-041800-generic-advanced-4418d962-00a0-48ed-baf2-c968984c67b7'</span> {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">33</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp; &nbsp; &nbsp;  menuentry <span class="cm-string">'Ubuntu, with Linux 4.18.0-041800-generic (recovery mode)'</span> <span class="cm-attribute">--class</span> ubuntu <span class="cm-attribute">--class</span> gnu-linux <span class="cm-attribute">--class</span> gnu <span class="cm-attribute">--class</span> os <span class="cm-def">$menuentry_id_option</span> <span class="cm-string">'gnulinux-4.18.0-041800-generic-recovery-4418d962-00a0-48ed-baf2-c968984c67b7'</span> {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">34</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp; &nbsp; &nbsp;  menuentry <span class="cm-string">'Ubuntu, with Linux 4.15.0-91-generic'</span> <span class="cm-attribute">--class</span> ubuntu <span class="cm-attribute">--class</span> gnu-linux <span class="cm-attribute">--class</span> gnu <span class="cm-attribute">--class</span> os <span class="cm-def">$menuentry_id_option</span> <span class="cm-string">'gnulinux-4.15.0-91-generic-advanced-4418d962-00a0-48ed-baf2-c968984c67b7'</span> {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">35</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp; &nbsp; &nbsp;  menuentry <span class="cm-string">'Ubuntu, with Linux 4.15.0-91-generic (recovery mode)'</span> <span class="cm-attribute">--class</span> ubuntu <span class="cm-attribute">--class</span> gnu-linux <span class="cm-attribute">--class</span> gnu <span class="cm-attribute">--class</span> os <span class="cm-def">$menuentry_id_option</span> <span class="cm-string">'gnulinux-4.15.0-91-generic-recovery-4418d962-00a0-48ed-baf2-c968984c67b7'</span> {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">36</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp; &nbsp; &nbsp;  menuentry <span class="cm-string">'Ubuntu, with Linux 4.4.0-21-generic'</span> <span class="cm-attribute">--class</span> ubuntu <span class="cm-attribute">--class</span> gnu-linux <span class="cm-attribute">--class</span> gnu <span class="cm-attribute">--class</span> os <span class="cm-def">$menuentry_id_option</span> <span class="cm-string">'gnulinux-4.4.0-21-generic-advanced-4418d962-00a0-48ed-baf2-c968984c67b7'</span> {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">37</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp; &nbsp; &nbsp;  menuentry <span class="cm-string">'Ubuntu, with Linux 4.4.0-21-generic (recovery mode)'</span> <span class="cm-attribute">--class</span> ubuntu <span class="cm-attribute">--class</span> gnu-linux <span class="cm-attribute">--class</span> gnu <span class="cm-attribute">--class</span> os <span class="cm-def">$menuentry_id_option</span> <span class="cm-string">'gnulinux-4.4.0-21-generic-recovery-4418d962-00a0-48ed-baf2-c968984c67b7'</span> {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">38</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">39</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment"># 修改内核启动顺序</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 8px; width: 29px;">40</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">lonelyor@ubuntusrv2004:~<span class="cm-def">$ nano</span> /etc/default/grub</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">41</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment">#GRUB_DEFAULT="Advanced options for Ubuntu&gt;Ubuntu, with Linux 5.4.0-105-generic"</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">42</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment">#GRUB_DEFAULT="Advanced options for Ubuntu&gt;Ubuntu, with Linux 4.4.0-21-generic"</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">43</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-def">GRUB_DEFAULT</span><span class="cm-operator">=</span><span class="cm-string">"Advanced options for Ubuntu&gt;Ubuntu, with Linux 4.15.0-91-generic"</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">44</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">45</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment"># 更新启动项</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">46</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">lonelyor@ubuntusrv2004:~<span class="cm-def">$ update</span><span class="cm-attribute">-grub</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">47</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">48</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment"># 重启服务器</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 8px; width: 29px;">49</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">lonelyor@ubuntusrv2004:~<span class="cm-def">$ sudo</span> reboot</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 0px; width: 1px; border-bottom: 0px solid transparent; top: 1440px;"></div><div class="CodeMirror-gutters" style="height: 1440px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 37px;"></div></div></div></div></pre><h3 id='cve-2021-3493-提权'><span>CVE-2021-3493 提权</span></h3><p><span>[CVE-2021-3493 是一个 Ubuntu 特定的问题，它在 Ubuntu 中没有正确验证关于用户名称空间的文件系统功能的应用程序。由于 Ubuntu 带有一个支持非特权的 overlayfs 挂载的补丁，因此本地攻击者可以使用它来进行提权操作</span></p><p><span>受影响的版本包括：</span></p><ul><li><span>Ubuntu 20.10</span></li><li><span>Ubuntu 20.04 LTS</span></li><li><span>Ubuntu 18.04 LTS</span></li><li><span>Ubuntu 16.04 LTS</span></li><li><span>[Ubuntu 14.04 ESM</span></li></ul><pre class="md-fences md-end-block md-fences-with-lineno ty-contain-cm modeLoaded" spellcheck="false" lang="bash" style="break-inside: unset;"><div class="CodeMirror cm-s-inner cm-s-null-scroll CodeMirror-wrap" lang="bash"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 9.42708px; left: 49px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 45px; margin-bottom: 0px; border-right-width: 0px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>19</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-code" role="presentation" style="text-rendering: auto;"><div class="CodeMirror-activeline" style="position: relative;"><div class="CodeMirror-activeline-background CodeMirror-linebackground"></div><div class="CodeMirror-gutter-background CodeMirror-activeline-gutter" style="left: -45px; width: 45px;"></div><div class="CodeMirror-gutter-wrapper CodeMirror-activeline-gutter" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 8px; width: 29px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment"># EXP代码已经在 ubantu2004 home 目录下</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">lonelyor@ubuntusrv2004:~<span class="cm-def">$ ls</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">CVE-2016-5195  CVE-2019-14287  CVE-2021-3156  CVE-2021-3493  CVE-2021-4034  linux-image  tmp</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment"># 进入相应的文件夹</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">lonelyor@ubuntusrv2004:~<span class="cm-def">$ cd</span>  CVE-2021-3493</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">lonelyor@ubuntusrv2004:~/CVE-2021-3493<span class="cm-def">$ ls</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">exploit  exploit.c  ovlcap  README.md</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">9</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 8px; width: 29px;">10</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment"># 对EXP代码进行预编译</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">11</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">lonelyor@ubuntusrv2004:~/CVE-2021-3493<span class="cm-def">$ gcc</span> exploit.c</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">12</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">13</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment"># 运行EXP代码</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">14</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">lonelyor@ubuntusrv2004:~/CVE-2021-3493<span class="cm-def">$ </span>./exploit</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">15</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">16</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment"># 提权成功！升级为root用户</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">17</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">bash-5.0<span class="cm-comment"># id</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 8px; width: 29px;">18</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-def">uid</span><span class="cm-operator">=</span><span class="cm-number">0</span>(root) <span class="cm-def">gid</span><span class="cm-operator">=</span><span class="cm-number">0</span>(root) <span class="cm-def">groups</span><span class="cm-operator">=</span><span class="cm-number">0</span>(root),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),116(lxd),1000(lonelyor)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -45px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 8px; width: 29px;">19</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 0px; width: 1px; border-bottom: 0px solid transparent; top: 434px;"></div><div class="CodeMirror-gutters" style="height: 434px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 37px;"></div></div></div></div></pre><p>&nbsp;</p></div></div>
+
+<script>(function(){var e=document.body.parentElement,t=[],n=null,i=document.body.classList.contains("typora-export-collapse-outline"),r=function(e,t,n){document.addEventListener(e,function(e){if(!e.defaultPrevented)for(var i=e.target;i&&i!=this;i=i.parentNode)if(i.matches(t)){!1===n.call(i,e)&&(e.preventDefault(),e.stopPropagation());break}},!1)};function o(){return e.scrollTop}r("click",".outline-expander",function(e){var t=this.closest(".outline-item-wrapper").classList;return t.contains("outline-item-open")?t.remove("outline-item-open"):t.add("outline-item-open"),d(),!1}),r("click",".outline-item",function(e){var t=this.querySelector(".outline-label");if(location.hash="#"+t.getAttribute("href"),i){var n=this.closest(".outline-item-wrapper").classList;n.contains("outline-item-open")||n.add("outline-item-open"),c(),n.add("outline-item-active")}});var a,s,l=function(){var e=o();n=null;for(var i=0;i<t.length&&t[i][1]-e<60;i++)n=t[i]},c=function(){document.querySelectorAll(".outline-item-active").forEach(e=>e.classList.remove("outline-item-active")),document.querySelectorAll(".outline-item-single.outline-item-open").forEach(e=>e.classList.remove("outline-item-open"))},d=function(){if(n){c();var e=document.querySelector('.outline-label[href="#'+(CSS.escape?CSS.escape(n[0]):n[0])+'"]');if(e)if(i){var t=e.closest(".outline-item-open>ul>.outline-item-wrapper");if(t)t.classList.add("outline-item-active");else{for(var r=(e=e.closest(".outline-item-wrapper")).parentElement.closest(".outline-item-wrapper");r;)r=(e=r).parentElement.closest(".outline-item-wrapper");e.classList.add("outline-item-active")}}else e.closest(".outline-item-wrapper").classList.add("outline-item-active")}};window.addEventListener("scroll",function(e){a&&clearTimeout(a),a=setTimeout(function(){l(),d()},300)});var u=function(){s=setTimeout(function(){!function(){t=[];var e=o();document.querySelector("#write").querySelectorAll("h1, h2, h3, h4, h5, h6").forEach(n=>{var i=n.getAttribute("id");t.push([i,e+n.getBoundingClientRect().y])})}(),l(),d()},300)};window.addEventListener("resize",function(e){s&&clearTimeout(s),u()}),u()})();</script></body>
+</html>
