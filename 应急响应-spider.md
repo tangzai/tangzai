@@ -19,8 +19,6 @@
 - Ubuntu 20.04.4 LTS
 - XShell
 
-<iframe src="//player.bilibili.com/player.html?aid=514675299&amp;cid=809910075&amp;bvid=BV1Ag411r7Wd&amp;ts=55382669" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" width="700px" height="472px"></iframe>
-
 伴随开机启动，一般生产服务器很少重启，但是为防止被控机器失联部分木马会添加开机启动项作为复活手段。
 
 ### [/etc/rc.local](#etcrclocal)
