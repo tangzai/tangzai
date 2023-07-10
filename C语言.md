@@ -187,6 +187,18 @@ int main(int argc, char const *argv[])
     printf("arr2=%s\n", arr2);
     return 0;
 }
+
+// 案例二
+# include <stdio.h>
+
+int main(){
+    // char 类型默认只存储一个字符，所以这里需要使用 字符数组 来存储
+    char input[20] = {0};
+    printf("输入密码：");
+    // 使用 %s 来提取内容，所以会在遇到换行或者空白内容时停止读取内容
+    scanf("%s", input);
+    printf("input=%s", input);
+}
 ```
 
 ## if判断初识
@@ -438,5 +450,88 @@ int main(){
 价格：55
 修改后的价格：10
 指针查询b1书名：C语言程序设计真正查询b1价格：10
+```
+
+# 分支和循环
+
+## if函数详解
+
+没啥说的，直接看代码示例
+
+**1. 判断输入的数字是否是奇数**
+
+```c
+# include <stdio.h>
+
+int main(){
+    int num;
+    printf("输入一个数字：");
+    scanf("%d", &num);
+    if (num % 2 != 0){
+        printf("是奇数");
+    } else{
+        printf("是偶数");
+    }
+
+    return 0;
+}
+```
+
+**2. 循环输出1-100的奇数**
+
+```c
+# include <stdio.h>
+
+int main(){
+    for (int i = 0; i <= 100; ++i) {
+        if (i % 2 !=0 ){
+            printf("%d\n",i);
+        }
+    }
+
+    return 0;
+}
+```
+
+## switch语句
+
+```c
+# include <stdio.h>
+
+int main(){
+    int num = 30;
+    switch (num) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+            printf("工作日\n");
+            break;
+        case 6:
+        case 7:
+            printf("休息日\n");
+            break;
+        default:
+            printf("错误输入\n");
+            break;
+    }
+    return 0;
+}
+```
+
+## while语句
+
+```c
+# include <stdio.h>
+
+int main(){
+    int num = 0;
+    while (num < 10){
+        num ++;
+        printf("num=%d\n", num);
+    }
+    return 0;
+}`
 ```
 

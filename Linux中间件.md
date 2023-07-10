@@ -931,8 +931,12 @@ net-tools-2.0-0.51.20160912git.el8.x86_64
 
 ```bash
 [root@localhost db]# ls
-mysql-community-client-8.0.33-1.el8.x86_64.rpm          mysql-community-common-8.0.33-1.el8.x86_64.rpm          mysql-community-libs-8.0.33-1.el8.x86_64.rpm
-mysql-community-client-plugins-8.0.33-1.el8.x86_64.rpm  mysql-community-icu-data-files-8.0.33-1.el8.x86_64.rpm  mysql-community-server-8.0.33-1.el8.x86_64.rpm
+mysql-community-client-8.0.33-1.el8.x86_64.rpm          
+mysql-community-common-8.0.33-1.el8.x86_64.rpm          
+mysql-community-libs-8.0.33-1.el8.x86_64.rpm
+mysql-community-client-plugins-8.0.33-1.el8.x86_64.rpm  
+mysql-community-icu-data-files-8.0.33-1.el8.x86_64.rpm  
+mysql-community-server-8.0.33-1.el8.x86_64.rpm
 ```
 
 ### 1.3 按下面顺序安装
