@@ -380,6 +380,8 @@ man = 2
 
 ### 内存地址的生成
 
+简单来说：**指针就是地址**
+
 一个64位的系统，最多能生成2^64次方个内存地址，一个内存地址占`64 / 8 = 8`字节
 
 一个32位的系统，最多能生成2^32次方个内存地址，一个内存地址占`32 / 8 = 4`字节，从：
@@ -533,5 +535,426 @@ int main(){
     }
     return 0;
 }`
+```
+
+## 案例：猜数字游戏
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+
+void menu() {
+    printf("**********************************\n");
+    printf("*** 0:exit ******* 1:play ********\n");
+    printf("**********************************\n");
+}
+
+void game(){
+    int ret = rand() / 300;
+    int guess = 0;
+    while (1){
+        printf("猜测一个数字：");
+        scanf("%d", &guess);
+        if (guess > ret){
+            printf("猜大了\n");
+        } else if (guess < ret){
+            printf("猜小了\n");
+        } else{
+            printf("猜对了\n");
+            break;
+        }
+    }
+
+}
+
+int main() {
+    srand((int) time(NULL));
+    int input = 0;
+    do {
+        menu();
+        printf("请输入你的选择：");
+        scanf("%d", &input);
+        switch (input) {
+            case 1:
+                printf("开始游戏\n");
+                game();
+                break;
+            case 0:
+                printf("结束游戏\n");
+                break;
+            default:
+                printf("输入错误\n");
+                break;
+        }
+    } while (input);
+
+    return 0;
+}
+```
+
+# 函数
+
+## 函数初始
+
+### 案例：交换函数
+
+```c
+#include <stdio.h>
+
+// 交换函数
+// 如果想要通过函数来改变全局变量，可以通过变量地址来改变
+void Swap(int* x, int* y){
+    int tmp;
+    tmp = *x;
+    *x = *y;
+    *y = tmp;
+}
+
+int main(){
+    int a = 10;
+    int b = 20;
+    int* pa = &a;
+    int* pb = &b;
+    printf("a=%d;b=%d\n", a,b);
+    Swap(pa, pb);
+    printf("a=%d;b=%d", a,b);
+    return 0;
+}
+```
+
+## 函数递归
+
+C语言中的递归函数就是python中的闭包
+
+```c
+#include <stdio.h>
+
+void my_strlen(char* str){
+    int count = 0;
+    while (1){
+        if (str[count] != '\0'){
+            count ++;
+        } else{
+            break;
+        }
+    }
+    printf("count = %d", count);
+}
+
+int main() {
+    char arr[] = "abcdef";
+    // 在C语言中，传递一个数组当实参时，实际传递的时这个数组的指针地址
+    my_strlen(arr);
+    return 0;
+}
+```
+
+# 数组
+
+## 数组的遍历
+
+一维数组的创建，是在内存中开辟一块连续的内存空间来存储的
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    // 字符串数组遍历
+    char arr1[] = "abcdefg";
+    for (int i = 0; i < strlen(arr1); ++i) {
+        printf("%c\n", arr1[i]);
+    }
+
+    // 数字数组遍历
+    int arr2[] = {0,1,2,3,4,5,6};
+    // 计算数组的大小除以每个元素的大小得到数组元素的数量
+    for (int i = 0; i < sizeof arr2 / sizeof arr2[0]; ++i) {
+        printf("%d\n",arr2[i]);
+    }
+    
+    for (int i = 0; i < sizeof arr2 / sizeof arr2[0]; ++i) {
+    	printf("arr[%d]->%p\n", i, &arr2[i]);
+    }
+    return 0;
+}
+
+// 输出
+arr[0]->00000092961ffb70
+arr[1]->00000092961ffb74
+arr[2]->00000092961ffb78
+arr[3]->00000092961ffb7c
+arr[4]->00000092961ffb80
+arr[5]->00000092961ffb84
+arr[6]->00000092961ffb88
+```
+
+## 二维数组的创建
+
+在一维数组中有包含几个数组就是几行，每个二维数组中包含几个元素呗称为几列；`arr[行][列]`
+
+```c
+int main() {
+    int arr[2][4] = {{1, 2, 3, 4},
+                     {5, 6, 7, 8}};
+    return 0;
+}
+```
+
+### 二维数组的遍历
+
+二维数组的存储依然是在内存中开辟一块连续的内存地址来存储
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    int arr[2][4] = {{1, 2, 3, 4},
+                     {5, 6, 7, 8}};
+
+    // 二维数组的遍历
+    for (int i = 0; i < sizeof arr / sizeof arr[0]; ++i) {
+        for (int j = 0; j < sizeof arr[0] / sizeof arr[0][0]; ++j) {
+            printf("%d\n", arr[i][j]);
+        }
+    }
+
+    // 二维数组的内存地址遍历
+    for (int i = 0; i < sizeof arr / sizeof arr[0]; ++i) {
+        for (int j = 0; j < sizeof arr[0] / sizeof arr[0][0]; ++j) {
+            printf("arr[%d][%d] -> %p\n", i, j, &arr[i][j]);
+        }
+    }
+    return 0;
+}
+
+// 输出
+arr[0][0] -> 0000001c90dff7e0
+arr[0][1] -> 0000001c90dff7e4
+arr[0][2] -> 0000001c90dff7e8
+arr[0][3] -> 0000001c90dff7ec
+arr[1][0] -> 0000001c90dff7f0
+arr[1][1] -> 0000001c90dff7f4
+arr[1][2] -> 0000001c90dff7f8
+arr[1][3] -> 0000001c90dff7fc
+```
+
+# 指针详解
+
+指针其实就是内存地址，在64位系统中，指针的大小是：64 / 8 = 8个字节，32位系统中，指针的大小是：34 / 4 = 8 个字节。
+
+## 指针与指针类型
+
+**指针的类型决定了指针进行解应用操作时能访问的空间大小**
+
+```c
+#include <stdio.h>
+
+int main() {
+    int a= 123456;
+    // 由于 int 类型占4个字节，所以可以访问的空间大小也是4个字节，即可以修改前4个字节的数据
+    int* pa = &a;
+    *pa = 0;
+    // 由于 char 类型占1个字节，所以可以访问的空间大小也是1个字节，即可以修改前1个字节的数据
+	char* ca = &a;
+	*ca = 0;
+    return 0;
+}
+```
+
+**指针类型决定了指针的步长**
+
+```c
+#include <stdio.h>
+
+int main() {
+    int a= 123456;
+    int* pa = &a;
+    char* ca = &a;
+    printf("%p\n",&a);
+    printf("int：%p\n", pa+1);
+    printf("char：%p\n", ca+1);
+    return 0;
+}
+
+
+// 输出
+0000009a1b9ffbfc
+// 由于指针类型是：int，所以步长为4
+int：0000009a1b9ffc00
+// 由于指针类型是：char，所以步长为1
+char：0000009a1b9ffbfd
+```
+
+## 野指针
+
+在C语言中，野指针（Wild Pointer）是指指向无效内存地址或未初始化的内存的指针。野指针是一个危险的编程错误，可能导致程序崩溃或产生未定义行为。
+
+以下是一些可能导致野指针的情况：
+
+1. **未初始化的指针：** 当声明指针变量但没有初始化时，它的值是未定义的，它会指向一个随机的内存地址，这是一个野指针。
+
+   ```
+   cCopy code
+   int* ptr; // 未初始化的指针
+   ```
+
+2. **指针释放后继续使用：** 当指针指向的内存已经被释放（比如通过`free()`函数释放动态分配的内存），但后续继续使用这个指针时，会导致野指针。
+
+   ```
+   cCopy codeint* ptr = (int*)malloc(sizeof(int));
+   free(ptr);
+   // 此后继续使用 ptr，这将导致野指针
+   ```
+
+3. **指针越界访问：** 当使用指针访问数组或其他数据结构时，如果指针越界访问了无效的内存，也会导致野指针。
+
+   ```
+   cCopy codeint arr[5] = {1, 2, 3, 4, 5};
+   int* ptr = &arr[0];
+   // 后续使用 ptr[10]，超出了数组边界，导致野指针
+   ```
+
+## 指针的加减
+
+可以通过控制指针的步长来控制指针的值
+
+```c
+#include <stdio.h>
+
+int main() {
+    int arr[10] = {1,2,3,4,5,6,7,8,9,10};
+    int* p = &arr;
+    for (int i = 0; i < 10; ++i) {
+        printf("%d\n", *p++);
+    }
+    return 0;
+}
+
+
+// 输出
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+```
+
+此外，**数组名代表的是第一个指针地址**，我们也可以利用这一点进行操作
+
+```c
+#include <stdio.h>
+
+int main() {
+    int arr[10] = {1,2,3,4,5,6,7,8,9,10};
+    int* p = &arr;
+    for (int i = 0; i < 10; ++i) {
+        printf("%d\n", *arr + i);
+    }
+    return 0;
+}
+
+// 输出
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+```
+
+## 二级指针
+
+二级指针实际上就是在指针的基础上在指向一个指针地址
+
+```c
+#include <stdio.h>
+
+int main() {
+    int arr[10] = {1,2,3,4,5,6,7,8,9,10};
+    int* p = &arr;
+    int** pp = &p;
+    printf("%d", **pp);
+    return 0;
+}
+
+// 输出
+2
+```
+
+## 指针数组
+
+指针数组：存储的内容是指针
+
+```c
+#include <stdio.h>
+
+int main() {
+    int a = 10;
+    int b = 20;
+    int c = 30;
+    int* arr[3] = {&a, &b, &c};
+    for (int i = 0; i < 3; ++i) {
+        printf("%d\n",*arr[i]);
+    }
+    return 0;
+}
+
+// 输出
+10
+20
+30
+```
+
+# 数据存储
+
+在计算机中，整型分为：**无符号类型**和**有符号类型**两种，这两种类型的存储方式都是用**补码 - -> 十六进制**来存储
+
+```c
+int main() {
+    int a = 20;
+    // 00000000 00000000 00000000 00010100 - 原码
+    // 00000000 00000000 00000000 00010100 - 反码
+    // 00000000 00000000 00000000 00010100 - 补码
+    // 0 0      0 0      0 0      1 4      - 十六进制
+    int b = -10;
+    // 1000000 00000000 00000000 00001010 - 原码
+    // 1111111 1111111 111111111 11110101 - 反码
+    // 1111111 1111111 111111111 11110110 - 补码
+    // F F     F F     F F       F 6      - 十六进制
+    return 0;
+}
+```
+
+![image-20230721170847778](C%E8%AF%AD%E8%A8%80.assets/image-20230721170847778.png)
+
+**有符号`char`和无符号`char`的区别**
+
+```
+有符号：认定最高位位符号位；范围：
+01111111 -> 127
+...
+00000000 -> 0
+...
+11111111 -> -127
+10000000 -> 128
+
+其中，由于 1000000 在还原成原码的时候比较特殊，无法直接减一，所以直接认定他为128
+
+无符号：认定为无符号位；范围：
+11111111 -> 128
+0000
 ```
 
