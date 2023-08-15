@@ -701,40 +701,7 @@ arr[6]->00000092961ffb88
 
 二维数组的存储依然是在内存中开辟一块连续的内存地址来存储
 
-```c
-#include <stdio.h>
-#include <string.h>
-
-int main() {
-    int arr[2][4] = {{1, 2, 3, 4},
-                     {5, 6, 7, 8}};
-
-    // 二维数组的遍历
-    for (int i = 0; i < sizeof arr / sizeof arr[0]; ++i) {
-        for (int j = 0; j < sizeof arr[0] / sizeof arr[0][0]; ++j) {
-            printf("%d\n", arr[i][j]);
-        }
-    }
-
-    // 二维数组的内存地址遍历
-    for (int i = 0; i < sizeof arr / sizeof arr[0]; ++i) {
-        for (int j = 0; j < sizeof arr[0] / sizeof arr[0][0]; ++j) {
-            printf("arr[%d][%d] -> %p\n", i, j, &arr[i][j]);
-        }
-    }
-    return 0;
-}
-
-// 输出
-arr[0][0] -> 0000001c90dff7e0
-arr[0][1] -> 0000001c90dff7e4
-arr[0][2] -> 0000001c90dff7e8
-arr[0][3] -> 0000001c90dff7ec
-arr[1][0] -> 0000001c90dff7f0
-arr[1][1] -> 0000001c90dff7f4
-arr[1][2] -> 0000001c90dff7f8
-arr[1][3] -> 0000001c90dff7fc
-```
+![image-20230815194312290](C%E8%AF%AD%E8%A8%80.assets/image-20230815194312290.png)
 
 # 指针详解
 
