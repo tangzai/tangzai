@@ -2083,7 +2083,7 @@ GIF89a
 
 <img src="CTF.assets/image-20230831212502591.png" alt="image-20230831212502591" style="zoom:67%;" />
 
-`{{7*7}}`被成功计算，发现这里存在SSTI漏洞
+![image-20230902184611487](CTF.assets/image-20230902184611487.png)
 
 <img src="CTF.assets/image-20230831212556260.png" alt="image-20230831212556260" style="zoom:67%;" />
 
