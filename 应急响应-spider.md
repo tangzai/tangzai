@@ -132,7 +132,8 @@ root      130672  0.0  0.1   7236  4056 pts/0    S    18:59   0:00              
 
 查找进程文件位置
 
-```
+```bash
+# lsof 显示指定进程打开的所有文件列表
 vulab@sechelper:~$ sudo lsof -p 948 # 查看pid为948的进程详细信息
 COMMAND PID USER   FD      TYPE             DEVICE SIZE/OFF       NODE NAME
 dockerd 948 root  cwd       DIR                8,2     4096          2 /
