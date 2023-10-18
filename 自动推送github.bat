@@ -1,5 +1,5 @@
 D:
-cd D:\note8848
+cd D:\Typroa
 git add .
 git commit -m "date"
 git push -u origin main
