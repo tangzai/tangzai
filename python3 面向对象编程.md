@@ -387,3 +387,219 @@ class Contact:
 
 + `all_contacts = []` 不等于 `self.all_contacts = []`
 + ``self.all_contacts = []`只允许当前对象访问；而`all_contacts = []`可以在任何位置以` Contact.all_contacts`访问
+
+### 3.2 重写和super
+
+如果子类要继承父类，并且需要在`__init__`上做其他配置，可以使用`super()`函数先继承父类的`__init__`后再添加额外属性
+
+**任何方法都可以使用`super()`来重写**
+
+```py
+class Contact:
+    all_contact = ContactList()
+
+    def __init__(self, name, email):
+        self.name = name
+        self.email = email
+        self.all_contact.append(self)
+
+
+class Friend(Contact):
+    def __init__(self, name, email, phone):
+        # 输入父类要输入的参数
+        super().__init__(name, email)
+        self.phone = phone
+```
+
+### 3.3 多重继承
+
+在python开发中，大多数情况下，==如果你要用到多重继承，那么大多数是因为你的架构有问题==
+
+多重继承的关键问题时：有时会让某个父类或基类的方法被执行了**多次**，这样是会存在一定的安全隐患的
+
+```py
+class BaseClass:
+    num_base_calls = 0
+
+    def call_me(self):
+        print("调用了 BaseClass")
+        self.num_base_calls += 1
+
+
+class LeftSubclass(BaseClass):
+    num_left_calls = 0
+
+    def call_me(self):
+        BaseClass.call_me(self)
+        print("调用了 LeftSubClass")
+        self.num_left_calls += 1
+
+
+class RightSubclass(BaseClass):
+    num_right_calls = 0
+
+    def call_me(self):
+        BaseClass.call_me(self)
+        print("调用了 RightSubclass")
+        self.num_right_calls += 1
+
+
+class Subclass(LeftSubclass, RightSubclass):
+    num_sub_calls = 0
+
+    def call_me(self):
+        LeftSubclass.call_me(self)
+        RightSubclass.call_me(self)
+        print("调用了 Subclass")
+        self.num_sub_calls += 1
+
+
+s = Subclass()
+s.call_me()
+print(s.num_sub_calls, s.num_left_calls, s.num_right_calls, s.num_base_calls) 
+
+
+# 输出
+调用了 BaseClass
+调用了 LeftSubClass
+调用了 BaseClass
+调用了 RightSubclass
+调用了 Subclass
+1 1 1 2
+```
+
+查看上面的代码可以看到，`BaseClass`的`call_me`方法被执行了多次，如果这个方法是用于银行取款的，那么就会产生隐患
+
+
+
+此时如果我们使用`super()`方法来继承的话，就会是下面这种结果：
+
+```py
+class BaseClass:
+    num_base_calls = 0
+
+    def call_me(self):
+        print("调用了 BaseClass")
+        self.num_base_calls += 1
+
+
+class LeftSubclass(BaseClass):
+    num_left_calls = 0
+
+    def call_me(self):
+        super().call_me()
+        print("调用了 LeftSubClass")
+        self.num_left_calls += 1
+
+
+class RightSubclass(BaseClass):
+    num_right_calls = 0
+
+    def call_me(self):
+        super().call_me()
+        print("调用了 RightSubclass")
+        self.num_right_calls += 1
+
+
+class Subclass(LeftSubclass, RightSubclass):
+    num_sub_calls = 0
+
+    def call_me(self):
+        super().call_me()
+        print("调用了 Subclass")
+        self.num_sub_calls += 1
+
+
+s = Subclass()
+s.call_me()
+print(s.num_sub_calls, s.num_left_calls, s.num_right_calls, s.num_base_calls)
+
+
+# 输出
+调用了 BaseClass
+调用了 RightSubclass
+调用了 LeftSubClass
+调用了 Subclass
+1 1 1 1
+```
+
+可以看到`Baseclass`的`call_me`方法只被执行了一次，这里的执行顺序如下：
+
+```
+Subclass.call_me -> LeftSubclass.call_me -> RightSubclass.call_me -> Subclass.call_me
+```
+
+为什么会先执行 `LeftSubclass`的`call_me`方法？
+
+​		在子类出现多重继承的时候，MRO遵循C3线性化原则，也就是子类永远在父类前面，如果有多个父类，会根据它们在列表中的顺序被检查，第一个被找到的父类中的方法将被使用。
+
+### 3.4 不同集合的参数
+
+以下面代码为例子
+
+```py
+class Subclass(Contact, AddressHolder):
+    	def __init__(self. name, email, street, city, state, code)
+        	Contact.__init__(self, name, email)
+            AddressHoloder.__init__(self, street, city, state, code)
+```
+
+这段代码将两个父类分别做了两次初始化，是非常笨重的，但是因为每个父类他所需要传入的参数都不一样，又不能直接以`super().__init__()`的方式来重构，所以只能使用下面这种写法
+
+```py
+class Contact:
+    all_contact = []
+
+    def __init__(self, name='', email='', **kwargs):
+        super().__init__(**kwargs)
+        self.name = name
+        self.email = email
+        self.all_contact.append(self)
+        print(f"Contact say name: {name}, email: {email}, all_contact: {self.all_contact}")
+        print(f"Contact say **kwargs: {kwargs}")
+
+
+class AddressHolder:
+    def __init__(self, street='', city='', state='', code='', **kwargs):
+        super().__init__(**kwargs)
+        self.street = street
+        self.city = city
+        self.state = state
+        self.code = code
+        print(f"AddressHolder say street: {self.street}, city: {self.city}, state: {self.state}, code: {self.code}")
+        print(f"AddressHolder say **kwargs: {kwargs}")
+
+
+class Friend(Contact, AddressHolder):
+    def __init__(self, phone='', **kwargs):
+        # 输入父类要输入的参数
+        super().__init__(**kwargs)
+        self.phone = phone
+        print(f"Friend say phone：{self.phone}")
+        print(f"Friend say **kwargs: {kwargs}")
+
+
+f = Friend(name='John Doe', email='johndoe@example.com', street='123 Main St', city='Anytown', state='Anystate', code='12345', phone='123456')
+
+
+# 输出
+AddressHolder say street: 123 Main St, city: Anytown, state: Anystate, code: 12345
+AddressHolder say **kwargs: {}
+Contact say name: John Doe, email: johndoe@example.com, all_contact: [<__main__.Friend object at 0x0000025C9235D2B0>]
+Contact say **kwargs: {'street': '123 Main St', 'city': 'Anytown', 'state': 'Anystate', 'code': '12345'}
+Friend say phone：123456
+Friend say **kwargs: {'name': 'John Doe', 'email': 'johndoe@example.com', 'street': '123 Main St', 'city': 'Anytown', 'state': 'Anystate', 'code': '12345'}
+```
+
+在使用`super()`重构的同时，使用`**kwargs`来传参，为了保证代码的健壮性，还需要将参数做一个默认赋值，最后使用`**kwargs`来传入
+
+```
+super().__init__(**kwargs)。这个调用会将**kwargs传递给上一级的父类，并且在每个类的__init__方法中，你都从**kwargs中取出了一些键值对来初始化该类的实例变量。
+
+例如，在Friend类的__init__方法中，你没有从**kwargs中删除任何键值对，所以打印出的**kwargs包含了所有你传入的参数。然后，当你在Friend类的__init__方法中调用了super().__init__(**kwargs)，这个调用将会把所有的参数传递给它的父类，也就是Contact和AddressHolder。
+
+然后，在Contact类的__init__方法中，你从**kwargs中取出了’name’和’email’两个键值对来初始化’name’和’email’两个实例变量。所以，当你打印出来的时候，'name’和’email’已经不再字典中了。
+
+同样，在 AddressHolder 类的 __init__() 方法中，你从 **kwargs 中取出了 ‘street’, ‘city’, ‘state’, ‘code’ 四个键值对来初始化相应的实例变量。所以，当你在 AddressHolder.__init__() 中打印 **kwargs, 它已经是空字典了。
+```
+
