@@ -2016,27 +2016,14 @@ JSON文件
 	]
 ```
 
-5、dumps 方法直接将 JSON对象 输出为 JSON文件
-
-+   第一个参数是 JSON对象
-    第二个参数是 文件操作对象
+5、dumps 方法直接将 对象 输出为 JSON字符串
 
 ```py
 import json
 
-data = [{
-    "name": "鲍勃",
-    "gender": "male",
-    "birthday": "1992-10-18"
-},
-    {
-        "name": "萨丽娜",
-        "gender": "female",
-        "birthday": "1995-10-181"
-    }]
-
-
-json.dump(data, open('data', 'w', encoding='UTF-8'), indent=2, ensure_ascii=False)
+str = ['admin']
+print(json.dumps(str))
+print(type(json.dumps(str)))
 ```
 
 ### 4.3 CSV文件存储
