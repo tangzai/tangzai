@@ -603,3 +603,155 @@ super().__init__(**kwargs)。这个调用会将**kwargs传递给上一级的父�
 同样，在 AddressHolder 类的 __init__() 方法中，你从 **kwargs 中取出了 ‘street’, ‘city’, ‘state’, ‘code’ 四个键值对来初始化相应的实例变量。所以，当你在 AddressHolder.__init__() 中打印 **kwargs, 它已经是空字典了。
 ```
 
+## 4. 异常处理
+
+### 4.1 抛出异常
+
+**本质上，异常只是一个对象**
+
+在异常处理时，我们可以抛出一个异常，然而，在异常抛出之后，后续的代码就无法执行
+
+```py
+class EvenOnly(list):
+    def append(self, integer):
+        if not isinstance(integer, int):
+            raise TypeError("只允许添加整数")
+            print("永远不会执行")
+        if integer % 2:
+            raise ValueError("只允许添加偶数")
+            print("永远不会执行")
+        super().append(integer)
+
+
+e = EvenOnly()
+e.append(3)
+print(e)
+```
+
+### 4.2 异常处理
+
+#### 4.2.1 捕获多个异常一起处理
+
+```py
+def funny_division2(anumber):
+    try:
+        if anumber == 13:
+            raise ValueError("13 是一个不幸运的数字")
+    except (ZeroDivisionError, TypeError, ValueError):
+        return "输入一个大于0的数字"
+```
+
+#### 4.2.2 捕获多个异常单独处理
+
+```py
+def funny_division2(anumber):
+    try:
+        if anumber == 13:
+            raise ValueError
+    except ZeroDivisionError:
+        return "请输入一个非0的整数"
+    except TypeError:
+        return "请输入一个数字"
+    except ValueError:
+        return "13 是一个不幸运的数字"
+```
+
+#### 4.2.3 不管是否有异常都执行特定代码
+
++ `else`：子句会在`try`子句中的代码正常执行完毕之后执行
++ `finally`：子句会在`try`子句执行完毕之后执行（不管是否遇到异常），这在某些特定情况非常有用
+  + 清除打开的数据库连接
+  + 关闭打开的文件
+  + 向网络发送一次关闭握手
+
+**注意：如果`try`子句中有`return`语句，`else`子句则不会执行**
+
+```py
+def funny_division2(anumber):
+    try:
+        if anumber == 13:
+            raise ValueError
+        print("try 语句正常执行")
+        # return True
+    except ZeroDivisionError:
+        return "请输入一个非0的整数"
+    except TypeError:
+        return "请输入一个数字"
+    except ValueError:
+        return "13 是一个不幸运的数字"
+    else:
+        print("else 语句执行完毕")
+    finally:
+        print("代码最后执行")
+```
+
+### 4.3 异常的层级
+
+==python 异常的层级关系：==
+
++ BaseException
+  + SystemExit
+  + Keyboardinterrupt
+  + Exception
+    + More Other Expection
+
+`SystemExit`会在程序自然退出时抛出，通常是因为我们执行了`sys.exit`函数
+
+`Keyboardinterrupt`会在用户执行依赖于系统的按键组合（通常是 Ctrl+C）中成勋时会抛出这个异常
+
+```py
+import sys
+
+
+def exception_dispose():
+    str = input('请输入：')
+
+    try:
+        if str == 'quit':
+            sys.exit()
+    except SystemExit:
+        print("函数 sys.exit() 退出程序")
+    except KeyboardInterrupt:
+        print("Ctrl+C 组合键退出程序")
+```
+
+### 4.4 自定义异常
+
+一个类继承了`Exception`或`BaseException`就可以做为异常类来处理
+
+```py
+class InvaildWithdrawal(Exception):
+    def __init__(self, balance, amount):
+        super().__init__(f"你的账户余额：{amount}")
+        self.amount = amount
+        self.balance = balance
+
+    def overage(self):
+        return self.amount - self.balance
+
+
+try:
+    raise InvaildWithdrawal(25, 50)
+# e 是一个异常对象，通过实例化 InvaildWithdrawal 获取，所以可以调用 InvaildWithdrawal 的方法
+except InvaildWithdrawal as e:
+    print(f"对不起， 您的余额不足。超过余额{e.overage()}")
+```
+
+### 4.5 什么时候使用自定义异常
+
+大多数的时候，我们都会使用`if`语句来判断用户的输入是否正确来躲避程序异常，但是这时一种非常愚蠢的方法，程序没有必要为了一些少数情况而去浪费CPU资源来做`if`判断。
+
+在我们遇到下面代码的时候就应该使用异常处理来处理程序，这样在保证异常程序顺利执行的同时还能在异常处理的时候添加更多的灵活处理
+
+```py
+def divide_with_exception(number, divisor):
+    if divisor == 0:
+        print("被除数不能为0")
+        return
+
+    print(f"{number} / {divisor} = {number / divisor}")
+
+
+divide_with_exception(2, 1)
+```
+
