@@ -259,3 +259,32 @@ SD的表现形式：
 每个进程创建时都会根据登录会话权限由LSA(Local Security Authority)分配一个Token，如果CreaetProcessl时自己指定了Token，LSA会用该Token,否则就用父进程Tokent的一份拷贝。
 
 <img src="Kerberos%E8%AE%A4%E8%AF%81%E8%AF%A6%E8%A7%A3.assets/image-20230517002600769.png" alt="image-20230517002600769" style="zoom:50%;" />
+
+## Kerberos 协议
+
+### 1. Kerberos基础
+
+Kerberos实际上是一种基于票据（Ticket）的认证方式。客户端要访问服务器的某个服务，首先需要购买服务端认可的 **ST服务票据(Service Ticker)**。也就是说，客户端在访问服务之前需要预先买好票，等待服务验票之后才能入场。但是这张票并不能直接购买，需要一张 **TGT认购权证**（Ticket Granting Ticket)。也就是说，客户端在买票之前必须先获得一张TGT认购权证。**TGT认购权证** 和 **ST服务票据** 均由KDC(密钥分发中心)发售，而 KDC 又是由域控担任，所以说 TGT 和 ST 均是由域控发放。
+
+| 简写 | 全拼                                               |
+| :--- | :------------------------------------------------- |
+| DC   | Domain Controller，域控                            |
+| KDC  | Key Distribution Center：密钥分发中心，由域控担任  |
+| AD   | Active Directory：活动目录，里面包含域内用户数据库 |
+| AS   | Authentication Service：认证服务                   |
+| TGT  | Ticket Granting Ticket：TGT认购权证，由AS服务发放  |
+| TGS  | Ticket Granting Service：票据授予服务              |
+| ST   | Service Ticket：ST服务票据，由TGS服务发放          |
+
+这里说一下 **krbtgt** 用户，该用户是在创建域时系统自动创建的一个账号，其作用是密钥发行中心的服务账号，其密码是系统随机生成的，无法正常登陆主机。
+
+![image-20231031210050641](Kerberos%E8%AE%A4%E8%AF%81%E8%AF%A6%E8%A7%A3.assets/image-20231031210050641.png)
+
+Kerberos协议有两个基础认证模块：AS_REQ & TGS_REP 和 TGS_REQ & TGS_REP，以及微软扩展的两个认证模式 S4U 和 PAC，S4U是微软为了实现委派而扩展的模块，分为 S4U2Self 和 S4U2Proxy。在Kerberos最初设计的流程只说明了如何证明客户端的真实身份，但是并没有说明客户端是否有权限访问该服务，因为在域中不同权限的用户能访问的资源是不同的。因此微软为了解决权限这个问题，引入了PAC（Privilege Attribute Certificate，特权属性证书）的概念
+
+### 2. PAC特权属性证书
+
+PAC(Privilege Attribute Certificate，特权属性证书)。其中所包含的是各种授权信息、附加凭据信息、配置文件和策略信息等。例如用户所属的用户组，用户所具有的权限等。在最初的RFC1510中规定的标准Kerberos认证过程中并没有PAC，微软在自己的产品中所实现的Kerberos流程加入了PAC的概念，因为在域中不同权限的用户能够访问的资源是不同的，因此微软设计PAC用来判别用户身份和权限
+
+在一个正常的Kerberos认证流程中，KSC返回的TGT认购权证和ST服务票据中都说带有PAC的，这样做的好处就是以后对资源的访问中，服务端再接收到客户请求的时候不需要借助KDC的帮助提供完整的授权信息来完成对用户权限的判断，而只需要根据请求中包含的PAC信息直接与本地资源的ACL相比叫做出裁决
+
