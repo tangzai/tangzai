@@ -1,0 +1,1084 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+
+<link href='https://fonts.loli.net/css?family=Open+Sans:400italic,700italic,700,400&subset=latin,latin-ext' rel='stylesheet' type='text/css' /><style type='text/css'>html {overflow-x: initial !important;}:root { --bg-color:#ffffff; --text-color:#333333; --select-text-bg-color:#B5D6FC; --select-text-font-color:auto; --monospace:"Lucida Console",Consolas,"Courier",monospace; --title-bar-height:20px; }
+.mac-os-11 { --title-bar-height:28px; }
+html { font-size: 14px; background-color: var(--bg-color); color: var(--text-color); font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+body { margin: 0px; padding: 0px; height: auto; inset: 0px; font-size: 1rem; line-height: 1.42857; overflow-x: hidden; background: inherit; tab-size: 4; }
+iframe { margin: auto; }
+a.url { word-break: break-all; }
+a:active, a:hover { outline: 0px; }
+.in-text-selection, ::selection { text-shadow: none; background: var(--select-text-bg-color); color: var(--select-text-font-color); }
+#write { margin: 0px auto; height: auto; width: inherit; word-break: normal; overflow-wrap: break-word; position: relative; white-space: normal; overflow-x: visible; padding-top: 36px; }
+#write.first-line-indent p { text-indent: 2em; }
+#write.first-line-indent li p, #write.first-line-indent p * { text-indent: 0px; }
+#write.first-line-indent li { margin-left: 2em; }
+.for-image #write { padding-left: 8px; padding-right: 8px; }
+body.typora-export { padding-left: 30px; padding-right: 30px; }
+.typora-export .footnote-line, .typora-export li, .typora-export p { white-space: pre-wrap; }
+.typora-export .task-list-item input { pointer-events: none; }
+@media screen and (max-width: 500px) {
+  body.typora-export { padding-left: 0px; padding-right: 0px; }
+  #write { padding-left: 20px; padding-right: 20px; }
+  .CodeMirror-sizer { margin-left: 0px !important; }
+  .CodeMirror-gutters { display: none !important; }
+}
+#write li > figure:last-child { margin-bottom: 0.5rem; }
+#write ol, #write ul { position: relative; }
+img { max-width: 100%; vertical-align: middle; image-orientation: from-image; }
+button, input, select, textarea { color: inherit; font: inherit; }
+input[type="checkbox"], input[type="radio"] { line-height: normal; padding: 0px; }
+*, ::after, ::before { box-sizing: border-box; }
+#write h1, #write h2, #write h3, #write h4, #write h5, #write h6, #write p, #write pre { width: inherit; }
+#write h1, #write h2, #write h3, #write h4, #write h5, #write h6, #write p { position: relative; }
+p { line-height: inherit; }
+h1, h2, h3, h4, h5, h6 { break-after: avoid-page; break-inside: avoid; orphans: 4; }
+p { orphans: 4; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.8rem; }
+h3 { font-size: 1.6rem; }
+h4 { font-size: 1.4rem; }
+h5 { font-size: 1.2rem; }
+h6 { font-size: 1rem; }
+.md-math-block, .md-rawblock, h1, h2, h3, h4, h5, h6, p { margin-top: 1rem; margin-bottom: 1rem; }
+.hidden { display: none; }
+.md-blockmeta { color: rgb(204, 204, 204); font-weight: 700; font-style: italic; }
+a { cursor: pointer; }
+sup.md-footnote { padding: 2px 4px; background-color: rgba(238, 238, 238, 0.7); color: rgb(85, 85, 85); border-radius: 4px; cursor: pointer; }
+sup.md-footnote a, sup.md-footnote a:hover { color: inherit; text-transform: inherit; text-decoration: inherit; }
+#write input[type="checkbox"] { cursor: pointer; width: inherit; height: inherit; }
+figure { overflow-x: auto; margin: 1.2em 0px; max-width: calc(100% + 16px); padding: 0px; }
+figure > table { margin: 0px; }
+tr { break-inside: avoid; break-after: auto; }
+thead { display: table-header-group; }
+table { border-collapse: collapse; border-spacing: 0px; width: 100%; overflow: auto; break-inside: auto; text-align: left; }
+table.md-table td { min-width: 32px; }
+.CodeMirror-gutters { border-right: 0px; background-color: inherit; }
+.CodeMirror-linenumber { user-select: none; }
+.CodeMirror { text-align: left; }
+.CodeMirror-placeholder { opacity: 0.3; }
+.CodeMirror pre { padding: 0px 4px; }
+.CodeMirror-lines { padding: 0px; }
+div.hr:focus { cursor: none; }
+#write pre { white-space: pre-wrap; }
+#write.fences-no-line-wrapping pre { white-space: pre; }
+#write pre.ty-contain-cm { white-space: normal; }
+.CodeMirror-gutters { margin-right: 4px; }
+.md-fences { font-size: 0.9rem; display: block; break-inside: avoid; text-align: left; overflow: visible; white-space: pre; background: inherit; position: relative !important; }
+.md-fences-adv-panel { width: 100%; margin-top: 10px; text-align: center; padding-top: 0px; padding-bottom: 8px; overflow-x: auto; }
+#write .md-fences.mock-cm { white-space: pre-wrap; }
+.md-fences.md-fences-with-lineno { padding-left: 0px; }
+#write.fences-no-line-wrapping .md-fences.mock-cm { white-space: pre; overflow-x: auto; }
+.md-fences.mock-cm.md-fences-with-lineno { padding-left: 8px; }
+.CodeMirror-line, twitterwidget { break-inside: avoid; }
+.footnotes { opacity: 0.8; font-size: 0.9rem; margin-top: 1em; margin-bottom: 1em; }
+.footnotes + .footnotes { margin-top: 0px; }
+.md-reset { margin: 0px; padding: 0px; border: 0px; outline: 0px; vertical-align: top; background: 0px 0px; text-decoration: none; text-shadow: none; float: none; position: static; width: auto; height: auto; white-space: nowrap; cursor: inherit; -webkit-tap-highlight-color: transparent; line-height: normal; font-weight: 400; text-align: left; box-sizing: content-box; direction: ltr; }
+li div { padding-top: 0px; }
+blockquote { margin: 1rem 0px; }
+li .mathjax-block, li p { margin: 0.5rem 0px; }
+li blockquote { margin: 1rem 0px; }
+li { margin: 0px; position: relative; }
+blockquote > :last-child { margin-bottom: 0px; }
+blockquote > :first-child, li > :first-child { margin-top: 0px; }
+.footnotes-area { color: rgb(136, 136, 136); margin-top: 0.714rem; padding-bottom: 0.143rem; white-space: normal; }
+#write .footnote-line { white-space: pre-wrap; }
+@media print {
+  body, html { border: 1px solid transparent; height: 99%; break-after: avoid; break-before: avoid; font-variant-ligatures: no-common-ligatures; }
+  #write { margin-top: 0px; padding-top: 0px; border-color: transparent !important; }
+  .typora-export * { -webkit-print-color-adjust: exact; }
+  .typora-export #write { break-after: avoid; }
+  .typora-export #write::after { height: 0px; }
+  .is-mac table { break-inside: avoid; }
+  .typora-export-show-outline .typora-export-sidebar { display: none; }
+}
+.footnote-line { margin-top: 0.714em; font-size: 0.7em; }
+a img, img a { cursor: pointer; }
+pre.md-meta-block { font-size: 0.8rem; min-height: 0.8rem; white-space: pre-wrap; background: rgb(204, 204, 204); display: block; overflow-x: hidden; }
+p > .md-image:only-child:not(.md-img-error) img, p > img:only-child { display: block; margin: auto; }
+#write.first-line-indent p > .md-image:only-child:not(.md-img-error) img { left: -2em; position: relative; }
+p > .md-image:only-child { display: inline-block; width: 100%; }
+#write .MathJax_Display { margin: 0.8em 0px 0px; }
+.md-math-block { width: 100%; }
+.md-math-block:not(:empty)::after { display: none; }
+.MathJax_ref { fill: currentcolor; }
+[contenteditable="true"]:active, [contenteditable="true"]:focus, [contenteditable="false"]:active, [contenteditable="false"]:focus { outline: 0px; box-shadow: none; }
+.md-task-list-item { position: relative; list-style-type: none; }
+.task-list-item.md-task-list-item { padding-left: 0px; }
+.md-task-list-item > input { position: absolute; top: 0px; left: 0px; margin-left: -1.2em; margin-top: calc(1em - 10px); border: none; }
+.math { font-size: 1rem; }
+.md-toc { min-height: 3.58rem; position: relative; font-size: 0.9rem; border-radius: 10px; }
+.md-toc-content { position: relative; margin-left: 0px; }
+.md-toc-content::after, .md-toc::after { display: none; }
+.md-toc-item { display: block; color: rgb(65, 131, 196); }
+.md-toc-item a { text-decoration: none; }
+.md-toc-inner:hover { text-decoration: underline; }
+.md-toc-inner { display: inline-block; cursor: pointer; }
+.md-toc-h1 .md-toc-inner { margin-left: 0px; font-weight: 700; }
+.md-toc-h2 .md-toc-inner { margin-left: 2em; }
+.md-toc-h3 .md-toc-inner { margin-left: 4em; }
+.md-toc-h4 .md-toc-inner { margin-left: 6em; }
+.md-toc-h5 .md-toc-inner { margin-left: 8em; }
+.md-toc-h6 .md-toc-inner { margin-left: 10em; }
+@media screen and (max-width: 48em) {
+  .md-toc-h3 .md-toc-inner { margin-left: 3.5em; }
+  .md-toc-h4 .md-toc-inner { margin-left: 5em; }
+  .md-toc-h5 .md-toc-inner { margin-left: 6.5em; }
+  .md-toc-h6 .md-toc-inner { margin-left: 8em; }
+}
+a.md-toc-inner { font-size: inherit; font-style: inherit; font-weight: inherit; line-height: inherit; }
+.footnote-line a:not(.reversefootnote) { color: inherit; }
+.md-attr { display: none; }
+.md-fn-count::after { content: "."; }
+code, pre, samp, tt { font-family: var(--monospace); }
+kbd { margin: 0px 0.1em; padding: 0.1em 0.6em; font-size: 0.8em; color: rgb(36, 39, 41); background: rgb(255, 255, 255); border: 1px solid rgb(173, 179, 185); border-radius: 3px; box-shadow: rgba(12, 13, 14, 0.2) 0px 1px 0px, rgb(255, 255, 255) 0px 0px 0px 2px inset; white-space: nowrap; vertical-align: middle; }
+.md-comment { color: rgb(162, 127, 3); opacity: 0.6; font-family: var(--monospace); }
+code { text-align: left; vertical-align: initial; }
+a.md-print-anchor { white-space: pre !important; border-width: initial !important; border-style: none !important; border-color: initial !important; display: inline-block !important; position: absolute !important; width: 1px !important; right: 0px !important; outline: 0px !important; background: 0px 0px !important; text-decoration: initial !important; text-shadow: initial !important; }
+.os-windows.monocolor-emoji .md-emoji { font-family: "Segoe UI Symbol", sans-serif; }
+.md-diagram-panel > svg { max-width: 100%; }
+[lang="flow"] svg, [lang="mermaid"] svg { max-width: 100%; height: auto; }
+[lang="mermaid"] .node text { font-size: 1rem; }
+table tr th { border-bottom: 0px; }
+video { max-width: 100%; display: block; margin: 0px auto; }
+iframe { max-width: 100%; width: 100%; border: none; }
+.highlight td, .highlight tr { border: 0px; }
+mark { background: rgb(255, 255, 0); color: rgb(0, 0, 0); }
+.md-html-inline .md-plain, .md-html-inline strong, mark .md-inline-math, mark strong { color: inherit; }
+.md-expand mark .md-meta { opacity: 0.3 !important; }
+mark .md-meta { color: rgb(0, 0, 0); }
+@media print {
+  .typora-export h1, .typora-export h2, .typora-export h3, .typora-export h4, .typora-export h5, .typora-export h6 { break-inside: avoid; }
+}
+.md-diagram-panel .messageText { stroke: none !important; }
+.md-diagram-panel .start-state { fill: var(--node-fill); }
+.md-diagram-panel .edgeLabel rect { opacity: 1 !important; }
+.md-fences.md-fences-math { font-size: 1em; }
+.md-fences-advanced:not(.md-focus) { padding: 0px; white-space: nowrap; border: 0px; }
+.md-fences-advanced:not(.md-focus) { background: inherit; }
+.typora-export-show-outline .typora-export-content { max-width: 1440px; margin: auto; display: flex; flex-direction: row; }
+.typora-export-sidebar { width: 300px; font-size: 0.8rem; margin-top: 80px; margin-right: 18px; }
+.typora-export-show-outline #write { --webkit-flex:2; flex: 2 1 0%; }
+.typora-export-sidebar .outline-content { position: fixed; top: 0px; max-height: 100%; overflow: hidden auto; padding-bottom: 30px; padding-top: 60px; width: 300px; }
+@media screen and (max-width: 1024px) {
+  .typora-export-sidebar, .typora-export-sidebar .outline-content { width: 240px; }
+}
+@media screen and (max-width: 800px) {
+  .typora-export-sidebar { display: none; }
+}
+.outline-content li, .outline-content ul { margin-left: 0px; margin-right: 0px; padding-left: 0px; padding-right: 0px; list-style: none; }
+.outline-content ul { margin-top: 0px; margin-bottom: 0px; }
+.outline-content strong { font-weight: 400; }
+.outline-expander { width: 1rem; height: 1.42857rem; position: relative; display: table-cell; vertical-align: middle; cursor: pointer; padding-left: 4px; }
+.outline-expander::before { content: ""; position: relative; font-family: Ionicons; display: inline-block; font-size: 8px; vertical-align: middle; }
+.outline-item { padding-top: 3px; padding-bottom: 3px; cursor: pointer; }
+.outline-expander:hover::before { content: ""; }
+.outline-h1 > .outline-item { padding-left: 0px; }
+.outline-h2 > .outline-item { padding-left: 1em; }
+.outline-h3 > .outline-item { padding-left: 2em; }
+.outline-h4 > .outline-item { padding-left: 3em; }
+.outline-h5 > .outline-item { padding-left: 4em; }
+.outline-h6 > .outline-item { padding-left: 5em; }
+.outline-label { cursor: pointer; display: table-cell; vertical-align: middle; text-decoration: none; color: inherit; }
+.outline-label:hover { text-decoration: underline; }
+.outline-item:hover { border-color: rgb(245, 245, 245); background-color: var(--item-hover-bg-color); }
+.outline-item:hover { margin-left: -28px; margin-right: -28px; border-left: 28px solid transparent; border-right: 28px solid transparent; }
+.outline-item-single .outline-expander::before, .outline-item-single .outline-expander:hover::before { display: none; }
+.outline-item-open > .outline-item > .outline-expander::before { content: ""; }
+.outline-children { display: none; }
+.info-panel-tab-wrapper { display: none; }
+.outline-item-open > .outline-children { display: block; }
+.typora-export .outline-item { padding-top: 1px; padding-bottom: 1px; }
+.typora-export .outline-item:hover { margin-right: -8px; border-right: 8px solid transparent; }
+.typora-export .outline-expander::before { content: "+"; font-family: inherit; top: -1px; }
+.typora-export .outline-expander:hover::before, .typora-export .outline-item-open > .outline-item > .outline-expander::before { content: "−"; }
+.typora-export-collapse-outline .outline-children { display: none; }
+.typora-export-collapse-outline .outline-item-open > .outline-children, .typora-export-no-collapse-outline .outline-children { display: block; }
+.typora-export-no-collapse-outline .outline-expander::before { content: "" !important; }
+.typora-export-show-outline .outline-item-active > .outline-item .outline-label { font-weight: 700; }
+.md-inline-math-container mjx-container { zoom: 0.95; }
+
+
+:root {
+    --side-bar-bg-color: #fafafa;
+    --control-text-color: #777;
+}
+
+@include-when-export url(https://fonts.loli.net/css?family=Open+Sans:400italic,700italic,700,400&subset=latin,latin-ext);
+
+/* open-sans-regular - latin-ext_latin */
+  /* open-sans-italic - latin-ext_latin */
+    /* open-sans-700 - latin-ext_latin */
+    /* open-sans-700italic - latin-ext_latin */
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    font-family: "Open Sans","Clear Sans", "Helvetica Neue", Helvetica, Arial, 'Segoe UI Emoji', sans-serif;
+    color: rgb(51, 51, 51);
+    line-height: 1.6;
+}
+
+#write {
+    max-width: 860px;
+  	margin: 0 auto;
+  	padding: 30px;
+    padding-bottom: 100px;
+}
+
+@media only screen and (min-width: 1400px) {
+	#write {
+		max-width: 1024px;
+	}
+}
+
+@media only screen and (min-width: 1800px) {
+	#write {
+		max-width: 1200px;
+	}
+}
+
+#write > ul:first-child,
+#write > ol:first-child{
+    margin-top: 30px;
+}
+
+a {
+    color: #4183C4;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    position: relative;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    line-height: 1.4;
+    cursor: text;
+}
+h1:hover a.anchor,
+h2:hover a.anchor,
+h3:hover a.anchor,
+h4:hover a.anchor,
+h5:hover a.anchor,
+h6:hover a.anchor {
+    text-decoration: none;
+}
+h1 tt,
+h1 code {
+    font-size: inherit;
+}
+h2 tt,
+h2 code {
+    font-size: inherit;
+}
+h3 tt,
+h3 code {
+    font-size: inherit;
+}
+h4 tt,
+h4 code {
+    font-size: inherit;
+}
+h5 tt,
+h5 code {
+    font-size: inherit;
+}
+h6 tt,
+h6 code {
+    font-size: inherit;
+}
+h1 {
+    font-size: 2.25em;
+    line-height: 1.2;
+    border-bottom: 1px solid #eee;
+}
+h2 {
+    font-size: 1.75em;
+    line-height: 1.225;
+    border-bottom: 1px solid #eee;
+}
+
+/*@media print {
+    .typora-export h1,
+    .typora-export h2 {
+        border-bottom: none;
+        padding-bottom: initial;
+    }
+
+    .typora-export h1::after,
+    .typora-export h2::after {
+        content: "";
+        display: block;
+        height: 100px;
+        margin-top: -96px;
+        border-top: 1px solid #eee;
+    }
+}*/
+
+h3 {
+    font-size: 1.5em;
+    line-height: 1.43;
+}
+h4 {
+    font-size: 1.25em;
+}
+h5 {
+    font-size: 1em;
+}
+h6 {
+   font-size: 1em;
+    color: #777;
+}
+p,
+blockquote,
+ul,
+ol,
+dl,
+table{
+    margin: 0.8em 0;
+}
+li>ol,
+li>ul {
+    margin: 0 0;
+}
+hr {
+    height: 2px;
+    padding: 0;
+    margin: 16px 0;
+    background-color: #e7e7e7;
+    border: 0 none;
+    overflow: hidden;
+    box-sizing: content-box;
+}
+
+li p.first {
+    display: inline-block;
+}
+ul,
+ol {
+    padding-left: 30px;
+}
+ul:first-child,
+ol:first-child {
+    margin-top: 0;
+}
+ul:last-child,
+ol:last-child {
+    margin-bottom: 0;
+}
+blockquote {
+    border-left: 4px solid #dfe2e5;
+    padding: 0 15px;
+    color: #777777;
+}
+blockquote blockquote {
+    padding-right: 0;
+}
+table {
+    padding: 0;
+    word-break: initial;
+}
+table tr {
+    border: 1px solid #dfe2e5;
+    margin: 0;
+    padding: 0;
+}
+table tr:nth-child(2n),
+thead {
+    background-color: #f8f8f8;
+}
+table th {
+    font-weight: bold;
+    border: 1px solid #dfe2e5;
+    border-bottom: 0;
+    margin: 0;
+    padding: 6px 13px;
+}
+table td {
+    border: 1px solid #dfe2e5;
+    margin: 0;
+    padding: 6px 13px;
+}
+table th:first-child,
+table td:first-child {
+    margin-top: 0;
+}
+table th:last-child,
+table td:last-child {
+    margin-bottom: 0;
+}
+
+.CodeMirror-lines {
+    padding-left: 4px;
+}
+
+.code-tooltip {
+    box-shadow: 0 1px 1px 0 rgba(0,28,36,.3);
+    border-top: 1px solid #eef2f2;
+}
+
+.md-fences,
+code,
+tt {
+    border: 1px solid #e7eaed;
+    background-color: #f8f8f8;
+    border-radius: 3px;
+    padding: 0;
+    padding: 2px 4px 0px 4px;
+    font-size: 0.9em;
+}
+
+code {
+    background-color: #f3f4f4;
+    padding: 0 2px 0 2px;
+}
+
+.md-fences {
+    margin-bottom: 15px;
+    margin-top: 15px;
+    padding-top: 8px;
+    padding-bottom: 6px;
+}
+
+
+.md-task-list-item > input {
+  margin-left: -1.3em;
+}
+
+@media print {
+    html {
+        font-size: 13px;
+    }
+    table,
+    pre {
+        page-break-inside: avoid;
+    }
+    pre {
+        word-wrap: break-word;
+    }
+}
+
+.md-fences {
+	background-color: #f8f8f8;
+}
+#write pre.md-meta-block {
+	padding: 1rem;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f7f7f7;
+    border: 0;
+    border-radius: 3px;
+    color: #777777;
+    margin-top: 0 !important;
+}
+
+.mathjax-block>.code-tooltip {
+	bottom: .375rem;
+}
+
+.md-mathjax-midline {
+    background: #fafafa;
+}
+
+#write>h3.md-focus:before{
+	left: -1.5625rem;
+	top: .375rem;
+}
+#write>h4.md-focus:before{
+	left: -1.5625rem;
+	top: .285714286rem;
+}
+#write>h5.md-focus:before{
+	left: -1.5625rem;
+	top: .285714286rem;
+}
+#write>h6.md-focus:before{
+	left: -1.5625rem;
+	top: .285714286rem;
+}
+.md-image>.md-meta {
+    /*border: 1px solid #ddd;*/
+    border-radius: 3px;
+    padding: 2px 0px 0px 4px;
+    font-size: 0.9em;
+    color: inherit;
+}
+
+.md-tag {
+    color: #a7a7a7;
+    opacity: 1;
+}
+
+.md-toc { 
+    margin-top:20px;
+    padding-bottom:20px;
+}
+
+.sidebar-tabs {
+    border-bottom: none;
+}
+
+#typora-quick-open {
+    border: 1px solid #ddd;
+    background-color: #f8f8f8;
+}
+
+#typora-quick-open-item {
+    background-color: #FAFAFA;
+    border-color: #FEFEFE #e5e5e5 #e5e5e5 #eee;
+    border-style: solid;
+    border-width: 1px;
+}
+
+/** focus mode */
+.on-focus-mode blockquote {
+    border-left-color: rgba(85, 85, 85, 0.12);
+}
+
+header, .context-menu, .megamenu-content, footer{
+    font-family: "Segoe UI", "Arial", sans-serif;
+}
+
+.file-node-content:hover .file-node-icon,
+.file-node-content:hover .file-node-open-state{
+    visibility: visible;
+}
+
+.mac-seamless-mode #typora-sidebar {
+    background-color: #fafafa;
+    background-color: var(--side-bar-bg-color);
+}
+
+.md-lang {
+    color: #b4654d;
+}
+
+/*.html-for-mac {
+    --item-hover-bg-color: #E6F0FE;
+}*/
+
+#md-notification .btn {
+    border: 0;
+}
+
+.dropdown-menu .divider {
+    border-color: #e5e5e5;
+    opacity: 0.4;
+}
+
+.ty-preferences .window-content {
+    background-color: #fafafa;
+}
+
+.ty-preferences .nav-group-item.active {
+    color: white;
+    background: #999;
+}
+
+.menu-item-container a.menu-style-btn {
+    background-color: #f5f8fa;
+    background-image: linear-gradient( 180deg , hsla(0, 0%, 100%, 0.8), hsla(0, 0%, 100%, 0)); 
+}
+
+
+
+</style><title>C语言笔记-51CTO</title>
+</head>
+<body class='typora-export os-windows'><div class='typora-export-content'>
+<div id='write'  class=' first-line-indent'><p>&nbsp;</p><h2><a id="0_C_10"></a>0. 什么是C语言？</h2> 
+<p>C语言是一门面向过程的计算机编程语言，与C++，Java等面向对象的编程语言有所不同。<br> 其编译器主要有Clang、<strong>GCC</strong>、WIN-TC、SUBLIME、<strong>MSVC</strong>、Turbo C等。</p> 
+<h2><a id="1_C_13"></a>1. 第一个C语言程序</h2> 
+<p>如果报错scanf:this function may be unsafe.请加上一句：（具体什么原因，当时鹏哥说了，但是没记住！）<br> #define _CRT_SECURE_NO_WARNINGS</p> 
+<pre><code class="prism language-c"><span class="token comment">//#define _CRT_SECURE_NO_WARNINGS</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span>  <span class="token comment">//头文件</span></span></code></pre><p><span class="token keyword"><span>int</span></span><span> </span><span class="token function"><span>main</span></span><span class="token punctuation"><span>(</span></span><span class="token punctuation"><span>)</span></span>
+<span class="token punctuation"><span>{</span><!-- --></span>
+<span>    </span><span class="token function"><span>printf</span></span><span class="token punctuation"><span>(</span></span><span class="token string">&#34;<span>hello bit\n</span>&#34;</span><span class="token punctuation"><span>)</span></span><span class="token punctuation"><span>;</span></span>
+<span>    </span><span class="token function"><span>printf</span></span><span class="token punctuation"><span>(</span></span><span class="token string">&#34;<span>he he\n</span>&#34;</span><span class="token punctuation"><span>)</span></span><span class="token punctuation"><span>;</span></span>
+<span>    </span><span class="token keyword"><span>return</span></span><span> </span><span class="token number"><span>0</span></span><span class="token punctuation"><span>;</span></span><span> </span><span class="token punctuation"><span>}</span></span>
+<span class="token comment"><span>//解释</span>&#xff1a;</span>
+<span class="token comment"><span>//main函数是程序的入口</span></span>
+<span class="token comment"><span>//一个 工程中main函数有且仅有一个</span></span>
+</code></pre><span> </span></p><h2><a id="2__29"></a>2. 数据类型</h2> 
+<p>char //字符数据类型<br> short //短整型<br> int //整形<br> long //长整型<br> long long //更长的整形<br> float //单精度浮点数<br> double //双精度浮点数<br> //C语言有没有字符串类型？ 答案是没有。c语言中没有string类型，string是用char型数组来构造的。</p> 
+<p>每种数据类型占据的字节大小：</p> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span>  </span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+		<span class="token comment">//以下是在win10的vs2017显示的结果</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 1</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">short</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 2</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 4</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">long</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 4</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">long</span> <span class="token keyword">long</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">//8</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">float</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">//4</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">double</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 8</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">long</span> <span class="token keyword">double</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">//8</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre> 
+<p>存在这么多的类型，其实是为了更加丰富的表达生活中的各种值。<br> 类型的使用：</p> 
+<pre><code class="prism language-c"><span class="token keyword">char</span> ch <span class="token operator">=</span> <span class="token char">'w'</span><span class="token punctuation">;</span>  <span class="token comment">//字符型</span>
+<span class="token keyword">int</span> weight <span class="token operator">=</span> <span class="token number">120</span><span class="token punctuation">;</span>  <span class="token comment">//整型</span>
+<span class="token keyword">float</span> salary <span class="token operator">=</span> <span class="token number">20000.0f</span><span class="token punctuation">;</span>  <span class="token comment">//单精度浮点型</span>
+</code></pre> 
+<h2><a id="3__64"></a>3. 变量、常量</h2> 
+<p>生活中的有些值是不变的（比如：圆周率，性别，身份证号码，血型等等）<br> 有些值是可变的（比如：年龄，体重，薪资）。<br> 不变的值，C语言中用常量的概念来表示，变得值C语言中用变量来表示。</p> 
+<h3><a id="31__69"></a>3.1 定义变量的方法</h3> 
+<p>语法：变量类型 变量名称 = 初始值；</p> 
+<pre><code class="prism language-c"><span class="token keyword">int</span> age <span class="token operator">=</span> <span class="token number">150</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> weight <span class="token operator">=</span> <span class="token number">45.5f</span><span class="token punctuation">;</span>
+<span class="token keyword">char</span> ch <span class="token operator">=</span> <span class="token char">'w'</span><span class="token punctuation">;</span>
+</code></pre> 
+<h3><a id="32__76"></a>3.2 变量的分类</h3> 
+<p>1）局部变量<br> 2）全局变量</p> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">int</span> global <span class="token operator">=</span> <span class="token number">2019</span><span class="token punctuation">;</span><span class="token comment">//全局变量</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+    <span class="token keyword">int</span> local <span class="token operator">=</span> <span class="token number">2018</span><span class="token punctuation">;</span><span class="token comment">//局部变量</span>
+    <span class="token comment">//下面定义的global会不会有问题？没有问题</span>
+    <span class="token keyword">int</span> global <span class="token operator">=</span> <span class="token number">2020</span><span class="token punctuation">;</span><span class="token comment">//局部变量，当局部变量和全局变量同名时，优先使用局部变量，这个人感觉和搜索路径相关！</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"global = %d\n"</span><span class="token punctuation">,</span> global<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre> 
+<h3><a id="33__91"></a>3.3 变量的使用</h3> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+    <span class="token keyword">int</span> num1 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> num2 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> sum <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"输入两个操作数:&gt;"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d %d"</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>num1<span class="token punctuation">,</span> <span class="token operator">&amp;</span>num2<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">//int -- %d  float -- %f  double -- %lf  char -- %c</span>
+    sum <span class="token operator">=</span> num1 <span class="token operator">+</span> num2<span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"sum = %d\n"</span><span class="token punctuation">,</span> sum<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre> 
+<p>这里介绍一下输入，输出语句<br> scanf()：输入<br> printf()：输出<br> int – %d float – %f double – %lf char – %c</p> 
+<pre><code class="prism language-c"><span class="token comment">//scanf()定义：等以后我看的懂，再回来解释，菜鸟哭泣！</span>
+    _Check_return_ <span class="token function">_CRT_INSECURE_DEPRECATE</span><span class="token punctuation">(</span>scanf_s<span class="token punctuation">)</span>
+    _CRT_STDIO_INLINE <span class="token keyword">int</span> __CRTDECL <span class="token function">scanf</span><span class="token punctuation">(</span>
+        _In_z_ _Scanf_format_string_ <span class="token keyword">char</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span> _Format<span class="token punctuation">,</span>
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span>
+<span class="token comment">//printf()定义：</span>
+    _Check_return_opt_
+    _CRT_STDIO_INLINE <span class="token keyword">int</span> __CRTDECL <span class="token function">printf</span><span class="token punctuation">(</span>
+        _In_z_ _Printf_format_string_ <span class="token keyword">char</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span> _Format<span class="token punctuation">,</span>
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span>
+</code></pre> 
+<h3><a id="34__123"></a>3.4 变量的作用域和生命周期</h3> 
+<p>1）作用域：作用域（scope）是程序设计概念，通常来说，一段程序代码中所用到的名字并不总是有效/可用<br> 的。而限定这个名字的可用性的代码范围就是这个名字的作用域。<br> （1）局部变量的作用域是变量所在的局部范围。比如：{int a = 10;}，{}内就是局部变量a的作用域。<br> （2）全局变量的作用域是整个工程。比如：int b =100;int main(){};,在main()函数{}之外也不在其他范围内的变量。</p> 
+<p>2）生命周期:变量的生命周期指的是变量的创建到变量的销毁之间的一个时间段<br> （1）局部变量的生命周期是：进入作用域生命周期开始，出作用域生命周期结束。比如函数的形参。<br> （2）全局变量的生命周期是：整个程序的生命周期。程序结束，全局变量生命周期才结束。</p> 
+<h3><a id="35__132"></a>3.5 常量</h3> 
+<p>C语言中的常量和变量的定义的形式有所差异。<br> C语言中的常量分为以下以下几种：<br> 1）字面常量<br> 2）const 修饰的常变量 语法： cont 变量类型<br> 3）#define 定义的标识符常量 语法：#define 常量标识符 常量值<br> 4）枚举常量 语法：enum 枚举常量名 {常量1， 常量2，…}; //这里记得加上分号！常量面前没有常量类型</p> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">_CRT_SECURE_NO_WARNINGS</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token comment">//举例</span>
+<span class="token keyword">enum</span> <span class="token class-name">Sex</span>
+<span class="token punctuation">{<!-- --></span>
+	MALE<span class="token punctuation">,</span>
+	<span class="token comment">//MALE=2,  //可指定默认值，后面的值在2的基础上，递增+1</span>
+	FEMALE<span class="token punctuation">,</span>
+	SECRET
+<span class="token punctuation">}</span><span class="token punctuation">;</span>  <span class="token comment">//这里要加上分号;</span>
+<span class="token comment">//括号中的MALE,FEMALE,SECRET是枚举常量</span></code></pre><p>&nbsp;</p><p><span class="token keyword"><span>int</span></span><span> </span><span class="token function"><span>main</span></span><span class="token punctuation"><span>(</span></span><span class="token punctuation"><span>)</span></span>
+<span class="token punctuation"><span>{</span><!-- --></span>
+<span>	</span><span class="token comment"><span>//字面常量演示</span></span>
+<span>	</span><span class="token number"><span>3.14</span></span><span class="token punctuation"><span>;</span></span><span class="token comment"><span>//字面常量</span></span>
+<span>	</span><span class="token number"><span>1000</span></span><span class="token punctuation"><span>;</span></span><span class="token comment"><span>//字面常量</span></span></p><pre class="md-fences md-end-block md-fences-with-lineno ty-contain-cm modeLoaded" spellcheck="false" lang="" style="break-inside: unset;"><div class="CodeMirror cm-s-inner cm-s-null-scroll CodeMirror-wrap" lang=""><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 9.51562px; left: 44px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 36px; margin-bottom: 0px; border-right-width: 0px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>14</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-code" role="presentation" style=""><div class="CodeMirror-activeline" style="position: relative;"><div class="CodeMirror-activeline-background CodeMirror-linebackground"></div><div class="CodeMirror-gutter-background CodeMirror-activeline-gutter" style="left: -36px; width: 36px;"></div><div class="CodeMirror-gutter-wrapper CodeMirror-activeline-gutter" style="left: -36px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 0px; width: 27px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token comment"&gt;//const 修饰的常变量&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -36px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 27px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token keyword"&gt;const&lt;/span&gt; &lt;span class="token keyword"&gt;float&lt;/span&gt; pai &lt;span class="token operator"&gt;&amp;#61;&lt;/span&gt; &lt;span class="token number"&gt;3.14f&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt; &lt;span class="token comment"&gt;//这里的pai是const修饰的 常变量&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -36px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 27px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token comment"&gt;//pai &amp;#61; 5.14;//是不能直接修改的&amp;#xff01;vs2017会提示表达式必须是可修改的左值&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -36px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 27px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -36px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 27px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token comment"&gt;//#define的标识符常量 演示&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -36px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 27px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token macro property"&gt;&lt;span class="token directive-hash"&gt;#&lt;/span&gt;&lt;span class="token directive keyword"&gt;define&lt;/span&gt; &lt;span class="token macro-name"&gt;MAX&lt;/span&gt; &lt;span class="token expression"&gt;&lt;span class="token number"&gt;100&lt;/span&gt;  &lt;/span&gt;&lt;span class="token comment"&gt;//这里没有分号”;“&lt;/span&gt;&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -36px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 27px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token function"&gt;printf&lt;/span&gt;&lt;span class="token punctuation"&gt;(&lt;/span&gt;&lt;span class="token string"&gt;&amp;#34;max &amp;#61; %d\n&amp;#34;&lt;/span&gt;&lt;span class="token punctuation"&gt;,&lt;/span&gt; MAX&lt;span class="token punctuation"&gt;)&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;  &lt;span class="token comment"&gt;// 100&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -36px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 27px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -36px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 27px;">9</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token comment"&gt;//枚举常量演示&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -36px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 0px; width: 27px;">10</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token function"&gt;printf&lt;/span&gt;&lt;span class="token punctuation"&gt;(&lt;/span&gt;&lt;span class="token string"&gt;&amp;#34;%d\n&amp;#34;&lt;/span&gt;&lt;span class="token punctuation"&gt;,&lt;/span&gt; MALE&lt;span class="token punctuation"&gt;)&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;  &lt;span class="token comment"&gt;// 0&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -36px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 27px;">11</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token function"&gt;printf&lt;/span&gt;&lt;span class="token punctuation"&gt;(&lt;/span&gt;&lt;span class="token string"&gt;&amp;#34;%d\n&amp;#34;&lt;/span&gt;&lt;span class="token punctuation"&gt;,&lt;/span&gt; FEMALE&lt;span class="token punctuation"&gt;)&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;  &lt;span class="token comment"&gt;// 1&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -36px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 27px;">12</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token function"&gt;printf&lt;/span&gt;&lt;span class="token punctuation"&gt;(&lt;/span&gt;&lt;span class="token string"&gt;&amp;#34;%d\n&amp;#34;&lt;/span&gt;&lt;span class="token punctuation"&gt;,&lt;/span&gt; SECRET&lt;span class="token punctuation"&gt;)&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;  &lt;span class="token comment"&gt;// 2&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -36px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 27px;">13</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token comment"&gt;//注&amp;#xff1a;枚举常量的默认是从0开始&amp;#xff0c;依次向下递增1的&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -36px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 0px; width: 27px;">14</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token keyword"&gt;return&lt;/span&gt; &lt;span class="token number"&gt;0&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 0px; width: 1px; border-bottom: 0px solid transparent; top: 668px;"></div><div class="CodeMirror-gutters" style="height: 668px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 35px;"></div></div></div></div></pre><p><span class="token punctuation"><span>}</span></span>
+</code></pre><span> </span></p><p>注（常变量）：<br> 上面例子上的 pai 被称为 const 修饰的常变量， const 修饰的常变量在C语言中只是在语法层面限制了变量 pai 不能直接被改变，但是 pai 本质上还是一个变量的，所以叫常变量。</p> 
+<h2><a id="4__178"></a>4. 字符串+转义字符+注释</h2> 
+<h3><a id="41__179"></a>4.1 字符串</h3> 
+<pre><code class="prism language-c"><span class="token string">"hello bit.\n"</span>
+</code></pre> 
+<p>这种由双引号（Double Quote）引起来的一串字符称为字符串字面值（String Literal），或者简称字符串。<br> 注：<strong>字符串的结束标志是一个 \0 的转义字符。在计算字符串长度的时候 \0 是结束标志，不算作字符串内容。</strong></p> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token comment">//下面代码，打印结果是什么？为什么？（突出'\0'的重要性）</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+	<span class="token keyword">char</span> arr1<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">"bit"</span><span class="token punctuation">;</span>  
+	<span class="token keyword">char</span> arr2<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{<!-- --></span> <span class="token char">'b'</span><span class="token punctuation">,</span> <span class="token char">'i'</span><span class="token punctuation">,</span> <span class="token char">'t'</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+	<span class="token keyword">char</span> arr3<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{<!-- --></span> <span class="token char">'b'</span><span class="token punctuation">,</span> <span class="token char">'i'</span><span class="token punctuation">,</span> <span class="token char">'t'</span><span class="token punctuation">,</span> <span class="token char">'\0'</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>  
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%s\n"</span><span class="token punctuation">,</span> arr1<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">//bit  默认包含了'\0'</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>arr1<span class="token punctuation">)</span><span class="token operator">/</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//4, 但是在计算长度的时候是包括的！！！</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%s\n"</span><span class="token punctuation">,</span> arr2<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">//bit烫烫烫烫蘠it 随机值</span>
+	<span class="token comment">//printf("%d\n", sizeof(arr2) / sizeof(char));</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%s\n"</span><span class="token punctuation">,</span> arr3<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">//bit 显示写出'\0'</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>arr3<span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 4  </span></code></pre><pre class="md-fences md-end-block md-fences-with-lineno ty-contain-cm modeLoaded" spellcheck="false" lang=""><div class="CodeMirror cm-s-inner cm-s-null-scroll CodeMirror-wrap" lang=""><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 9.42444px; left: 36px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 28px; margin-bottom: 0px; border-right-width: 0px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>1</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-code" role="presentation"><div class="CodeMirror-activeline" style="position: relative;"><div class="CodeMirror-activeline-background CodeMirror-linebackground"></div><div class="CodeMirror-gutter-background CodeMirror-activeline-gutter" style="left: -28px; width: 28px;"></div><div class="CodeMirror-gutter-wrapper CodeMirror-activeline-gutter" style="left: -28px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 0px; width: 19px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token keyword"&gt;return&lt;/span&gt; &lt;span class="token number"&gt;0&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 0px; width: 1px; border-bottom: 0px solid transparent; top: 46px;"></div><div class="CodeMirror-gutters" style="height: 46px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 27px;"></div></div></div></div></pre><p><span class="token punctuation"><span>}</span></span>
+</code></pre><span> </span></p><h3><a id="42__204"></a>4.2 转义字符</h3> 
+<p>加入我们要在屏幕上打印一个目录： c:\code\test.c<br> 我们该如何写代码？</p> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+ <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"c:\code\test.c\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre> 
+<p>实际上程序运行的结果是这样的：<br> <img src="https://img-blog.csdnimg.cn/524504a5f7194eaba25bbf2dadd5746c.png#pic_center" alt="转移字符\t"><br> 这里就不得不提一下转义字符了。转义字符顾名思义就是转变意思。<br> 下面看一些转义字符。<br> <img src="https://img-blog.csdnimg.cn/420243e826114f628e49e1e776fa2121.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p2o5b6354ix5ZGA,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="常用转义字符，我一般都是用到就查，实在是记不住那么多！"></p> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">_CRT_SECURE_NO_WARNINGS</span></span></code></pre><p><span class="token macro property"><span class="token directive-hash"><span>#</span></span><span class="token directive keyword"><span>include</span></span><span> </span><span class="token string">&lt;<span>stdio.h</span>&gt;</span></span>
+<span class="token keyword"><span>int</span></span><span> </span><span class="token function"><span>main</span></span><span class="token punctuation"><span>(</span></span><span class="token punctuation"><span>)</span></span>
+<span class="token punctuation"><span>{</span><!-- --></span>
+<span>	</span><span class="token comment"><span>//问题1</span>&#xff1a;<span>在屏幕上打印一个单引号</span>&#39;&#xff0c;<span>怎么做</span>&#xff1f;</span>
+<span>	</span><span class="token comment"><span>//问题2</span>&#xff1a;<span>在屏幕上打印一个字符串</span>&#xff0c;<span>字符串的内容是一个双引号“</span>&#xff0c;<span>怎么做</span>&#xff1f;</span>
+<span>	</span><span class="token function"><span>printf</span></span><span class="token punctuation"><span>(</span></span><span class="token string">&#34;<span>%c\n</span>&#34;</span><span class="token punctuation"><span>,</span></span><span> </span><span class="token char">&#39;<span>&amp;</span><span>#39;</span>&#39;</span><span class="token punctuation"><span>)</span></span><span class="token punctuation"><span>;</span></span><span>  </span><span class="token comment"><span>//注意</span>&#xff1a;<span>单引号</span>&#39;&#39;<span>括起来的对应%c,双引号括起来的对应%s</span></span>
+<span>	</span><span class="token function"><span>printf</span></span><span class="token punctuation"><span>(</span></span><span class="token string">&#34;<span>%s\n</span>&#34;</span><span class="token punctuation"><span>,</span></span><span> </span><span class="token string">&#34;<span>&amp;</span><span>#39;</span>&#34;</span><span class="token punctuation"><span>)</span></span><span class="token punctuation"><span>;</span></span><span> </span>
+<span>	</span><span class="token function"><span>printf</span></span><span class="token punctuation"><span>(</span></span><span class="token string">&#34;<span>%s\n</span>&#34;</span><span class="token punctuation"><span>,</span></span><span> </span><span class="token string">&#34;<span>&amp;</span><span>#34;</span>&#34;</span><span class="token punctuation"><span>)</span></span><span class="token punctuation"><span>;</span></span>
+<span>	</span><span class="token function"><span>printf</span></span><span class="token punctuation"><span>(</span></span><span class="token string">&#34;<span>%c\n</span>&#34;</span><span class="token punctuation"><span>,</span></span><span> </span><span class="token char">&#39;<span>&amp;</span><span>#34;</span>&#39;</span><span class="token punctuation"><span>)</span></span><span class="token punctuation"><span>;</span></span>
+<span>	</span><span class="token keyword"><span>return</span></span><span> </span><span class="token number"><span>0</span></span><span class="token punctuation"><span>;</span></span>
+<span class="token punctuation"><span>}</span></span>
+</code></pre><span> </span></p><pre><code class="prism language-c"><span class="token comment">//程序输出什么？</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+	<span class="token comment">//strlen()求字符串长度</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token function">strlen</span><span class="token punctuation">(</span><span class="token string">"abcdef"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 6</span>
+	<span class="token comment">// \62被解析成一个转义字符</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token function">strlen</span><span class="token punctuation">(</span><span class="token string">"c:\test\628\test.c"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">//14 = 11 + 3个转义字符</span></code></pre><pre class="md-fences md-end-block md-fences-with-lineno ty-contain-cm modeLoaded" spellcheck="false" lang=""><div class="CodeMirror cm-s-inner cm-s-null-scroll CodeMirror-wrap" lang=""><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 9.42444px; left: 36px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 28px; margin-bottom: 0px; border-right-width: 0px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>3</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-code" role="presentation"><div class="CodeMirror-activeline" style="position: relative;"><div class="CodeMirror-activeline-background CodeMirror-linebackground"></div><div class="CodeMirror-gutter-background CodeMirror-activeline-gutter" style="left: -28px; width: 28px;"></div><div class="CodeMirror-gutter-wrapper CodeMirror-activeline-gutter" style="left: -28px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 0px; width: 19px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token function"&gt;printf&lt;/span&gt;&lt;span class="token punctuation"&gt;(&lt;/span&gt;&lt;span class="token string"&gt;&amp;#34;%c\n&amp;#34;&lt;/span&gt;&lt;span class="token punctuation"&gt;,&lt;/span&gt; &lt;span class="token char"&gt;&amp;#39;\62&amp;#39;&lt;/span&gt;&lt;span class="token punctuation"&gt;)&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;  &lt;span class="token comment"&gt;//2  ???&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -28px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 19px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -28px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 0px; width: 19px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token keyword"&gt;return&lt;/span&gt; &lt;span class="token number"&gt;0&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 0px; width: 1px; border-bottom: 0px solid transparent; top: 161px;"></div><div class="CodeMirror-gutters" style="height: 161px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 27px;"></div></div></div></div></pre><p><span class="token punctuation"><span>}</span></span>
+</code></pre><span> </span></p><h2><a id="5__251"></a>5. 注释</h2> 
+<p>1） 代码中有不需要的代码可以直接删除，也可以注释掉<br> 2）代码中有些代码比较难懂，可以加一下注释文字<br> //注释单行<br> /* 注释代码块 */</p> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">int</span> <span class="token function">Add</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">,</span> <span class="token keyword">int</span> y<span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+	<span class="token keyword">return</span> x <span class="token operator">+</span> y<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">/*C语言风格注释
+int Sub(int x, int y)
+{
+    return x-y;
+}
+*/</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+	<span class="token comment">//C++注释风格</span>
+	<span class="token comment">//int a = 10;</span>
+	<span class="token comment">//调用Add函数，完成加法</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token function">Add</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre> 
+<h2><a id="6__276"></a>6. 选择语句</h2> 
+<p>如果你好好学习，校招时拿一个好offer，走上人生巅峰。<br> 如果你不学习，毕业等于失业，回家卖红薯。<br> 这就是选择！<br> <img src="https://img-blog.csdnimg.cn/6decd64d13f94ec7959be266018b9cdb.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p2o5b6354ix5ZGA,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="选择语句"></p> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+    <span class="token keyword">int</span> coding <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"你会去敲代码吗？（选择1 or 0）:&gt;"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>coding<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>coding <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span>
+   <span class="token punctuation">{<!-- --></span>
+       <span class="token function">prinf</span><span class="token punctuation">(</span><span class="token string">"坚持，你会有好offer\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+   <span class="token punctuation">}</span>
+    <span class="token keyword">else</span>
+   <span class="token punctuation">{<!-- --></span>
+       <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"放弃，回家卖红薯\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+   <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre> 
+<h2><a id="7__298"></a>7. 循环语句</h2> 
+<p>有些事必须一直做，比如我日复一日的讲课，比如大家，日复一日的学习。<br> 还比如：<br> <img src="https://img-blog.csdnimg.cn/11811a1d85e647289060d147e31d8d36.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p2o5b6354ix5ZGA,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="循环结构">C语言的循环结构有：<br> 1）while语句-讲解<br> while(结束条件) //满足结束条件，就跳出循环体<br> {<!-- --><br> 循环体；<br> }</p> 
+<p>2）for语句（后期讲解）<br> 3）do…while (后期讲解)<br> 要想成为大牛！要敲20000行有效代码，干完这个就去干数据结构！！！奥力给！！！</p> 
+<pre><code class="prism language-c"><span class="token comment">//while循环的实例</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"加入比特\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">int</span> line <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token keyword">while</span> <span class="token punctuation">(</span>line <span class="token operator">&lt;=</span> <span class="token number">20000</span><span class="token punctuation">)</span>
+	<span class="token punctuation">{<!-- --></span>
+		line<span class="token operator">++</span><span class="token punctuation">;</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"我要继续努力敲代码\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">if</span> <span class="token punctuation">(</span>line <span class="token operator">&gt;</span> <span class="token number">20000</span><span class="token punctuation">)</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"好offer\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre> 
+<h2><a id="8__328"></a>8. 函数</h2> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+    <span class="token keyword">int</span> num1 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+   <span class="token keyword">int</span> num2 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> sum <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"输入两个操作数:&gt;"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d %d"</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>num1<span class="token punctuation">,</span> <span class="token operator">&amp;</span>num2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    sum <span class="token operator">=</span> num1 <span class="token operator">+</span> num2<span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"sum = %d\n"</span><span class="token punctuation">,</span> sum<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre> 
+<p>上述代码，写成函数如下：<br> 函数的特点就是简化代码，代码复用。<br> 函数语法：<br> 函数返回值类型 函数名（函数形参）<br> {<!-- --><br> 函数体<br> }</p> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">int</span> <span class="token function">Add</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">,</span> <span class="token keyword">int</span> y<span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+   <span class="token keyword">int</span> z <span class="token operator">=</span> x<span class="token operator">+</span>y<span class="token punctuation">;</span>
+   <span class="token keyword">return</span> z<span class="token punctuation">;</span> <span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+    <span class="token keyword">int</span> num1 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+   <span class="token keyword">int</span> num2 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> sum <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"输入两个操作数:&gt;"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d %d"</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>num1<span class="token punctuation">,</span> <span class="token operator">&amp;</span>num2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    sum <span class="token operator">=</span> <span class="token function">Add</span><span class="token punctuation">(</span>num1<span class="token punctuation">,</span> num2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"sum = %d\n"</span><span class="token punctuation">,</span> sum<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre> 
+<h2><a id="9__366"></a>9. 数组</h2> 
+<p>要存储1-10的数字，怎么存储？<br> C语言中给了数组的定义：一组<strong>相同类型</strong>元素的集合</p> 
+<h3><a id="91__369"></a>9.1 数组定义</h3> 
+<p>语法：数组元素类型 数组名[数组长度] = {元素1， 元素2， …};</p> 
+<pre><code class="prism language-c"><span class="token keyword">int</span> arr<span class="token punctuation">[</span><span class="token number">10</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{<!-- --></span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token number">3</span><span class="token punctuation">,</span><span class="token number">4</span><span class="token punctuation">,</span><span class="token number">5</span><span class="token punctuation">,</span><span class="token number">6</span><span class="token punctuation">,</span><span class="token number">7</span><span class="token punctuation">,</span><span class="token number">8</span><span class="token punctuation">,</span><span class="token number">9</span><span class="token punctuation">,</span><span class="token number">10</span><span class="token punctuation">}</span><span class="token punctuation">;</span><span class="token comment">//定义一个整形数组，最多放10个元素</span>
+</code></pre> 
+<h3><a id="92__375"></a>9.2 数组的下标</h3> 
+<p>C语言规定：数组的每个元素都有一个下标，下标是从0开始的。<br> 数组可以通过下标来访问的。比如：</p> 
+<pre><code class="prism language-c"><span class="token keyword">int</span> arr<span class="token punctuation">[</span><span class="token number">10</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{<!-- --></span><span class="token number">0</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token comment">//如果数组10个元素，下标的范围是0-9</span>
+</code></pre> 
+<h3><a id="93__382"></a>9.3 数组的使用</h3> 
+<p>利用循环for遍历数组</p> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+ <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+ <span class="token keyword">int</span> arr<span class="token punctuation">[</span><span class="token number">10</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{<!-- --></span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token number">3</span><span class="token punctuation">,</span><span class="token number">4</span><span class="token punctuation">,</span><span class="token number">5</span><span class="token punctuation">,</span><span class="token number">6</span><span class="token punctuation">,</span><span class="token number">7</span><span class="token punctuation">,</span><span class="token number">8</span><span class="token punctuation">,</span><span class="token number">9</span><span class="token punctuation">,</span><span class="token number">10</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+ <span class="token keyword">for</span><span class="token punctuation">(</span>i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span> i<span class="token operator">&lt;</span><span class="token number">10</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+ <span class="token punctuation">{<!-- --></span>
+       <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d "</span><span class="token punctuation">,</span> arr<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+ <span class="token punctuation">}</span>
+ <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> 
+<span class="token punctuation">}</span>
+</code></pre> 
+<h3><a id="10__398"></a>10. 操作符</h3> 
+<p>简单介绍<br> 1）算术操作符</p> 
+<pre><code class="prism language-c"><span class="token operator">+</span> <span class="token operator">-</span> <span class="token operator">*</span> <span class="token operator">/</span> <span class="token operator">%</span>  <span class="token comment">//加 减 乘 除 取余</span>
+</code></pre> 
+<p>2）移位操作符</p> 
+<pre><code class="prism language-c"><span class="token operator">&gt;&gt;</span> <span class="token operator">&lt;&lt;</span>   <span class="token comment">//右移操作符号  左移操作符号</span>
+</code></pre> 
+<p>3）位操作符</p> 
+<pre><code class="prism language-c"><span class="token operator">&amp;</span> <span class="token operator">^</span> <span class="token operator">|</span>  <span class="token comment">//按位与  按位取反 按位或</span>
+</code></pre> 
+<p>4）赋值操作符</p> 
+<pre><code class="prism language-c"><span class="token operator">=</span>  <span class="token operator">+=</span>  <span class="token operator">-=</span>  <span class="token operator">*=</span>  <span class="token operator">/=</span>  <span class="token operator">&amp;=</span> <span class="token operator">^=</span>  <span class="token operator">|=</span>    <span class="token operator">&gt;&gt;=</span>   <span class="token operator">&lt;&lt;=</span>
+</code></pre> 
+<p>5）单目操作符</p> 
+<pre><code class="prism language-c"><span class="token operator">!</span>          <span class="token comment">// 逻辑反操作</span>
+<span class="token operator">-</span>          <span class="token comment">// 负值</span>
+<span class="token operator">+</span>          <span class="token comment">// 正值</span>
+<span class="token operator">&amp;</span>          <span class="token comment">// 取地址</span>
+<span class="token keyword">sizeof</span>     <span class="token comment">// 操作数的类型长度（以字节为单位）</span>
+<span class="token operator">~</span>          <span class="token comment">// 对一个数的二进制按位取反</span>
+<span class="token operator">--</span>         <span class="token comment">// 前置、后置--</span>
+<span class="token operator">++</span>         <span class="token comment">// 前置、后置++</span>
+<span class="token operator">*</span>          <span class="token comment">// 间接访问操作符(解引用操作符) (类型)       强制类型转换</span>
+</code></pre> 
+<p>6）关系操作符</p> 
+<pre><code class="prism language-c"><span class="token operator">&gt;</span>
+<span class="token operator">&gt;=</span>
+<span class="token operator">&lt;</span>
+<span class="token operator">&lt;=</span>
+<span class="token operator">!=</span>    <span class="token comment">// 用于测试“不相等”</span>
+<span class="token operator">==</span>    <span class="token comment">// 用于测试“相等</span>
+</code></pre> 
+<p>7）逻辑操作符</p> 
+<pre><code class="prism language-c"><span class="token operator">&amp;&amp;</span>     <span class="token comment">// 逻辑与</span>
+<span class="token operator">||</span>     <span class="token comment">// 逻辑或</span>
+</code></pre> 
+<p>8）条件操作符</p> 
+<pre><code class="prism language-c">exp1 <span class="token operator">?</span> exp2 <span class="token operator">:</span> exp3   <span class="token comment">//三目运算符 exp1成立，取exp2，否则取exp3</span>
+</code></pre> 
+<p>9）逗号运算符</p> 
+<pre><code class="prism language-c">exp1<span class="token punctuation">,</span> exp2<span class="token punctuation">,</span> exp3<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+</code></pre> 
+<p>10）下标引用、函数调用和结构成员</p> 
+<pre><code class="prism language-c"><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">.</span> <span class="token operator">-&gt;</span>  <span class="token comment">//-&gt;针对结构体指针</span>
+</code></pre> 
+<h2><a id="11__466"></a>11. 常见关键字</h2> 
+<p>定义变量名时不能占用这些关键字。</p> 
+<pre><code class="prism language-c"><span class="token keyword">auto</span>  <span class="token keyword">break</span>   <span class="token keyword">case</span>  <span class="token keyword">char</span>  <span class="token keyword">const</span>   <span class="token keyword">continue</span>  <span class="token keyword">default</span>  <span class="token keyword">do</span>   <span class="token keyword">double</span> <span class="token keyword">else</span>  <span class="token keyword">enum</span>   
+<span class="token class-name">extern</span> <span class="token keyword">float</span>  <span class="token keyword">for</span>   <span class="token keyword">goto</span>  <span class="token keyword">if</span>   <span class="token keyword">int</span>   <span class="token keyword">long</span>  <span class="token keyword">register</span>    <span class="token keyword">return</span>   <span class="token keyword">short</span>  <span class="token keyword">signed</span>
+<span class="token keyword">sizeof</span>   <span class="token keyword">static</span> <span class="token keyword">struct</span>  <span class="token class-name">switch</span>  <span class="token keyword">typedef</span> <span class="token keyword">union</span>  <span class="token keyword">unsigned</span>   <span class="token keyword">void</span>  <span class="token keyword">volatile</span>  <span class="token keyword">while</span>
+</code></pre> 
+<p>注：关键字，先介绍下面几个，后期遇到讲解。</p> 
+<h3><a id="111__typedef_474"></a>11.1 关键字 typedef</h3> 
+<p>typedef 顾名思义是类型定义，这里应该理解为类型重命名。比如：</p> 
+<pre><code class="prism language-c"><span class="token comment">//将unsigned int 重命名为uint_32, 所以uint_32也是一个类型名</span>
+<span class="token keyword">typedef</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> uint_32<span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+    <span class="token comment">//观察num1和num2,这两个变量的类型是一样的</span>
+    <span class="token keyword">unsigned</span> <span class="token keyword">int</span> num1 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    uint_32 num2 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre> 
+<h3><a id="112_static_487"></a>11.2 关键字static</h3> 
+<p>在C语言中：<br> static是用来修饰变量和函数的</p> 
+<ol><li>修饰局部变量-称为静态局部变量</li><li>修饰全局变量-称为静态全局变量</li><li>修饰函数-称为静态函数</li></ol> 
+<h4><a id="1121__493"></a>11.2.1 修饰局部变量</h4> 
+<p>对比代码1和代码2的效果理解static修饰局部变量的意义。</p> 
+<pre><code class="prism language-c"><span class="token comment">//代码1</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">void</span> <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+    <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    i<span class="token operator">++</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d "</span><span class="token punctuation">,</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">//每次函数执行结束，i值都会被释放掉</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+ <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span>i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span> i<span class="token operator">&lt;</span><span class="token number">10</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+   <span class="token punctuation">{<!-- --></span>
+        <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//每次有打印1</span>
+   <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre> 
+<pre><code class="prism language-c"><span class="token comment">//代码2</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">void</span> <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+    <span class="token comment">//static修饰局部变量</span>
+    <span class="token keyword">static</span> <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>  <span class="token comment">//test()执行结束后,保留i值</span>
+    i<span class="token operator">++</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d "</span><span class="token punctuation">,</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+ <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span>i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span> i<span class="token operator">&lt;</span><span class="token number">10</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+   <span class="token punctuation">{<!-- --></span>
+        <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//每次有打印1到10</span>
+   <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre> 
+<p>结论：static修饰局部变量改变了变量的生命周期，让静态局部变量出了作用域依然存在，<strong>到程序结束，生命周期才结束。</strong></p> 
+<h4><a id="1122__535"></a>11.2.2 修饰全局变量</h4> 
+<p>代码1正常，代码2在编译的时候会出现连接性错误。</p> 
+<pre><code class="prism language-c"><span class="token comment">//代码1</span>
+<span class="token comment">//add.c</span>
+<span class="token keyword">int</span> g_val <span class="token operator">=</span> <span class="token number">2018</span><span class="token punctuation">;</span>
+<span class="token comment">//test.c</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> g_val<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span></code></pre><p><span class="token comment"><span>//代码2</span></span>
+<span class="token comment"><span>//add.c   static 全局变量</span></span>
+<span class="token keyword"><span>static</span></span><span> </span><span class="token keyword"><span>int</span></span><span> g_val </span><span class="token operator">&#61;</span><span> </span><span class="token number"><span>2018</span></span><span class="token punctuation"><span>;</span></span>
+<span class="token comment"><span>//test.c</span></span>
+<span class="token keyword"><span>int</span></span><span> </span><span class="token function"><span>main</span></span><span class="token punctuation"><span>(</span></span><span class="token punctuation"><span>)</span></span>
+<span class="token punctuation"><span>{</span><!-- --></span>
+<span>    </span><span class="token function"><span>printf</span></span><span class="token punctuation"><span>(</span></span><span class="token string">&#34;<span>%d\n</span>&#34;</span><span class="token punctuation"><span>,</span></span><span> g_val</span><span class="token punctuation"><span>)</span></span><span class="token punctuation"><span>;</span></span>
+<span>    </span><span class="token keyword"><span>return</span></span><span> </span><span class="token number"><span>0</span></span><span class="token punctuation"><span>;</span></span><span> </span><span class="token punctuation"><span>}</span></span>
+</code></pre><span> </span></p><p>结论：<strong>一个全局变量被static修饰，使得这个全局变量只能在本源文件内使用</strong>，不能在其他源文件内使用。</p> 
+<h4><a id="1123__557"></a>11.2.3 修饰函数</h4> 
+<p>代码1正常，代码2在编译的时候会出现连接性错误，和修饰全局变量一样。</p> 
+<pre><code class="prism language-c"><span class="token comment">//代码1</span>
+<span class="token comment">//add.c</span>
+<span class="token keyword">int</span> <span class="token function">Add</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">,</span> <span class="token keyword">int</span> y<span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+    <span class="token keyword">return</span> x<span class="token operator">+</span>y<span class="token punctuation">;</span> <span class="token punctuation">}</span>
+<span class="token comment">//test.c</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token function">Add</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span></code></pre><p><span class="token comment"><span>//代码2</span></span>
+<span class="token comment"><span>//add.c   static 修饰函数</span></span>
+<span class="token keyword"><span>static</span></span><span> </span><span class="token keyword"><span>int</span></span><span> </span><span class="token function"><span>Add</span></span><span class="token punctuation"><span>(</span></span><span class="token keyword"><span>int</span></span><span> x</span><span class="token punctuation"><span>,</span></span><span> </span><span class="token keyword"><span>int</span></span><span> y</span><span class="token punctuation"><span>)</span></span><span> </span><span class="token punctuation"><span>{</span><!-- --></span>
+<span>    </span><span class="token keyword"><span>return</span></span><span> c</span><span class="token operator">&#43;</span><span>y</span><span class="token punctuation"><span>;</span></span><span> </span><span class="token punctuation"><span>}</span></span>
+<span class="token comment"><span>//test.c</span></span>
+<span class="token keyword"><span>int</span></span><span> </span><span class="token function"><span>main</span></span><span class="token punctuation"><span>(</span></span><span class="token punctuation"><span>)</span></span>
+<span class="token punctuation"><span>{</span><!-- --></span>
+<span>    </span><span class="token function"><span>printf</span></span><span class="token punctuation"><span>(</span></span><span class="token string">&#34;<span>%d\n</span>&#34;</span><span class="token punctuation"><span>,</span></span><span> </span><span class="token function"><span>Add</span></span><span class="token punctuation"><span>(</span></span><span class="token number"><span>2</span></span><span class="token punctuation"><span>,</span></span><span> </span><span class="token number"><span>3</span></span><span class="token punctuation"><span>)</span></span><span class="token punctuation"><span>)</span></span><span class="token punctuation"><span>;</span></span>
+<span>    </span><span class="token keyword"><span>return</span></span><span> </span><span class="token number"><span>0</span></span><span class="token punctuation"><span>;</span></span><span> </span><span class="token punctuation"><span>}</span></span>
+</code></pre><span> </span></p><p>结论：<strong>一个函数被static修饰，使得这个函数只能在本源文件内使用</strong>，不能在其他源文件内使用。<br> （剩余关键字后续课程中陆续会讲解。）</p> 
+<h2><a id="12_define__582"></a>12. #define 定义常量和宏</h2> 
+<p>注意 #define 后面没有分号;<br> #define 常量名 常量值<br> #define 宏名 宏表达式</p> 
+<pre><code class="prism language-c"><span class="token comment">//define定义标识符常量</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">MAX</span> <span class="token expression"><span class="token number">1000</span></span></span>
+<span class="token comment">//define定义宏</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">ADD</span><span class="token expression"><span class="token punctuation">(</span>x<span class="token punctuation">,</span> y<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token operator">+</span><span class="token punctuation">(</span>y<span class="token punctuation">)</span><span class="token punctuation">)</span>   </span><span class="token comment">//注意x,y要用括号括起来</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+	<span class="token keyword">int</span> sum <span class="token operator">=</span> <span class="token function">ADD</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"sum = %d\n"</span><span class="token punctuation">,</span> sum<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><pre class="md-fences md-end-block md-fences-with-lineno ty-contain-cm modeLoaded" spellcheck="false" lang=""><div class="CodeMirror cm-s-inner cm-s-null-scroll CodeMirror-wrap" lang=""><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 9.42432px; left: 36px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 28px; margin-bottom: 0px; border-right-width: 0px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>4</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-code" role="presentation"><div class="CodeMirror-activeline" style="position: relative;"><div class="CodeMirror-activeline-background CodeMirror-linebackground"></div><div class="CodeMirror-gutter-background CodeMirror-activeline-gutter" style="left: -28px; width: 28px;"></div><div class="CodeMirror-gutter-wrapper CodeMirror-activeline-gutter" style="left: -28px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 0px; width: 19px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">sum &lt;span class="token operator"&gt;&amp;#61;&lt;/span&gt; &lt;span class="token number"&gt;10&lt;/span&gt; &lt;span class="token operator"&gt;*&lt;/span&gt; &lt;span class="token function"&gt;ADD&lt;/span&gt;&lt;span class="token punctuation"&gt;(&lt;/span&gt;&lt;span class="token number"&gt;2&lt;/span&gt;&lt;span class="token punctuation"&gt;,&lt;/span&gt; &lt;span class="token number"&gt;3&lt;/span&gt;&lt;span class="token punctuation"&gt;)&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -28px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 19px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token function"&gt;printf&lt;/span&gt;&lt;span class="token punctuation"&gt;(&lt;/span&gt;&lt;span class="token string"&gt;&amp;#34;sum &amp;#61; %d\n&amp;#34;&lt;/span&gt;&lt;span class="token punctuation"&gt;,&lt;/span&gt; sum&lt;span class="token punctuation"&gt;)&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -28px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 19px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -28px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 0px; width: 19px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token keyword"&gt;return&lt;/span&gt; &lt;span class="token number"&gt;0&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 0px; width: 1px; border-bottom: 0px solid transparent; top: 230px;"></div><div class="CodeMirror-gutters" style="height: 230px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 27px;"></div></div></div></div></pre><p><span class="token punctuation"><span>}</span></span>
+</code></pre><span> </span></p><h2><a id="13__603"></a>13. 指针</h2> 
+<h3><a id="131__604"></a>13.1 内存</h3> 
+<p>内存是电脑上特别重要的存储器，计算机中程序的运行都是在内存中进行的 。<br> 所以为了有效的使用内存，就把内存划分成一个个小的内存单元，每个内存单元的大小是1个字节。<br> 为了能够有效的访问到内存的每个单元，就给内存单元进行了编号，这些编号被称为该内存单元的地址。<br> <img src="https://img-blog.csdnimg.cn/8fb97c9db41f48419415d7c9ab35252d.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p2o5b6354ix5ZGA,size_16,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="内存示意图">变量是创建在内存中的（在内存中分配空间的)，每个内存单元都有地址，所以变量也是有地址的。取出变量地址如下：</p> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+ <span class="token keyword">int</span> num <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">;</span>
+ <span class="token operator">&amp;</span>num<span class="token punctuation">;</span><span class="token comment">//取出num的地址</span>
+    <span class="token comment">//注：这里num的4个字节，每个字节都有地址，取出的是第一个字节的地址（较小的地址）</span>
+ <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%p\n"</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>num<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//打印地址，%p是以地址的形式打印</span>
+ <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre> 
+<p><img src="https://img-blog.csdnimg.cn/0a677fdaf62a40809e990a954e2e71c7.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p2o5b6354ix5ZGA,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="取地址示意图">那地址如何存储，需要定义指针变量。</p> 
+<pre><code class="prism language-c"><span class="token keyword">int</span> num <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token operator">*</span>p<span class="token punctuation">;</span>  <span class="token comment">//p为一个整形指针变量</span>
+p <span class="token operator">=</span> <span class="token operator">&amp;</span>num<span class="token punctuation">;</span>
+</code></pre> 
+<p>指针的使用实例：</p> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+	<span class="token keyword">int</span> num <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> num<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 10</span></code></pre><pre class="md-fences md-end-block md-fences-with-lineno ty-contain-cm modeLoaded" spellcheck="false" lang=""><div class="CodeMirror cm-s-inner cm-s-null-scroll CodeMirror-wrap" lang=""><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 9.42432px; left: 36px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 28px; margin-bottom: 0px; border-right-width: 0px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>6</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-code" role="presentation" style=""><div class="CodeMirror-activeline" style="position: relative;"><div class="CodeMirror-activeline-background CodeMirror-linebackground"></div><div class="CodeMirror-gutter-background CodeMirror-activeline-gutter" style="left: -28px; width: 28px;"></div><div class="CodeMirror-gutter-wrapper CodeMirror-activeline-gutter" style="left: -28px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 0px; width: 19px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token keyword"&gt;int&lt;/span&gt; &lt;span class="token operator"&gt;*&lt;/span&gt;p &lt;span class="token operator"&gt;&amp;#61;&lt;/span&gt; &lt;span class="token operator"&gt;&amp;amp;&lt;/span&gt;num&lt;span class="token punctuation"&gt;;&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -28px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 19px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token operator"&gt;*&lt;/span&gt;p &lt;span class="token operator"&gt;&amp;#61;&lt;/span&gt; &lt;span class="token number"&gt;20&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -28px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 19px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token function"&gt;printf&lt;/span&gt;&lt;span class="token punctuation"&gt;(&lt;/span&gt;&lt;span class="token string"&gt;&amp;#34;%d\n&amp;#34;&lt;/span&gt;&lt;span class="token punctuation"&gt;,&lt;/span&gt; &lt;span class="token operator"&gt;*&lt;/span&gt;p&lt;span class="token punctuation"&gt;)&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;  &lt;span class="token comment"&gt;// 20&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -28px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 19px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token function"&gt;printf&lt;/span&gt;&lt;span class="token punctuation"&gt;(&lt;/span&gt;&lt;span class="token string"&gt;&amp;#34;%d\n&amp;#34;&lt;/span&gt;&lt;span class="token punctuation"&gt;,&lt;/span&gt; num&lt;span class="token punctuation"&gt;)&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;  &lt;span class="token comment"&gt;// 20&lt;/span&gt;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -28px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 19px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="" cm-zwsp="">
+</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -28px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt CodeMirror-linenumber-show" style="left: 0px; width: 19px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">&lt;span class="token keyword"&gt;return&lt;/span&gt; &lt;span class="token number"&gt;0&lt;/span&gt;&lt;span class="token punctuation"&gt;;&lt;/span&gt;</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 0px; width: 1px; border-bottom: 0px solid transparent; top: 345px;"></div><div class="CodeMirror-gutters" style="height: 345px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 27px;"></div></div></div></div></pre><p><span class="token punctuation"><span>}</span></span>
+</code></pre><span> </span></p><p><img src="https://img-blog.csdnimg.cn/37e7789767754e75b5507cb9acc756c3.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5p2o5b6354ix5ZGA,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="指针应用">以整形指针举例，可以推广到其他类型，如：</p> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+ <span class="token keyword">char</span> ch <span class="token operator">=</span> <span class="token char">'w'</span><span class="token punctuation">;</span>  
+ <span class="token keyword">char</span><span class="token operator">*</span> pc <span class="token operator">=</span> <span class="token operator">&amp;</span>ch<span class="token punctuation">;</span>  <span class="token comment">// 用ch的地址给指针变量pc初始化,即pc存的是变量ch的地址</span>
+ <span class="token operator">*</span>pc <span class="token operator">=</span> <span class="token char">'q'</span><span class="token punctuation">;</span>  <span class="token comment">//pc指向的（ch）地址上的值改为‘q’</span>
+ <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%c\n"</span><span class="token punctuation">,</span> ch<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// q</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> 
+<span class="token punctuation">}</span>
+</code></pre> 
+<h3><a id="132__656"></a>13.2 指针变量的大小</h3> 
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token comment">//指针变量的大小取决于地址的大小,即无论何种类型的指针都取决于地址的大小</span>
+<span class="token comment">//32位平台下地址是32个bit位（即4个字节）</span>
+<span class="token comment">//64位平台下地址是64个bit位（即8个字节）</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">char</span> <span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">short</span> <span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d\n"</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">double</span> <span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre> 
+<p>结论：<strong>指针大小在32位平台是4个字节，64位平台是8个字节。</strong></p> 
+<h2><a id="14__671"></a>14. 结构体</h2> 
+<p>结构体是C语言中特别重要的知识点，结构体使得C语言有能力描述复杂类型。<br> 比如描述学生，学生包含： 名字+年龄+性别+学号 这几项信息。<br> 这里只能使用结构体来描述了。例如：<br> 语法：struct 结构体类型名<br> {<!-- --><br> 成员变量类型1 成员变量1；<br> 成员变量类型2 成员变量2；<br> }<br> 个人感觉像类，但是只包含类的属性，没有方法。</p> 
+<pre><code class="prism language-c"><span class="token keyword">struct</span> <span class="token class-name">Stu</span>
+<span class="token punctuation">{<!-- --></span>
+    <span class="token keyword">char</span> name<span class="token punctuation">[</span><span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">;</span><span class="token comment">//名字</span>
+    <span class="token keyword">int</span> age<span class="token punctuation">;</span>      <span class="token comment">//年龄</span>
+    <span class="token keyword">char</span> sex<span class="token punctuation">[</span><span class="token number">5</span><span class="token punctuation">]</span><span class="token punctuation">;</span>  <span class="token comment">//性别</span>
+    <span class="token keyword">char</span> id<span class="token punctuation">[</span><span class="token number">15</span><span class="token punctuation">]</span>； <span class="token comment">//学号</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre> 
+<p>结构体的初始化和点操作符 . -&gt; ：</p> 
+<pre><code class="prism language-c"><span class="token comment">//打印结构体信息</span>
+<span class="token keyword">struct</span> <span class="token class-name">Stu</span> s <span class="token operator">=</span> <span class="token punctuation">{<!-- --></span><span class="token string">"张三"</span>， <span class="token number">20</span>， <span class="token string">"男"</span>， <span class="token string">"20180101"</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token comment">//.为结构成员访问操作符  用于结构体变量访问成员</span>
+<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"name = %s age = %d sex = %s id = %s\n"</span><span class="token punctuation">,</span> s<span class="token punctuation">.</span>name<span class="token punctuation">,</span> s<span class="token punctuation">.</span>age<span class="token punctuation">,</span> s<span class="token punctuation">.</span>sex<span class="token punctuation">,</span> s<span class="token punctuation">.</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">//-&gt;操作符  用于结构体指针变量访问成员变量</span>
+<span class="token keyword">struct</span> <span class="token class-name">Stu</span> <span class="token operator">*</span>ps <span class="token operator">=</span> <span class="token operator">&amp;</span>s<span class="token punctuation">;</span>
+<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"name = %s age = %d sex = %s id = %s\n"</span><span class="token punctuation">,</span> ps<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span> ps<span class="token operator">-&gt;</span>age<span class="token punctuation">,</span> ps<span class="token operator">-&gt;</span>sex<span class="token punctuation">,</span> ps<span class="token operator">-</span> <span class="token operator">&gt;</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre> 
+<p>（缺少了联合体union的内容！）<br> 初始C语言到此结束！</p></div></div>
+
+<script>(function(){var e=document.body.parentElement,t=[],n=null,i=document.body.classList.contains("typora-export-collapse-outline"),r=function(e,t,n){document.addEventListener(e,function(e){if(!e.defaultPrevented)for(var i=e.target;i&&i!=this;i=i.parentNode)if(i.matches(t)){!1===n.call(i,e)&&(e.preventDefault(),e.stopPropagation());break}},!1)};function o(){return e.scrollTop}r("click",".outline-expander",function(e){var t=this.closest(".outline-item-wrapper").classList;return t.contains("outline-item-open")?t.remove("outline-item-open"):t.add("outline-item-open"),d(),!1}),r("click",".outline-item",function(e){var t=this.querySelector(".outline-label");if(location.hash="#"+t.getAttribute("href"),i){var n=this.closest(".outline-item-wrapper").classList;n.contains("outline-item-open")||n.add("outline-item-open"),c(),n.add("outline-item-active")}});var a,s,l=function(){var e=o();n=null;for(var i=0;i<t.length&&t[i][1]-e<60;i++)n=t[i]},c=function(){document.querySelectorAll(".outline-item-active").forEach(e=>e.classList.remove("outline-item-active")),document.querySelectorAll(".outline-item-single.outline-item-open").forEach(e=>e.classList.remove("outline-item-open"))},d=function(){if(n){c();var e=document.querySelector('.outline-label[href="#'+(CSS.escape?CSS.escape(n[0]):n[0])+'"]');if(e)if(i){var t=e.closest(".outline-item-open>ul>.outline-item-wrapper");if(t)t.classList.add("outline-item-active");else{for(var r=(e=e.closest(".outline-item-wrapper")).parentElement.closest(".outline-item-wrapper");r;)r=(e=r).parentElement.closest(".outline-item-wrapper");e.classList.add("outline-item-active")}}else e.closest(".outline-item-wrapper").classList.add("outline-item-active")}};window.addEventListener("scroll",function(e){a&&clearTimeout(a),a=setTimeout(function(){l(),d()},300)});var u=function(){s=setTimeout(function(){!function(){t=[];var e=o();document.querySelector("#write").querySelectorAll("h1, h2, h3, h4, h5, h6").forEach(n=>{var i=n.getAttribute("id");t.push([i,e+n.getBoundingClientRect().y])})}(),l(),d()},300)};window.addEventListener("resize",function(e){s&&clearTimeout(s),u()}),u()})();</script></body>
+</html>

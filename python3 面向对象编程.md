@@ -755,3 +755,113 @@ def divide_with_exception(number, divisor):
 divide_with_exception(2, 1)
 ```
 
+## 5. 何时使用面向对象编程
+
+### 5.1 property关键字的使用
+
+返回 property 属性。
+
+*fget* 是获取属性值的函数。 *fset* 是用于设置属性值的函数。 *fdel* 是用于删除属性值的函数。并且 *doc* 为属性对象创建文档字符串。
+
+一个典型的用法是定义一个托管属性 `x`:
+
+```
+class C:
+    def __init__(self):
+        self._x = None
+
+    def getx(self):
+        return self._x
+
+    def setx(self, value):
+        self._x = value
+
+    def delx(self):
+        del self._x
+
+    x = property(getx, setx, delx, "I'm the 'x' property.")
+```
+
+如果 *c* 是 *C* 的实例，`c.x` 将调用getter，`c.x = value` 将调用setter， `del c.x` 将调用deleter。
+
+### 5.2 通过属性向类数据添加行为
+
+python中的`property`关键字用于将方法变得看起来像属性，当我们对类或者方法进行私有化操作的时候，可以通过`property`关键字做到让外部直接进行访问
+
+```bash
+class Color:
+    def __init__(self, rgb_value, name):
+        self.rgb_value = rgb_value
+        self.name = name
+
+    def _set_name(self, name):
+        if not name:
+            raise Exception("Invalid Name")
+        self._name = name
+
+    def _get_name(self):
+        return self._name
+
+    name = property(_get_name, _set_name)
+
+
+c = Color('#0000ff', 'red')
+print(c.name)		# red
+
+c.name = 'blue'
+print(c.name)		# blue
+```
+
+### 5.3 属性的细节
+
+```bash
+class Silly:
+    def _get_silly(self):
+        print("你越来越傻了")
+        return self._silly
+
+    def _set_silly(self, value):
+        print(f"你在胡闹 {value}")
+        self._silly = value
+
+    def _del_silly(self):
+        print("哇，你杀了个傻瓜！")
+        del self._silly
+
+    silly = property(_get_silly, _set_silly, _del_silly, "这是一个愚蠢的性质")
+
+
+s = Silly()
+s.silly = "funny"			# 输出：你在胡闹 funny
+del s.silly					# 输出：哇，你杀了个傻瓜！
+```
+
+### 5.4 装饰器——另一种创建属性的方法
+
+着段代码等价于上面的代码
+
+```py
+class Silly:
+    @property
+    def silly(self):
+        print("你越来越傻了")
+        return self._silly
+
+    @silly.setter
+    def silly(self, value):
+        print(f"你在胡闹 {value}")
+        self._silly = value
+
+    @silly.deleter
+    def silly(self):
+        print("哇，你杀了个傻瓜！")
+        del self._silly
+
+
+s = Silly()
+s.silly = 'bob'			# 输出：你在胡闹 bob
+s.silly					# 输出：你越来越傻了
+```
+
+
+
