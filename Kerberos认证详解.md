@@ -12,6 +12,49 @@ Windows不会直接保存文件的密文，他会将密码进行Hash计算，然
 
 <img src="Kerberos%E8%AE%A4%E8%AF%81%E8%AF%A6%E8%A7%A3.assets/image-20230516164616829.png" alt="image-20230516164616829" style="zoom:50%;" />
 
+winlogon.exe 运行锁屏界面，给予用户密码输入的交互窗口，用户输入密码后交给 lsass.exe 做加密比较，相同则认证通过，否则失败
+
+**lsass.exe 主要作用：**
+
+1. 密码明文保存
+2. 将明文密码做NTLM Hash计算并与SAM文件做对比
+
+<img src="Kerberos%E8%AE%A4%E8%AF%81%E8%AF%A6%E8%A7%A3.assets/image-20231111151648330.png" alt="image-20231111151648330" style="zoom:67%;" />
+
+**SAM文件存储格式**
+
+```
+username:RID:LM-HASH:NT-HASH
+
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+DefaultAccount:503:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+lonelyor:1001:aad3b435b51404eeaad3b435b51404ee:3b972cab044c498843e8438b1f854f4f:::
+plsec:1002:aad3b435b51404eeaad3b435b51404ee:d39b9035413146077e55ac4d8cd03922:::
+skill:1011:aad3b435b51404eeaad3b435b51404ee:394cb82b14ebfcf86eaedc13fe293e15:::
+WDAGUtilityAccount:504:aad3b435b51404eeaad3b435b51404ee:7944e349cf5bcef1da0cb7f35930f034:::
+```
+
+### LM Hash 介绍
+LM哈希的加密步骤如下：
+
+1. **将密码转换为大写：**
+   - 将明文密码的所有字符转换为大写。
+2. **将密码填充到14字节：**
+   - 如果密码长度不足14字节，用零字节（0x00）进行填充，直到达到14字节。
+3. **将密码分为两个7字节的块：**
+   - 将填充后的密码分为两个7字节的块。
+4. **将每个7字节块转换为56位二进制：**
+   - 将每个7字节块的每个字节转换为8位二进制，然后将这56位二进制拼接在一起。
+5. **在每7位后添加一个零：**
+   - 在56位二进制的每7位后添加一个零，得到64位二进制。
+6. **将64位二进制分为两个32位块：**
+   - 将64位二进制分为两个32位的块，作为DES加密的两个密钥。
+7. **对固定的魔术字符串进行DES加密：**
+   - 使用两个32位块作为DES加密的密钥，对固定的魔术字符串 "KGS!@#$%" 进行加密。
+8. **得到最终的LM哈希值：**
+   - 将DES加密的结果拼接在一起，得到最终的LM哈希值。
+
 ### NTLM Hash 介绍
 
 #### NTLM Hash python计算代码
@@ -1148,8 +1191,8 @@ python3 getST.py -dc-ip AD01.xie.com xie.com/machine\$:root -spn cifs/ad01.xie.c
 认证流程：
 
 1. 客户端向AS服务器发送AS-REQ请求TGT
-2. AS服务器验证客户端的合法性，是则返回TGT和Logon Session Key
-3. 客户端拿着Logon Session Key来加密时间戳并且将TGT一起发给TGS服务器来请求服务
+2. AS服务器验证**客户端的合法性**，是则返回TGT和Logon Session Key
+3. 客户端拿着Logon Session Key来加密时间戳并且将TGT一起发给TGS服务器来**请求服务**
 4. TGS服务器通过解密时间戳与验证TGT来验证客户端合法性，并通过PAC来校验客户端对于该服务的具体权限，最后返回ST服务票据和 Service Session key，（Service Session key是使用Logon Session Key加密的，用于后续通信的加密）
 5. 客户端拿着ST来申请具体的服务
 
