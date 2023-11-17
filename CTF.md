@@ -2438,6 +2438,88 @@ for i in range(500):
 
 ![image-20230902220848461](CTF.assets/image-20230902220848461.png)
 
+## 攻防世界 web2
+
+### 1. 前置知识
+
+ROT13编码：ROT13编码其实就是凯撒密码，偏移量为13；php函数为：`str_rot13()`，编码和解码都是用这个函数！
+
+### 2. 题目源码
+
+```bash
+<?php
+$miwen="a1zLbgQsCESEIqRLwuQAyMwLyq2L5VwBxqGA3RQAyumZ0tmMvSGM2ZwB4tws";
+
+function encode($str){
+    $_o=strrev($str);
+    // echo $_o;
+        
+    for($_0=0;$_0<strlen($_o);$_0++){
+       
+        $_c=substr($_o,$_0,1);
+        $__=ord($_c)+1;
+        $_c=chr($__);
+        $_=$_.$_c;   
+    } 
+    return str_rot13(strrev(base64_encode($_)));
+}
+
+highlight_file(__FILE__);
+/*
+   逆向加密算法，解密$miwen就是flag
+*/
+?>
+```
+
+### 3. 解题分析
+
+加密过程：
+
+1. 字符串翻转
+2. 从字符串中将字符串从左到右一个个取出
+3. 将字符转为ASCII码后加1
+4. 将ASCII码转为字符
+5. 拼接字符串
+5. base64 编码字符串
+6. 将 base64 编码翻转
+7. 将 base64 编码做 ROT13 编码
+7. 得到密文
+
+解密脚本：
+
+```php
+<?php
+$miwen = "a1zLbgQsCESEIqRLwuQAyMwLyq2L5VwBxqGA3RQAyumZ0tmMvSGM2ZwB4tws";
+
+# 密文 ROT13 编码
+$a = str_rot13($miwen);
+var_dump($a);
+# 密文翻转
+$b = strrev($a);
+var_dump($b);
+# 密文解码
+$c = base64_decode($b);
+var_dump($c);
+
+# 将得到的结果的每个字符逐一取出，转为ASCII码后减1再拼接，再转回字符
+function decode($str)
+{
+    for ($i = 0; $i < strlen($str); $i++) {
+        $simple = substr($str, $i, 1);
+        $simple = ord($simple) - 1;
+        $simple = chr($simple);
+        $res = $res.$simple;
+    }
+    return $res;
+}
+
+$d = decode($c);
+# 最后再做一次翻转
+var_dump(strrev($d));		# 输出：flag:{NSCTF_b73d5adfb819c64603d7237fa0d52977}
+```
+
+
+
 
 
 # Misc
