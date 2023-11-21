@@ -401,3 +401,47 @@ PC1一脸懵：咋回事？还有这操作？**不管了，我选最新的！（
 **3. 指定规则**
 
 <img src="arp%E6%AC%BA%E9%AA%97%E5%A4%87%E8%AF%BE.assets/image-20231114183514726.png" alt="image-20231114183514726" style="zoom:67%;" />
+
+点击启动加速即可！
+
+# 5. 补充
+
+> https://www.yuque.com/lonelyor/blog/egmgqt0fn3xl4kd7
+
+## 5.1 win 11 渗透机兼容性问题
+
+关闭所有CPU虚拟化设置
+
+![image-20231121143803929](arp%E6%AC%BA%E9%AA%97%E5%A4%87%E8%AF%BE.assets/image-20231121143803929.png)
+
+点击 虚拟机-管理-更改硬件兼容性
+
+![image-20231121143843204](arp%E6%AC%BA%E9%AA%97%E5%A4%87%E8%AF%BE.assets/image-20231121143843204.png)
+
+改成`Workstation 15.x`即可；具体改到多少根据自己的VM版本来定！
+
+![image-20231121143949635](arp%E6%AC%BA%E9%AA%97%E5%A4%87%E8%AF%BE.assets/image-20231121143949635.png)
+
+## 5.2 ARP欺骗防御
+
+造成ARP欺骗的根本原因是：肉鸡的ARP表做了错误的 IP-MAC 映射，导致了错误转发。所以只要保证ARP表里的映射关系的正确，就可以有效的防御ARP欺骗。这里介绍一种最简单的防御方法
+
+**arp -a 查看ARP表**
+
+![image-20231121173431447](arp%E6%AC%BA%E9%AA%97%E5%A4%87%E8%AF%BE.assets/image-20231121173431447.png)
+
+**查看网卡的IDX值**
+
+![image-20231121173726991](arp%E6%AC%BA%E9%AA%97%E5%A4%87%E8%AF%BE.assets/image-20231121173726991.png)
+
+**查看网关IP地址**
+
+![image-20231121174005070](arp%E6%AC%BA%E9%AA%97%E5%A4%87%E8%AF%BE.assets/image-20231121174005070.png)
+
+**静态绑定网关的IP地址和MAC地址**
+
+![image-20231121173756954](arp%E6%AC%BA%E9%AA%97%E5%A4%87%E8%AF%BE.assets/image-20231121173756954.png)
+
+**发起ARP欺骗后依然可以正常上网**
+
+![image-20231121173935864](arp%E6%AC%BA%E9%AA%97%E5%A4%87%E8%AF%BE.assets/image-20231121173935864.png)
