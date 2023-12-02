@@ -4388,6 +4388,105 @@ for flag_num in range(1,80):
 print(flag)
 ```
 
+## [BJDCTF2020]EasySearch
+
+### 1. 前置知识
+
+#### 1.1 md5硬碰硬
+
+大部分的CTF中，都是利用PHP的弱类型来绕过md5，但有时也需要用到硬碰撞，这时就需要用到脚本了，感觉大概率都是考纯数字的硬碰撞
+
+```py
+import hashlib
+
+# 这里是爆破范围
+for i in range(100000000):
+    md5 = hashlib.md5(str(i).encode('utf-8')).hexdigest()
+    # 这里是碰撞目标
+    if md5[:6:] == '6d0bc1':
+        print(f"字符：{i}, md5值：{md5}")
+```
+
+#### 1.2 SSI 注入
+
+现在的SSI注入利用也很少见到了，详情去看葵花宝典。个人认为SSI注入最好的判断方式就是看文件的后缀名，如：`shtml stm shtm`
+
+### 2, 复现
+
+进来看到是一个登录口，第一反应是尝试做一个SQL注入。但是没反应！做CTF永远记住，如果没有思路，就是信息搜集没有做好，最简单的方式就是做一个目录扫描
+
+![image-20231202160619123](CTF.assets/image-20231202160619123.png)
+
+由于备份文件名是：`index.php.swp`，是大部分字典都没有的，尽量在自己常用的字典上面加上这条吧
+
+访问这个文件就能拿到网站的源码，如下：
+
+```php
+<?php
+ob_start();
+function get_hash(){
+    $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()+-';
+    $random = $chars[mt_rand(0,73)].$chars[mt_rand(0,73)].$chars[mt_rand(0,73)].$chars[mt_rand(0,73)].$chars[mt_rand(0,73)];//Random 5 times
+    $content = uniqid().$random;
+    return sha1($content);
+}
+header("Content-Type: text/html;charset=utf-8");
+***
+if(isset($_POST['username']) and $_POST['username'] != '' )
+{
+    # 要求密码哈希后的前六位必须是 6d0bc1
+    $admin = '6d0bc1';
+    if ( $admin == substr(md5($_POST['password']),0,6)) {
+        echo "<script>alert('[+] Welcome to manage system')</script>";
+        $file_shtml = "public/".get_hash().".shtml";
+        $shtml = fopen($file_shtml, "w") or die("Unable to open file!");
+        $text = '
+            ***
+            ***
+            # SSI 漏洞注入点
+            <h1>Hello,'.$_POST['username'].'</h1>
+            ***
+			***';
+        fwrite($shtml,$text);
+        fclose($shtml);
+        ***
+        echo "[!] Header  error ...";
+    } else {
+        echo "<script>alert('[!] Failed')</script>";
+
+    }else
+    {
+        ***
+    }
+    ***
+    ?>
+```
+
+**解题思路：**
+
+1. md5硬碰撞出密码
+2. 利用SSI漏洞执行RCE
+
+用上面的Python脚本跑出了下面的结果，随便选一个做密码即可：
+
+```
+字符：2020666, md5值：6d0bc1153791aa2b4e18b4f344f26ab4
+字符：2305004, md5值：6d0bc1ec71a9b814677b85e3ac9c3d40
+字符：9162671, md5值：6d0bc11ea877b37d694b38ba8a45b19c
+```
+
+可看到成功回显：`Welcome to manage system`
+
+![image-20231202161331541](CTF.assets/image-20231202161331541.png)
+
+在源码处可以看到诸如点在`$_POST['username']`，利用这一点执行代码，查看响应头可看到提示：`Url_is_here`，访问这个URL就可以看到执行结果
+
+![image-20231202161454760](CTF.assets/image-20231202161454760.png)
+
+![image-20231202161540748](CTF.assets/image-20231202161540748.png)
+
+
+
 
 
 # Misc
