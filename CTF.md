@@ -4485,6 +4485,39 @@ if(isset($_POST['username']) and $_POST['username'] != '' )
 
 ![image-20231202161540748](CTF.assets/image-20231202161540748.png)
 
+## [FBCTF2019]RCEService
+
+这题就很搞，没有任何的提示，然后去看了以下wp，人家博主都是直接找源码来看的。这里直接贴上
+
+ke
+
+```php
+<?php
+# 设置环境变量
+putenv('PATH=/home/rceservice/jail');
+
+if (isset($_REQUEST['cmd'])) {
+    $json = $_REQUEST['cmd'];
+
+    if (!is_string($json)) {
+        echo 'Hacking attempt detected<br/><br/>';
+    } elseif (preg_match('/^.*(alias|bg|bind|break|builtin|case|cd|command|compgen|complete|continue|declare|dirs|disown|echo|enable|eval|exec|exit|export|fc|fg|getopts|hash|help|history|if|jobs|kill|let|local|logout|popd|printf|pushd|pwd|read|readonly|return|set|shift|shopt|source|suspend|test|times|trap|type|typeset|ulimit|umask|unalias|unset|until|wait|while|[\x00-\x1FA-Z0-9!#-\/;-@\[-`|~\x7F]+).*$/', $json)) {
+        echo 'Hacking attempt detected<br/><br/>';
+    } else {
+        echo 'Attempting to run command:<br/>';
+        $cmd = json_decode($json, true)['cmd'];
+        if ($cmd !== NULL) {
+            system($cmd);
+        } else {
+            echo 'Invalid input';
+        }
+        echo '<br/><br/>';
+    }
+}
+
+?>
+```
+
 
 
 
