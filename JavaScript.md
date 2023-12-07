@@ -3291,9 +3291,23 @@ function fn() {
 
 ![image-20231014181255275](JavaScript.assets/image-20231014181255275.png)
 
-### 闭包
+## 闭包
 
-### 变量提升
+概念：一个函数对周围状态的引用捆绑一起，内层函数中访问到其外层函数的作用域
+
+简单理解：**闭包 = 内层函数 + 外层函数的变量**
+
+```javascript
+function outer(){
+    const a = 1
+    function f(){
+      console.log(a)
+    }
+    f()
+  }
+```
+
+
 
 
 

