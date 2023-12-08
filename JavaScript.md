@@ -3187,9 +3187,9 @@ console.log(reg.test(str))      // true
 
 # JS 进阶
 
-## 作用域
+## 01 作用域
 
-### 局部作用域
+### 1.1 局部作用域
 
 #### 局部作用域
 
@@ -3207,11 +3207,11 @@ console.log(reg.test(str))      // true
 3. 不同代码块之间的变量无法互相访问
 4. 推荐使用了let 或 const
 
-### 全局作用域
+### 1.2 全局作用域
 
 `<script>`标签和`.js`的【最外层】就是所谓的全局作用域，在此声明的变量在函数内部也可以被访问。全局作用域中声明的变量，任何其他作用域都可以被访问
 
-### 作用域链
+### 1.3 作用域链
 
 作用域链本质上是最底层的**变量查找机制**
 
@@ -3226,7 +3226,7 @@ console.log(reg.test(str))      // true
 2. 相同作用域链中按着从小到大的规则查找变量
 3. 子作用域能够访问父作用域，父级作用域无法访问子级作用域
 
-### JS垃圾回收机制
+### 1.4 JS垃圾回收机制
 
 #### 内存的生命周期
 
@@ -3291,23 +3291,327 @@ function fn() {
 
 ![image-20231014181255275](JavaScript.assets/image-20231014181255275.png)
 
-## 闭包
+### 1.5 闭包
 
 概念：一个函数对周围状态的引用捆绑一起，内层函数中访问到其外层函数的作用域
 
 简单理解：**闭包 = 内层函数 + 外层函数的变量**
 
 ```javascript
-function outer(){
+  function outer(){
     const a = 1
     function f(){
       console.log(a)
     }
-    f()
+    return f
+  }
+
+  const fn = outer()
+  fn()
+```
+
+### 1.6 变量提升
+
+`var`声明的变量允许变量在声明之前即被访问，如下：
+
+```javascript
+console.log(num + "件")
+var num = 10;
+
+// 输出
+undefined件
+```
+
+在JavaScript执行的时候会以下下面的形式执行
+
+```javascript
+var num;
+console.log(num + "件")
+num = 10;
+```
+
+**注意：**
+
+1. 变量咋未声明即被访问时会报语法错误
+2. 变量在var声明之前即被访问，变量的值未undefined
+3. let/const声明的变量不存在变量提升
+4. 变量提升出现在相同作用域当中
+5. 实际开发中推荐先声明在访问变量
+
+## 02 函数进阶
+
+### 2.1 函数提升
+
+函数提升与变量提升比较类似，时值函数在声明之前即可被调用
+
+```javascript
+  foo()
+  function foo(){
+    console.log(1)
   }
 ```
 
+上面代码在执行之前，JavaScript会优先检查函数声明并把函数声明提升到最前面，如下：
 
+```javascript
+  function foo(){
+    console.log(1)
+  }
+  foo()
+```
 
+**总结：**
 
+1. 函数提升能够使函数的声明调用更灵活
+2. 函数表达式不存在提升的现象
+3. 函数提升出现在相同作用域当中
+
+### 2.2 函数参数
+
+#### 2.2.1 动态参数
+
+`argument`时函数内部内置的伪数组变量，它包含了调用函数时传入的所有实参
+
+```javascript
+    function sum() {
+        let sum = 0
+        for (let i = 0; i < arguments.length; i++) {
+            sum += arguments[i]
+        }
+        console.log(sum)
+    }
+
+    sum(1, 2, 3, 4, 5, 6)
+    sum(1, 2, 3, 4, 5, 6, 8, 8, 8)
+</script>
+```
+
+**总结：**
+
+1. `arguments`是一个伪数组，只存在于函数中
+2. `arguments`的作用时动态获取函数的实参
+3. 可以通过for循环依次得到传递过来的实参
+
+#### 2.2.2 剩余参数
+
+1. `...`是语法符号，置于最末函数形参之前，用于获取多余的实参
+2. 借助`...`获取的剩余实参，是个真数组
+
+```javascript
+    function spider(url, method, ...arr){
+        console.log(url)
+        console.log(method)
+        console.log(arr)
+    }
+    
+    spider('http://www.baidu.com', 'get', 'uname=admin&passwd=admin')
+```
+
+#### 2.2.3 展开运算符
+
+展开运算符`...`，将一个数组进行展开
+
+典型应用场景：求数组最大值（最小值）、合并数组等，相当于python中的解引用
+
+```javascript
+const arr = [1,2,3,4]
+console.log(Math.max(...arr))       // 4
+console.log(Math.min(...arr))       // 1
+```
+
+```javascript
+const arr1 = [1,2,3,4]
+const arr2 = [5,6,7,8]
+const arr3 = [...arr1, ...arr2]
+console.log(arr3)
+```
+
+### 2.3 箭头函数
+
+#### 2.3.1 箭头函数介绍
+
+箭头函数是一种极致简洁的写法，如下：
+
+正常函数写法：
+
+```javascript
+const fn = function (a){
+    console.log(a)
+}
+```
+
+1、箭头函数写法：
+
+```javascript
+const fn = (x) => {
+    console.log(x)
+}
+```
+
+2、只有一个形参的时候，可以省略小括号
+
+```javascript
+const fn = x => {
+    console.log(x)
+}
+```
+
+3、只有一行代码的时候，可以省略大括号
+
+```
+const fn = x => console.log(x)
+```
+
+4、只有一行代码的时候，可以省略`retuen`
+
+```javascript
+const fn = x => x+x		// return x+x
+```
+
+5、箭头函数直接返回对象
+
+```
+const fn = uname => ({uname: uname})
+```
+
+#### 2.3.2 箭头函数求和
+
+1. 箭头函数没有`argument`动态参数
+2. 箭头函数没有`argument`动态参数，但是又剩余参数`...args`
+
+```javascript
+    const fn = (...arr) => {
+        let sum = 0
+        for (let i = 0; i < arr.length; i++) {
+            sum += arr[i]
+        }
+        return sum
+    }
+
+    const result = fn(1,2,3,4,5)
+    console.log(result)
+```
+
+#### 2.3.3 箭头函数 this
+
+在箭头函数出现之前，每一个新函数根据它是被如何调用的来定义这个函数的this值，但是箭头函数不会创建自己的this，它只会从自己的作用域链的上一层沿用this
+
+这里解释一下，这里的调用链是：`window.obj.sayHi()`，箭头函数沿用`obj`的this，所以是window，如果觉得太抽象，就记住：**在调用链上往上看两层**
+
+```javascript
+    obj = {
+        uname: 'Jack',
+        sayHi: () => {
+            console.log(this)       // Window
+        }
+    }
+
+    obj.sayHi()
+```
+
+在看下面代码，调用链为：`window.obj.sayHi.fn`，网上看两层，就是`o`
+
+```javascript
+    obj = {
+        uname: 'Jack',
+        sayHi: function (){
+            const fn = () => {
+                console.log(this)       // obj
+            }
+            fn()
+        }
+    }
+
+    obj.sayHi()
+```
+
+### 2.4 结构赋值
+
+#### 2.4.1 数组解构
+
+**基本语法：**
+
+1. 赋值运算符 = 左侧的 [] 用于批量声明变量，右侧数组单元值被赋值给左侧的变量
+2. 变量的顺序对应数组单元值的位置依次进行赋值操作
+
+```javascript
+    const arr = [100, 80, 60]
+    const [max, avg, min] = arr
+    console.log(max)
+    console.log(avg)
+    console.log(min)
+```
+
+**典型应用：变量交换**
+
+```javascript
+let a = 1
+let b = 2;
+[b,a] = [a,b]
+```
+
+#### 2.4.2 对象解构
+
+##### 2.4.2.1 基本语法：
+
+1. 赋值运算符 = 左侧的 {} 用于批量声明变量，右侧对象的属性值将被赋值给左侧的变量
+2. 对象属性的值将被赋值给与属性名相同的变量
+3. 注意结构的变量名不要和外面的变量名冲突否则报错
+4. 对象中找不到与变量名一致的属性时变量值为 undefined
+
+```javas
+const {uname, age} = {uname: 'jack', age: 18}
+console.log(uname)
+console.log(age)
+```
+
+##### 2.4.2.2 给新边变量名赋值
+
+可防止变量名冲突
+
+```javascript
+const {uname: username, age} = {uname: 'jack', age: 18}
+console.log(username)
+console.log(age)
+```
+
+##### 2.4.2.3 数组对象结构
+
+```javascript
+const pig = [{uname: 'jack', age: 18}]
+const [{uname, age}] = pig
+console.log(uname)
+console.log(age)
+```
+
+##### 2.4.2.4 多级对象解构
+
+```javascript
+const pig = {
+    name: '佩奇',
+    family: {
+        mother: '猪妈妈',
+        father: '猪爸爸',
+        sister: '乔治'
+    },
+    age: 6
+}
+
+const {name, family: {mother, father, sister}, age} = pig
+console.log(name)
+console.log(mother)
+console.log(father)
+console.log(sister)
+console.log(age)
+```
+
+### 2.5 遍历数组 forEach
+
+```javascript
+const arr = ['pink', 'red', 'green']
+arr.forEach(function (item, index){
+    console.log(`当前数组元素时：${item}`)
+    console.log(`当前数组元素的索引是：${index}`)
+})
+```
 
