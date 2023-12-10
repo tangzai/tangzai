@@ -3615,3 +3615,147 @@ arr.forEach(function (item, index){
 })
 ```
 
+# AJAX  入门
+
+## 1. AJAX入门与axios使用
+
+### 1.1 AJAX定义
+
+AJAX 是异步的 JavaScript 和 XML（Asynchronous Javascript And XML）。简单来说，就是使用`XMLHttpRequest`对象与服务器通信。它可以使用JSON，XML，HTML和text文本等格式发送和接收数据。AJAX最吸引人的就是它的“异步”特性，也就是说它可以在不重新刷新页面的情况下与服务器通信，交换数据，或更新网页
+
+### 1.2 axios 使用
+
+1. 引入 axios.js：https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js
+2. 使用 axios 函数
+
+```javascript
+// 引入 axios.js
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    // 2. 使用axios函数
+    axios({
+    	// 向哪个URL请求数据
+        url: 'http://hmajax.itheima.net/api/province'
+    }).then(result => {
+        console.log(result)
+        console.log(result.data.list)
+        document.querySelector('.my-p').innerHTML = result.data.list.join("<br/>")
+    })
+</script>
+```
+
+### 1.3 参数查询
+
+浏览器在提供给服务器的额外信息，让服务器返回浏览器想要的数据
+
+下面例子最后发送的URL：`http://hmajax.itheima.net/api/city?pname='河北省'`
+
+```javascript
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    // 2. 使用axios函数
+    axios({
+        url: 'http://hmajax.itheima.net/api/city',
+    	// 这里写 GET 请求参数的键值对
+        params: {
+            pname: '河北省'
+        }
+    }).then(result => {
+        console.log(result)
+    })
+</script>
+```
+
+### 1.4 常用方法和请求数据
+
+`axios`用`method`指定请求方法，`data`指定表单数据
+
+```javascript
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    /*
+      注册用户：http://hmajax.itheima.net/api/register
+      请求方法：POST
+      参数名：
+        username：用户名（中英文和数字组成，最少8位）
+        password：密码  （最少6位）
+
+      目标：点击按钮，通过axios提交用户和密码，完成注册
+    */
+    document.querySelector('.btn').addEventListener('click', () => {
+        axios({
+            url: 'http://hmajax.itheima.net/api/register',
+            method: 'post',
+            data: {
+                username: 'qwddwqdwq123',
+                password: '123456789'
+            }
+        }).then(result => {
+            console.log(result)
+        })
+    })
+</script>
+```
+
+### 1.5 axios 错误处理
+
+`axios`错误处理可以使用`catch`方法来处理错误信息
+
+```javascript
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    /*
+      注册用户：http://hmajax.itheima.net/api/register
+      请求方法：POST
+      参数名：
+        username：用户名（中英文和数字组成，最少8位）
+        password：密码  （最少6位）
+
+      目标：点击按钮，通过axios提交用户和密码，完成注册
+    */
+    document.querySelector('.btn').addEventListener('click', () => {
+        axios({
+            url: 'http://hmajax.itheima.net/api/register',
+            method: 'post',
+            data: {
+                username: 'qwddwqdwq123',
+                password: '123456789'
+            }
+        }).then(result => {
+            console.log(result)
+        }).catch(error => {
+            alert(`${error.response.data.message}`)
+        })
+    })
+</script>
+```
+
+### 1.6 `from-searialize`的使用
+
+JavaScript中，可以直接使用插件 `from-searialize` 获取指定表单的键值对
+
++ 参数1：要获取哪个表单的数据
+  + 表单元素设置name属性，值会作为对象的属性名
+  + 建议name属性的值，最好和接口文档参数一致
++ 参数2：配置对象
+  + hash：设置获取数据结构
+    + true：JS对象（推荐）一帮请求体里提交给服务器
+    + false：查询字符串
+  + empty：设置是否获取空值
+    + true：获取空值（推荐）
+    + false：不获取空值
+
+```javascript
+<script src="lib/form-serialize.js"></script>
+<script>
+    document.querySelector('.btn').addEventListener('click', () => {
+        const from = document.querySelector('.example-form')
+
+        const data = serialize(from, {hash: true, empty: true})
+        console.log(data)
+    })
+</script>
+```
+
+
+
