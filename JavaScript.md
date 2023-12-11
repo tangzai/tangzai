@@ -3757,5 +3757,84 @@ JavaScript中，可以直接使用插件 `from-searialize` 获取指定表单的
 </script>
 ```
 
+### 1.7 `BootStrap` 弹框使用
 
+> 官网：https://getbootstrap.com/docs/5.3/components/modal/
+
+#### 1.7.1 导入 BootStrap
+
+首先需要看清楚版本，当前官网的是 BootStrap5 版本，链接如下
+
+```html
+<link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/js/bootstrap.bundle.min.js"></script>
+```
+
+#### 1.7.2 CSS 控制弹框
+
+**通过 data 属性**：在控制器元素（比如按钮或者链接）上设置属性 **data-bs-toggle="modal"**，同时设置 **data-bs-target="#identifier"** 或 **href="#identifier"** 来指定要切换的特定的模态框（带有 id="identifier"）。
+
+```html
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+  Launch demo modal
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+#### 1.7.3 JavaScript控制
+
+```javascript
+// 1. 创建弹框对象
+const modalDOM = document.querySelector('.modal')
+const modal = new bootstrap.Modal(modalDOM)
+
+// 展示弹框
+modal.show()
+// 隐藏弹框
+modal.hide()
+```
+
+### 1.8 图片上传
+
+通过 JavaScript 将图片上传到服务器，并通过服务器返回访问图片的链接
+
+```javascript
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    // 文件选择元素->change改变事件
+    document.querySelector('.upload').addEventListener('change', event => {
+        // event.target.files[0] 获取图片数据，FormData 打包
+        const fd = new FormData()
+        // img 为后台参数规定的can'shu
+        fd.append('img', event.target.files[0])
+
+        axios({
+            url: 'http://hmajax.itheima.net/api/uploadimg',
+            method: 'post',
+            data: fd
+        }).then(result => {
+            document.querySelector('.my-img').src = result.data.data.url
+        })
+    })
+</script>
+```
 
