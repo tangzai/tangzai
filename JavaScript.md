@@ -3838,3 +3838,259 @@ modal.hide()
 </script>
 ```
 
+## 2. XMLHTTP Request
+
+### 2.1 XMLHTTP Request 基本使用
+
+定义：XMLHttpRequest（XHR）对象用于与服务器交互。通过XMLHttpRequest可以在不刷新页面的情况下请求特定URL，获取数据。这允许在不影响用户操作的情况下，更新页面的布局内容
+
+```javascript
+    const xhr = new XMLHttpRequest()
+    // 创建请求
+    xhr.open('请求fan', 'http://hmajax.itheima.net/api/province')
+    // 监听响应结果
+    xhr.addEventListener('loadend', () => {
+        console.log(xhr.response)
+    })
+    
+    // 发起请求
+    xhr.send()
+```
+
+### 2.2 XMLHTTP Request 查询参数
+
+JavaScript 自带的 `URLSearchParams` 方法可以将参数参数自动转换为URL参数格式。代码使用如下：
+
+```javascript
+const pName = document.querySelector('.province').value
+        const cName = document.querySelector('.city').value
+
+        const paramsOBJ = new URLSearchParams({
+            pname: pName,
+            cname: cName
+        })
+        
+        console.log(paramsOBJ.toString())
+```
+
+### 2.3 XMLHTTP Request POST 提交
+
+```javascript
+    document.querySelector('.reg-btn').addEventListener('click', () => {
+        const xhr = new XMLHttpRequest()
+        //  创建 POST 请求方法
+        xhr.open('POST', 'http://hmajax.itheima.net/api/register')
+        // 设置数据类型：JSON 
+        xhr.setRequestHeader('Content-Type', 'application/json')
+
+        // 账号密码
+        let data = {username: 'Aa1234567891', 'password': '123456'}
+        // 将 数据对象 打成 JSON 格式
+        data = JSON.stringify(data)
+
+        xhr.addEventListener('loadend', () => {
+            console.log(xhr.response)
+        })
+
+        xhr.send(data)
+    })
+```
+
+对于一个完整的 HTTP POST请求必须包含下面这4个字段：
+
+```
+POST /index.php HTTP/1.1
+Host: 192.168.231.153:8000
+Content-Type: application/json
+Content-Length: 13
+
+{"username":"Aa1234567891","password":"123456"}
+```
+
+## 3. Promise
+
+### 3.1 认识 Promise
+
+定义：`Permise`对象用于表示一个异步操作的最终完成（或失败）及其结果值
+
+```javascript
+    // 创建 Promise 对象
+    const p = new Promise((resolve, reject) => {
+        // 成功调用 resolve，失败调用 reject
+        // resolve('执行成功')
+        reject('执行失败')
+    })
+
+    p.then(result => {
+        console.log(result)
+    }).catch(error => {
+        console.log(error)
+    })
+```
+
+### 3.2 Promise 的三种状态
+
+一个`Promise`对象，必然处于以下几种状态之一
+
++ 待定（pending）：初始状态，即没有被兑现，也没有被拒绝
++ 已兑现（fulfilled）：意味着：操作成功完成
++ 已拒绝（rejected）：意味着：操作失败
+
+注意：`Promise`兑现一旦被 兑现/拒绝 就是已敲定了，状态无法再被改变
+
+![image-20231212165246960](JavaScript.assets/image-20231212165246960.png)
+
+对于`Promise`对象状态的查看可以直接使用 `console.log(对象)` 来查看
+
+![image-20231212165413973](JavaScript.assets/image-20231212165413973.png)
+
+### 3.3 Promise和XHR获取省份列表
+
+本案例主要是通过 `Promise`和`XHR`  的使用让我们来理解`axios`的原理
+
+```javascript
+    const p = new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('GET', 'http://hmajax.itheima.net/api/province11')
+        xhr.addEventListener('loadend', () => {
+            // 成功则丢给 resolve 处理
+            if (xhr.status >= 200 && xhr.status < 300){
+                resolve(xhr.response)
+       		// 失败则丢给 reject 处理
+            }else {
+                reject(new Error(rejec))
+            }
+        })
+
+        xhr.send()
+    })
+	
+    // 处理成功的数据
+    p.then(result => {
+        const data = JSON.parse(result)
+        const htmlStr = data.list.map(item => {
+            return `<li>${item}</li>`
+        })
+        document.querySelector('.cname').innerHTML = htmlStr
+    // 处理失败的错误
+    }).catch(error => {
+        document.querySelector('.cname').innerHTML = error.response
+    })
+```
+
+### 3.4 封装简易 axios
+
+根据 `Promise` 和`xhr` 的知识封装属于自己的 axios
+
+```javascript
+    function myAxios(config) {
+        return  new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest()
+            xhr.open(config.method || 'GET', config.url)
+            xhr.addEventListener('loadend', () => {
+                if (xhr.status >= 200 && xhr.status < 300){
+                    resolve(JSON.parse(xhr.response))
+                }else {
+                    reject(new Error(xhr.response))
+                }
+            })
+            xhr.send()
+        })
+    }
+
+    myAxios({
+        url: 'http://hmajax.itheima.net/api/province'
+    }).then(result => {
+       document.querySelector('.pname').innerHTML = result.list.join('<br/>')
+    }).catch(error => {
+        console.log(error)
+    })
+```
+
+### 3.4 封装简易 axios 带 GET 参数
+
+下面代码是在 简易axios 的基础上带上HTTP GET query参数
+
+```javascript
+    function myAxios(config) {
+        return  new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest()
+            // 判断有无 config.params，有则带上
+            if (config.params){
+                const query = new URLSearchParams(config.params).toString()
+                config.url += `?${query}`
+            }
+
+            xhr.open(config.method || 'GET', config.url)
+            xhr.addEventListener('loadend', () => {
+                if (xhr.status >= 200 && xhr.status < 300){
+                    resolve(JSON.parse(xhr.response))
+                }else {
+                    reject(new Error(xhr.response))
+                }
+            })
+            xhr.send()
+        })
+    }
+
+    myAxios({
+        url: 'http://hmajax.itheima.net/api/area',
+        params: {
+            pname: '辽宁省',
+            cname: '大连市'
+        }
+    }).then(result => {
+       document.querySelector('.pname').innerHTML = result.list.join('<br/>')
+    }).catch(error => {
+        console.log(error)
+    })
+```
+
+### 3.5 封装简易 axios 带 POST 参数
+
+这是在上面的代码的基础上进一步封装 POST 方法
+
+```javascript
+    function myAxios(config) {
+        return  new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest()
+            // 支持完整 GET 方法
+            if (config.params){
+                const query = new URLSearchParams(config.params).toString()
+                config.url += `?${query}`
+            }
+
+            xhr.open(config.method || 'GET', config.url)
+            xhr.addEventListener('loadend', () => {
+                if (xhr.status >= 200 && xhr.status < 300){
+                    resolve(JSON.parse(xhr.response))
+                }else {
+                    reject(new Error(xhr.response))
+                }
+            })
+
+            // 支持 完整POST 方法
+            if (config.data){
+                xhr.setRequestHeader('Content-Type', 'application/json')
+                const jsonStr = JSON.stringify(config.data)
+                xhr.send(jsonStr)
+            }else {
+                xhr.send()
+            }
+        })
+    }
+
+    myAxios({
+        url: 'http://hmajax.itheima.net/api/register',
+        method: 'POST',
+        data: {
+            username: 'sadx21213',
+            password: '1dwa56d1wa6'
+        }
+    }).then(result => {
+        console.log(result)
+    }).catch(error => {
+        console.log(error)
+    })
+```
+
