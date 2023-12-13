@@ -4094,3 +4094,105 @@ Content-Length: 13
     })
 ```
 
+## 4. 各种知识点总结
+
+#### 4.1 同步代码和异步代码
+
+同步代码：浏览器是按照我们书写代码的顺序一行一行地执行程序的。浏览器会等待代码的解析和工作，在上一行完成后才会执行写一行。这样很有必要，因为每一行新的代码都是建立在前面代码的基础之上的（逐行执行，需原地等待结果后，才继续向下执行）
+
+异步代码：异步编程技术使你的程序可以在执行一个可能长期运行的任务的同时继续对其他事件做出反应而不必等待任务完成。于此同时，你的程序也将在任务完成后显示结果（调用后耗时，不阻塞代码继续执行（不必原地等待），在将来完成后触发一个回调函数）
+
+#### 4.2 Promise 链式结构解决回调函数地狱
+
+##### 4.2.1 什么是回调函数地狱？
+
+回调函数地狱指的是在A回调函数中嵌套着B回调函数，而B回调函数又嵌套则回调函数C。以此环环相扣。这样的代码会出现耦合性低，可读性差，异常捕获困难的问题
+
+典型回调函数如下：
+
+![image-20231212224754909](JavaScript.assets/image-20231212224754909.png)
+
+##### 4.2.2 Promise 链式结构解决回调函数地狱
+
+核心思想：首先明确一点，`axios`中的`then()`是由pormise抛出的，那么只要在一个axios执行完毕之后再抛出一个新的promise则可构造出 peomise链，以此代码的维护性和耦合性就会高很多。从而解决回调函数地狱的问题
+
+```javascript
+let pname = ''
+    let cname = ''
+    axios({
+        url: 'http://hmajax.itheima.net/api/province'
+    }).then(result => {
+        pname = result.data.list[0]
+        document.querySelector('.province').innerHTML = pname
+
+        return axios({url: 'http://hmajax.itheima.net/api/city', params: {pname}})
+    }).then(result => {
+        cname = result.data.list[0]
+        document.querySelector('.city').innerHTML = cname
+
+        return axios({url: 'http://hmajax.itheima.net/api/area', params: {pname, cname}})
+    }).then(result => {
+        document.querySelector('.area').innerHTML = result.data.list[0]
+    })
+```
+
+#### 4.3 asynchronous函数和await解决回调函数地狱
+
+核心思想：`async`将函数标记为异步函数，await阻塞代码执行，直到有结果返回。以此类推
+
+```javascript
+    async function getData(){
+        const pnameObj = await axios({url: 'http://hmajax.itheima.net/api/province'})
+        const pname = pnameObj.data.list[0]
+        const cnameObj = await axios({url: 'http://hmajax.itheima.net/api/city', params:{pname}})
+        const cname = cnameObj.data.list[0]
+        const areaObj = await axios({url: 'http://hmajax.itheima.net/api/area', params: {pname, cname}})
+        const area = areaObj.data.list[0]
+
+        document.querySelector('.province').innerHTML = pname
+        document.querySelector('.city').innerHTML = cname
+        document.querySelector('.area').innerHTML = area
+    }
+
+    getData()
+```
+
+#### 4.4 JavaScript 异常处理
+
+JavaScript 的异常处理使用语句：`try...catch`
+
+```javascript
+try{
+        async function getData(){
+            const pnameObj = await axios({url: 'http://hmajax.itheima.net/api/province'})
+            const pname = pnameObj.data.list[0]
+            const cnameObj = await axios({url: 'http://hmajax.itheima.net/api/city', params:{pname}})
+            const cname = cnameObj.data.list[0]
+            const areaObj = await axios({url: 'http://hmajax.itheima.net/api/area', params: {pname, cname}})
+            const area = areaObj.data.list[0]
+
+            document.querySelector('.province').innerHTML = pname
+            document.querySelector('.city').innerHTML = cname
+            document.querySelector('.area').innerHTML = area
+        }
+    }catch (error){
+        console.log(error)
+    }
+```
+
+#### 4.5 Promise.all 静态方法
+
+`Promise.all`对象可以用于需要同时发出多个AJAX请求并将结果整合一起处理的情况
+
+```javascript
+// 语法
+const p = Promise.all([Promise对象, Promise对象])
+p.then(result => {
+    // result 结果：[Promise对象成功结果, Promise对象成功结果, ...]
+}).catch(error => {
+    // 第一个失败的Promise对象，抛出的异常
+})
+```
+
+示例：同时请求多个城市的天气情况并处理
+
