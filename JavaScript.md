@@ -4196,3 +4196,81 @@ p.then(result => {
 
 示例：同时请求多个城市的天气情况并处理
 
+# Node.js与Webpack
+
+## 1. Node.js
+
+### 1.1 Node.js 安装
+
+官网下载Node.js的安装包直接安装即可，安装完后在DOS窗口上输入`node -v`有回显即安装成功！
+
+对于PHPStorm需要先重启一下计算机才能正确加载node.js
+
+```powershell
+PS D:\PHP\JavaScript\nodeJS>  node -v
+v16.19.0
+```
+
+### 1.2 Node.js fs模块-读写文件
+
+#### 1.2.1 Node.js 读文件
+
+```javascript
+const fs = require('fs')
+fs.readFile('文件路径', (err, data) => {
+    // 读取后的回调函数
+    // data 是文件内容 Buffer 数据流
+})
+
+// 示例
+fs.readFile('./test.txt', (err, data) => {
+    if (err) console.log(err)
+    console.log(data.toString())
+})
+```
+
+#### 1.2.2 Node.js 写文件
+
+```javascript
+const fs = require('fs')
+fs.writeFile('文件路径', '写入内容', err => {
+    // 写入后的回调函数
+})
+
+// 示例
+fs.writeFile('./test.txt', 'Hello Node.js', err => {
+    if (err){
+        console.log(err)
+    }
+    console.log('写入成功')
+})
+```
+
+### 1.3 Node.js path模块-路径处理
+
+在 Node.js 中，对于相对文件路径`../`的处理，是取决于当前终端环境的路径的。这也导致脚本执行会非常不稳定，所以这里推荐使用`__dirname`内置变量；`__dirname`返回的是当前node.js脚本的路径
+
+```javascript
+console.log(__dirname)			// D:\PHP\JavaScript\nodeJS
+```
+
+`path.join()`会使用特定平台的分割符，作为分界线，讲所有给定的路径片段链接在一起
+
+```javascript
+const path = require('path')
+console.log(path.join(__dirname, 'test.txt'))			// D:\PHP\JavaScript\nodeJS\test.txt
+```
+
+`__dirname`与`path.join()`一起使用读取文件示例
+
+```javascript
+const path = require('path')
+const fs = require('fs')
+
+fs.readFile(path.join(__dirname, 'test.txt'), (err, data) => {
+    console.log(data.toString())
+})
+```
+
+
+
