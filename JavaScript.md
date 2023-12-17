@@ -4196,11 +4196,9 @@ p.then(result => {
 
 示例：同时请求多个城市的天气情况并处理
 
-# Node.js与Webpack
+# Node.js
 
-## 1. Node.js
-
-### 1.1 Node.js 安装
+## 1 Node.js 安装
 
 官网下载Node.js的安装包直接安装即可，安装完后在DOS窗口上输入`node -v`有回显即安装成功！
 
@@ -4211,9 +4209,9 @@ PS D:\PHP\JavaScript\nodeJS>  node -v
 v16.19.0
 ```
 
-### 1.2 Node.js fs模块-读写文件
+## 2. Node.js fs模块-读写文件
 
-#### 1.2.1 Node.js 读文件
+### 2.1 Node.js 读文件
 
 ```javascript
 const fs = require('fs')
@@ -4229,7 +4227,7 @@ fs.readFile('./test.txt', (err, data) => {
 })
 ```
 
-#### 1.2.2 Node.js 写文件
+### 2.2 Node.js 写文件
 
 ```javascript
 const fs = require('fs')
@@ -4246,7 +4244,7 @@ fs.writeFile('./test.txt', 'Hello Node.js', err => {
 })
 ```
 
-### 1.3 Node.js path模块-路径处理
+## 3 Node.js path模块-路径处理
 
 在 Node.js 中，对于相对文件路径`../`的处理，是取决于当前终端环境的路径的。这也导致脚本执行会非常不稳定，所以这里推荐使用`__dirname`内置变量；`__dirname`返回的是当前node.js脚本的路径
 
@@ -4272,5 +4270,409 @@ fs.readFile(path.join(__dirname, 'test.txt'), (err, data) => {
 })
 ```
 
+## 4 Node.js HTTP模块-创建web服务
 
+```javascript
+const http = require('http')
+const server = http.createServer()
+
+server.on('request', (req, res) => {
+    // 由于返回的内容中有中文字符，所以这里讲编码改为 utf-8
+    res.setHeader('Content-Type', 'text/plain;charset=utf-8')
+    res.end('欢迎使用 Node.js')
+})
+
+// 启动并监听HTTP服务
+server.listen(3000, () => {
+    console.log('3000 端口启动成功')
+})
+```
+
+## 5 案例：Node.js 返回HTML代码
+
+```javascript
+const http = require('http')
+const path = require('path')
+const fs = require('fs')
+const server = http.createServer()
+
+server.on('request', (req, res) => {
+    // 通过路径判断回显的资源
+    if (req.url === '/index.html'){
+        // 读取HTML文件
+        fs.readFile(path.join(__dirname, '../AJAX/02.案例_图书管理/index.html'), (err, data) => {
+            if (err) return err
+            let htmlStr = data.toString()
+            // 压缩代码传到前端
+            htmlStr = htmlStr.replace(/[\r\n]/g, '')
+            // 注意：这里需要浏览器执行HTML代码，所以 Content-Type 值为：text/html
+            res.setHeader('Content-Type', 'text/html;charset=utf-8')
+            res.end(htmlStr)
+        })
+    }else {
+        res.setHeader('Content-Type', 'text/plain;charset=utf-8')
+        res.end('请求资源不存在')
+    }
+})
+
+server.listen(3000, () => {
+    console.log('3000 端口启动成功')
+})
+```
+
+## 6 Node.js 模块化
+
+如果想把js文件打包成Node.js的模块，则可以使用 `module.exports` 将要暴露的属性和函数暴露出去
+
+```javascript
+const baseURL = 'http://127.0.0.1:8080'
+const arraySum = function (array){
+    let sum = 0
+    array.map(item => {
+        sum += item
+    })
+    return sum
+}
+
+module.exports = {
+    url: baseURL,
+    arraySum: arraySum
+}
+```
+
+在使用的时候就可以直接用`require`将模块包含进来
+
+```javascript
+const obj = require('./utils')
+```
+
+## 7 Node.js ECMAScript-默认导入导出
+
+![image-20231216225346943](JavaScript.assets/image-20231216225346943.png)
+
+
+
+## 8 Node.js ECMAScript-命名导入导出
+
+![image-20231216225850322](JavaScript.assets/image-20231216225850322.png)
+
+## 9 Node.js npm 本地软件包管理
+
+### 9.1 npm 换源
+
+```
+PS D:\PHP\JavaScript\nodeJS> npm config set registry http://registry.npm.taobao.org/
+// 查看当前源
+PS D:\PHP\JavaScript\nodeJS> npm config get registry
+http://registry.npm.taobao.org/
+```
+
+### 9.2 nrm 管理源
+
+#### 9.2.1 下载nrm
+
+```
+D:\PHP\JavaScript\nodeJS>npm install nrm -g
+```
+
+#### 9.2.2 查看所有npm源
+
+```
+D:\PHP\JavaScript\nodeJS>nrm ls
+  npm ---------- https://registry.npmjs.org/
+  yarn --------- https://registry.yarnpkg.com/
+  tencent ------ https://mirrors.cloud.tencent.com/npm/
+  cnpm --------- https://r.cnpmjs.org/
+  taobao ------- https://registry.npmmirror.com/
+  npmMirror ---- https://skimdb.npmjs.com/registry/
+```
+
+#### 9.2.3 切换源
+
+```
+D:\PHP\JavaScript\nodeJS>nrm use npm  
+ SUCCESS  The registry has been changed to 'npm'.
+```
+
+### 9.3 npm 使用
+
+```
+npm init -y			// 初始化清单文件
+npm install pkgName		// 下载需要的软件包
+```
+
+#### 9.3.1 使用软件包
+
+```javascript
+import dayjs from "dayjs";
+const newDateStr = dayjs().format('YYYY-MM-DD')
+console.log(newDateStr)
+```
+
+#### 9.3.2 npm 安装所有依赖
+
+**注意：**项目中必须包含`package-lock.json`和`package.json`文件
+
+![image-20231216232640197](JavaScript.assets/image-20231216232640197.png)
+
+```
+PS D:\PHP\JavaScript\nodeJS> npm install 
+[##################] \ reify:dayjs: sill audit bulk request { dayjs: [ '1.11.10' ] }
+```
+
+#### 9.3.3 包的语义化和规范
+
+包的版本号是以“点分十进制”形式进行定义的，总共有三位数字，例如：2.24.0
+
+其中每一位的数字所代表的含义如下：
+
+第一位数字：大版本（底层重构修改）
+
+第二位数字：功能版本
+
+第三位数字：Bug修复版本
+
+版本号提升的规则：只要前面的版本号增长了，则后面的版本号归零
+
+## 10 Node.js npm 全局软件包
+
+软件包区别：
+
++ 本地软件包：当前项目内使用，封装属性和方法，存在于 node_modules
++ 全局软件包：本机所有项目使用，封装命令和工具，存在于系统设置的位置
+
+nodemon 作用：替代 node 命令，检测代码更改，自动重启程序
+
+安装：`npm install -g`
+
+### 1.10.1 PHPstorm 无法使用nodemon
+
+由于PHPStorm默认使用的是Power shell，而Power Shell默认是禁止运行脚本的，所以无法启动`nodemon`，这里将终端改为DOS即可，注意重启PHP Storm
+
+<img src="JavaScript.assets/image-20231216234252242.png" alt="image-20231216234252242" style="zoom: 50%;" />
+
+## 1.11 Node.js Express
+
+### 1.11.1 Express 简介
+
+#### 1.11.1.1 什么是Express
+
+Express 的作用和Node.js内置的http模块类似，是专门用来创建web服务器的
+
+#### 1.11.1.2 Express 能做什么
+
++ Web 网站服务器：专门对外提供Web网页资源的服务器
++ API 接口服务器：专门对外提供API接口的服务器
+
+### 1.11.2 Express 的基本使用
+
+#### 1.11.2.1 Express 安装
+
+```
+D:\PHP\JavaScript\express> npm install express@4.17.1
+```
+
+#### 1.11.2.2 Express 创建基本的Web服务器
+
+```javascript
+const express = require('express')
+// 创建web服务器
+const app = express()
+
+// 调用 app.listen 启动服务器
+app.listen(80, () => {
+    console.log('express server running at http://127.0.0.1')
+})
+```
+
+#### 1.11.2.3 Express 监听get方法
+
+```javascript
+// app.get('请求路径', (request, response))
+
+app.get('/user', (req, res) => {
+    res.send({name: '张三', age: '18', gender: '男'})
+})
+```
+
+#### 1.11.2.4 Express 监听post方法
+
+```javascript
+app.post('/user', (req,res) =>{
+    res.send('POST 方法请求成功')
+})
+```
+
+#### 1.11.2.5 获取URL中携带的查询参数
+
+node.js 使用`req.query`接收URL中的查询参数
+
+```javascript
+app.get('/', (req, res) => {
+    res.send(req.query)
+})
+```
+
+#### 1.11.2.6 获取URL中的动态参数
+
+`req.params`获取到的就是`id`的值，返回的是一串JSON键值对
+
+```javascript
+app.get('/user:id', (req, res) => {
+    res.send(req.params)
+})
+```
+
+![image-20231217165214536](JavaScript.assets/image-20231217165214536.png)
+
+### 1.11.3 托管静态资源
+
+#### 1.11.3.1 `express.static()`
+
+Express在指定的静态目录中查找文件，并对外提供资源的访问路径，因此，存放静态文件的目录名不会出现在URL中
+
+可将指定目录下的所有资源直接暴露出去
+
+如果需要暴露多个静态资源，那么使用多次`express.static()`即可
+
+```javascript
+app.use(express.static('./public'))
+```
+
+![image-20231217170848191](JavaScript.assets/image-20231217170848191.png)
+
+#### 1.11.3.2 挂载路径前缀
+
+如果希望在托管的静态资源访问路径之前，挂载路径前缀，则可以使用如下方式：
+
+```javascript
+app.use('/public', express.static('./public'))
+```
+
+![image-20231217171517996](JavaScript.assets/image-20231217171517996.png)
+
+### 1.11.4 Express 路由
+
+#### 1.11.4.1 初识Express路由
+
+##### 1.11.4.1.1 Express 中的路由
+
+在Express中，路由指的是客户端的请求与服务器处理函数之间的映射关系
+
+Express中的路由分3部分组成，分别是请求的类型、请求的URL地址、处理函数，格式如下：
+
+```
+app.METHOD(PATH, HANDKER)
+```
+
+##### 1.11.4.1.2 路由的匹配过程
+
+每当一个请求到达服务器之后，需要先经过路由的匹配，只有匹配成功之后，才会调用对应的处理函数
+
+在匹配时，会按照路由的顺序进行匹配，如果请求类型和请求的URL同时匹配成功，则Express会将这次请求，转交给对应的function函数进行处理
+
+**路由匹配的注意点：**
+
+1. 按照定义的先后顺序进行匹配
+2. 请求类型和请求的URL同时匹配成功，才会调用对应的处理函数
+
+##### 1.11.4.1.3 最简单的用法
+
+```javascript
+const express = require('express')
+const app = express()
+
+app.get('/', (req, res) => {
+    res.send('GET 请求成功')
+})
+
+app.post('/', (req, res) => {
+    res.send('POST 请求成功')
+})
+
+app.listen(80, () => {
+    console.log('express server running at http://127.0.0.1')
+})
+```
+
+#### 1.11.4.2 模块化路由
+
+为了方便对路由进行模块化管理，Express不建议将路由直接挂载到app上，而是推荐将路由抽离为单独的模块。
+
+将路由抽离为单独的模块步骤如下：
+
+1. 创建路由模块对应的.js文件
+2. 使用`express.Router()`函数创建路由对象
+3. 向路由对象上挂载具体的路由
+4. 使用`module.exports`向外共享路由对象
+5. 使用`app.use()`函数注册路由模块
+
+#### 1.11.4.3 创建路由模块
+
+```javascript
+const express = require('express')
+const router = express.Router()
+
+router.get('/user/get', (req, res) => {
+    res.send('Get 请求成功')
+})
+
+router.post('/user/post', (req, res) => {
+    res.send('POST 请求成功')
+})
+
+// 将路由模块暴露出去
+module.exports = router
+```
+
+#### 1.11.4.4 注册路由模块
+
+```javascript
+const express = require('express')
+// 导入路由模块
+const router = require('./Router')
+const app = express()
+
+// 使用路由模块
+app.use(router)
+
+app.listen(80, () => {
+    console.log("Express server is run at http://127.0.0.1")
+})
+```
+
+#### 1.11.4.5 为路由模块添加前缀
+
+路由模块添加前缀的方式与静态资源托管添加路由模块的方式一样
+
+```javascript
+app.use('/api', router)
+```
+
+### 1.11.5 Express 中间件
+
+#### 1.11.5.1 Express中间件的调用流程
+
+当一个请求到达Express的服务器之后，可以连续调用多个中间件，从而对这次请求进行**预处理**
+
+<img src="JavaScript.assets/image-20231217214824726.png" alt="image-20231217214824726" style="zoom:67%;" />
+
+#### 1.11.5.2 Express 中间件的格式
+
+Express的中间件，本质上就是一个**function处理函数**，Express中间件格式如下：
+
+![image-20231217215026789](JavaScript.assets/image-20231217215026789.png)
+
+注意：中间件函数的形参列表中，**必须包含next参数**。而路由处理函数中值包含req和res
+
+**next 函数**是实现多个中间件连续调用的关键，它表示把流程关系转交给下一个中间件或路由
+
+#### 1.11.5.3 定义中间件函数
+
+```javascript
+const mw = function (req, res, next){
+    console.log("中间件函数 1")
+    next()
+}
+```
 
