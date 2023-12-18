@@ -4394,7 +4394,7 @@ D:\PHP\JavaScript\nodeJS>nrm use npm
  SUCCESS  The registry has been changed to 'npm'.
 ```
 
-### 9.3 npm 使用
+### 9.3 npm 初始化和使用
 
 ```
 npm init -y			// 初始化清单文件
@@ -4451,28 +4451,28 @@ nodemon 作用：替代 node 命令，检测代码更改，自动重启程序
 
 <img src="JavaScript.assets/image-20231216234252242.png" alt="image-20231216234252242" style="zoom: 50%;" />
 
-## 1.11 Node.js Express
+## 11 Node.js Express
 
-### 1.11.1 Express 简介
+### 11.1 Express 简介
 
-#### 1.11.1.1 什么是Express
+#### 11.1.1 什么是Express
 
 Express 的作用和Node.js内置的http模块类似，是专门用来创建web服务器的
 
-#### 1.11.1.2 Express 能做什么
+#### 11.1.2 Express 能做什么
 
 + Web 网站服务器：专门对外提供Web网页资源的服务器
 + API 接口服务器：专门对外提供API接口的服务器
 
-### 1.11.2 Express 的基本使用
+### 11.2 Express 的基本使用
 
-#### 1.11.2.1 Express 安装
+#### 11.2.1 Express 安装
 
 ```
 D:\PHP\JavaScript\express> npm install express@4.17.1
 ```
 
-#### 1.11.2.2 Express 创建基本的Web服务器
+#### 11.2.2 Express 创建基本的Web服务器
 
 ```javascript
 const express = require('express')
@@ -4485,7 +4485,7 @@ app.listen(80, () => {
 })
 ```
 
-#### 1.11.2.3 Express 监听get方法
+#### 11.2.3 Express 监听get方法
 
 ```javascript
 // app.get('请求路径', (request, response))
@@ -4495,7 +4495,7 @@ app.get('/user', (req, res) => {
 })
 ```
 
-#### 1.11.2.4 Express 监听post方法
+#### 11.2.4 Express 监听post方法
 
 ```javascript
 app.post('/user', (req,res) =>{
@@ -4503,7 +4503,7 @@ app.post('/user', (req,res) =>{
 })
 ```
 
-#### 1.11.2.5 获取URL中携带的查询参数
+#### 11.2.5 获取URL中携带的查询参数
 
 node.js 使用`req.query`接收URL中的查询参数
 
@@ -4513,7 +4513,7 @@ app.get('/', (req, res) => {
 })
 ```
 
-#### 1.11.2.6 获取URL中的动态参数
+#### 11.2.6 获取URL中的动态参数
 
 `req.params`获取到的就是`id`的值，返回的是一串JSON键值对
 
@@ -4525,9 +4525,9 @@ app.get('/user:id', (req, res) => {
 
 ![image-20231217165214536](JavaScript.assets/image-20231217165214536.png)
 
-### 1.11.3 托管静态资源
+### 11.3 托管静态资源
 
-#### 1.11.3.1 `express.static()`
+#### 11.3.1 `express.static()`
 
 Express在指定的静态目录中查找文件，并对外提供资源的访问路径，因此，存放静态文件的目录名不会出现在URL中
 
@@ -4541,7 +4541,7 @@ app.use(express.static('./public'))
 
 ![image-20231217170848191](JavaScript.assets/image-20231217170848191.png)
 
-#### 1.11.3.2 挂载路径前缀
+#### 11.3.2 挂载路径前缀
 
 如果希望在托管的静态资源访问路径之前，挂载路径前缀，则可以使用如下方式：
 
@@ -4551,11 +4551,11 @@ app.use('/public', express.static('./public'))
 
 ![image-20231217171517996](JavaScript.assets/image-20231217171517996.png)
 
-### 1.11.4 Express 路由
+### 11.4 Express 路由
 
-#### 1.11.4.1 初识Express路由
+#### 11.4.1 初识Express路由
 
-##### 1.11.4.1.1 Express 中的路由
+##### 11.4.1.1 Express 中的路由
 
 在Express中，路由指的是客户端的请求与服务器处理函数之间的映射关系
 
@@ -4565,7 +4565,7 @@ Express中的路由分3部分组成，分别是请求的类型、请求的URL地
 app.METHOD(PATH, HANDKER)
 ```
 
-##### 1.11.4.1.2 路由的匹配过程
+##### 11.4.1.2 路由的匹配过程
 
 每当一个请求到达服务器之后，需要先经过路由的匹配，只有匹配成功之后，才会调用对应的处理函数
 
@@ -4595,7 +4595,7 @@ app.listen(80, () => {
 })
 ```
 
-#### 1.11.4.2 模块化路由
+#### 11.4.2 模块化路由
 
 为了方便对路由进行模块化管理，Express不建议将路由直接挂载到app上，而是推荐将路由抽离为单独的模块。
 
@@ -4607,7 +4607,7 @@ app.listen(80, () => {
 4. 使用`module.exports`向外共享路由对象
 5. 使用`app.use()`函数注册路由模块
 
-#### 1.11.4.3 创建路由模块
+#### 11.4.3 创建路由模块
 
 ```javascript
 const express = require('express')
@@ -4625,7 +4625,7 @@ router.post('/user/post', (req, res) => {
 module.exports = router
 ```
 
-#### 1.11.4.4 注册路由模块
+#### 11.4.4 注册路由模块
 
 ```javascript
 const express = require('express')
@@ -4641,7 +4641,7 @@ app.listen(80, () => {
 })
 ```
 
-#### 1.11.4.5 为路由模块添加前缀
+#### 11.4.5 为路由模块添加前缀
 
 路由模块添加前缀的方式与静态资源托管添加路由模块的方式一样
 
@@ -4649,15 +4649,15 @@ app.listen(80, () => {
 app.use('/api', router)
 ```
 
-### 1.11.5 Express 中间件
+### 11.5 Express 中间件
 
-#### 1.11.5.1 Express中间件的调用流程
+#### 11.5.1 Express中间件的调用流程
 
 当一个请求到达Express的服务器之后，可以连续调用多个中间件，从而对这次请求进行**预处理**
 
 <img src="JavaScript.assets/image-20231217214824726.png" alt="image-20231217214824726" style="zoom:67%;" />
 
-#### 1.11.5.2 Express 中间件的格式
+#### 11.5.2 Express 中间件的格式
 
 Express的中间件，本质上就是一个**function处理函数**，Express中间件格式如下：
 
@@ -4667,7 +4667,7 @@ Express的中间件，本质上就是一个**function处理函数**，Express中
 
 **next 函数**是实现多个中间件连续调用的关键，它表示把流程关系转交给下一个中间件或路由
 
-#### 1.11.5.3 定义中间件函数
+#### 11.5.3 定义中间件函数
 
 ```javascript
 const mw = function (req, res, next){
@@ -4676,3 +4676,477 @@ const mw = function (req, res, next){
 }
 ```
 
+#### 11.5.4 全局生效的中间件
+
+客户端发起的任何请求，到达服务器之后，**都会触发的中间件**，叫做全局生效中间件
+
+通过调用`app.use(中间件函数)`，即可定义一个**全局生效的中间件**，如下：
+
+```javascript
+const mw = function (req, res, next){
+    console.log("中间件函数 1")
+    next()
+}
+
+// 全局生效的中间件
+app.use(mw)
+```
+
+上面的代码也可以简化成下面的形式：
+
+```javascript
+app.use(function (req, res, next){
+    console.log("简化中间件函数 1")
+    next()
+})
+```
+
+#### 11.5.5 中间件的作用
+
+多个中间件之间，共享同一份req和res，基于这个特性，我们可以在上有的中间件，统一为req或res对象添加自定义的属性或方法，供下游的中间件或路由进行使用
+
+```javascript
+app.use(function (req, res, next){
+    // 通过在 req 上创建属性来接收返回值并让后续的中间件调用
+    req.startTime = new Date()
+    next()
+})
+```
+
+**注意：**对于多个中间件，会按照中间件定义的先后顺序依次进行调用
+
+#### 11.5.6 局部生效的中间件
+
+不使用`app.use()`定义的中间件，叫做局部生效的中间件，如下：
+
+```javascript
+const mw = function (req, res,next){
+    console.log('这是专属于 user 的中间件')
+    next()
+}
+
+// mw 这个中间件函数只会在”当前路由中生效“，这种用法属于”局部生效的中间件“
+app.get('/user', mw,(req, res) => {
+    res.send('User Page.')
+})
+
+app.get('/', (req, res) => {
+    res.send('Home Page.')
+})
+```
+
+#### 11.5.7 定义多个局部中间件
+
+可以在路由中，通过如下两种等价的方式，使用多个局部中间件
+
+```javascript
+app.get('/user', mw1, mw2, (req, res) => {
+    res.send('User Page.')
+})
+
+// 这种方法跟上面的方法等价
+app.get('/user', [mw1, mw2], (req, res) => {
+    res.send('User Page.')
+})
+```
+
+#### 11.5.8 中间件的注意事项
+
+1. 一定要在**路由之前**注册中间件
+2. 客户端在发送过来的请求，**可以连续调用多个**中间件进行处理
+3. 执行完中间件的业务代码之后，**不要忘记调用next()函数**
+4. 为了**防止代码逻辑混乱**，调用next()函数不要再写额外的代码
+5. 连续调用多个中间件时，多个中间件之间，**共享**req和res对象
+
+#### 11.5.7 错误处理中间件
+
+错误级别中间件的作用：专门用来捕获整个项目中发生异常错误，从而防止项目异常崩溃的问题
+
+格式：错误级别中间件的function处理函数，必须又4个参数，形参顺序从前到后，分别是`err, req, res, next`
+
+```javascript
+app.get('/', (req, res) => {
+    throw new Error('服务器错误');
+    res.send('Home Page.')
+});
+
+app.use(function (err, req, res, next){
+    console.log("错误信息：" + err.message);
+    res.send('错误信息：' + err.message);
+    next();
+});
+```
+
+**注意：**错误级别中间件必须注册在所有路由之后
+
+#### 11.5.8 Express 内置的中间件
+
+自Express 4.16.0 版本开始，Express 内置了3个常用的中间件，极大的提高了Express项目开发效率和体验
+
+1. `express,static` 快速托管静态资源的内置中间件
+2. `express.json`解析JSON格式的请求体数据
+3. `express.urlencoded`解析URL-encoded格式的请求体数据
+
+```javascript
+// 配置解析 application/json 格式数据的内置中间件
+app.use(express.json)
+// 配置解析 application/x-www-form-urlencoded 格式数据的内置中间件
+app.use(express.urlencoded({extend: false}))
+```
+
+#### 11.5.9 express.json 中间件的使用
+
+```
+JSON 数据格式：{"name": "Bob", "age", 18}
+```
+
+```javascript
+// 调用 express.json 中间件的使用
+app.use(express.json())
+
+app.post('/user', (req, res) => {
+    // 使用 req.body 接收
+    console.log(req.body)
+    res.send('OK!')
+})
+```
+
+#### 11.5.10 express.urlencoded 中间件的使用
+
+```
+application/x-www-from-urlencoded 数据格式示例：username=JohnDoe&password=secretpassword
+```
+
+```javascript
+app.use(express.urlencoded({extended: false}))
+app.post('/book', (req, res) => {
+    console.log(req.body)
+    res.send('OK!')
+})
+```
+
+#### 11.5.11 第三方中间件
+
+这里以 `body-parser` 示例
+
+**1. 下载中间件**
+
+```
+D:\PHP\JavaScript\express>npm install body-parser
+```
+
+**2. 使用**
+
+```
+application/x-www-from-urlencoded 数据格式示例：username=JohnDoe&password=secretpassword
+```
+
+```javascript
+app.use(parser.urlencoded({extend: false}))
+
+app.post('/book', (req, res) => {
+    console.log(req.body)
+    res.send('OK!')
+})
+```
+
+#### 11.5.12 Node.js 事件监听
+
+Node.js 的事件监听格式如下：
+
+```javascript
+req.on('事件名', function)
+```
+
+常见事件：
+
+`data`：当请求体中带有表单数据的时候自动触发
+
+```javascript
+    let str = ''    
+	req.on('data', (chunk) => {
+        str += chunk
+    })
+```
+
+`end`：当检测到请求体中的所有数据传输完毕后自动触发
+
+```javascript
+    req.on('end', () => {
+        req.body = qs.parse(str)
+        next()
+    })
+```
+
+#### 11.5.13 自定义中间件
+
+本案例以一个能自动解析`application/x-www-form-urlencoded`函数示例
+
+```javascript
+const qs = require('querystring')
+
+const parser = function (req, res, next){
+    // 考虑到可能请求体的数据太大，导致会分包传输，这里额外使用 str 变量以叠加的方式接收
+    let str = ''
+    req.on('data', (chunk) => {
+        str += chunk
+    })
+
+    req.on('end', () => {
+        req.body = qs.parse(str)
+        next()
+    })
+}
+
+module.exports = parser
+```
+
+使用
+
+```javascript
+const parser = require('./custom-body-parser')
+app.use(parser)
+
+app.post('/book', (req, res) => {
+    res.setHeader('Content-Type', 'text/html;charset=utf-8')
+    res.send(req.body)
+})
+```
+
+## 12 cors 跨域共享资源
+
+### 12.1 使用cors中间件解决资源跨域问题
+
+使用步骤如下：
+
+1. 运行`npm install cors`安装中间件
+2. 使用`const cors = require('cors')`导入中间件
+3. 在路由之前调用`app.use(cors)`配置中间件
+
+### 12.2 什么是CORS
+
+cors（Cross-Origin Resource Sharing，跨域资源共享）由一系列HTTP响应头组成，这些HTTP响应头决定浏览器是否阻止前端JS代码跨域获取资源
+
+浏览器的同源安全策略默认会阻止网页“跨域”获取资源，但如果接口服务器配置了CORS相关的HTTP响应头，就可以解除浏览器前端的跨域访问限制
+
+![image-20231218145408869](JavaScript.assets/image-20231218145408869.png)
+
+### 12.3 CORS的注意事项
+
+1. CORS 主要在服务器端进行配置，客户端浏览器无需做任何额外的配置，即可请求开启了CORS接口
+2. CORS在浏览器中有兼容性，只有执行XMLHttpRequest Level 2 的浏览器，才能正常访问开启了CORS的服务器
+
+### 12.4 响应头部 - `Access-Control-Allow-Origin`
+
+响应头部中可以携带一个 Access-Control-Allow-Origin字段，其语法如下：
+
+其中通配符`*`表示允许所有的跨域请求
+
+```
+Access-Control-Allow-Origin: <origin> | *
+```
+
+其中，origin参数的值指定了允许访问该资源的外域URL
+
+例如，下面的字段值将只允许来自`http://www.baidu.com`的请求
+
+```
+res.setHeader('Access-Control-Allow-Origin', 'http://www.baidu.com')
+```
+
+#### 12.5 响应头部 - `Access-Control-Allow-Headers`
+
+默认情况下，CORS仅支持客户福安向服务器发送如下9个请求头
+
+```
+Accept、Accept-Language、Content-Language、DPR、Downlink、Save-Date、Viewport-Width、Width、Content-Type（之仅限于 text/plain、multipart/from-data、application/x-www-from-urlencoded三者之一）
+```
+
+如果客户端向服务器发送了额外的请求头信息，则需要在服务器端，通过Access-Control-Allow-Headers对额外的请求头进行声明，否则这次请求会失败
+
+```
+// 允许客户端额外向服务器发送 Content-Type 请求头和 X-Custom-Header 请求头
+// 注意：多个请求头之间使用英文的都好进行分割
+res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Custom-Header')
+```
+
+#### 12.6 CORS 响应头部 - Access-Control-Allow-Method
+
+默认情况下，CORS仅支持客户端发起GET、POST、HEAD请求
+
+如果客户端希望通过PUT、DELETE等方式请求服务器的资源，则需要在服务器端、通过`Access-Control-Allow-Methods`开值明实际请求所有允许使用HTTP方法
+
+```
+// 只允许 POST、GET、DELETE、HEAD 请求方法
+res.setHeader('Access-Control-Allow-Methods', 'POST, GET, DELETE, HEAD')
+// 允许所有的HTTP请求方法
+res.setHeader('Access-Control-Allow-Methods', '*')
+```
+
+### 12.7 简单请求和预检请求
+
+#### 12.7.1 简单请求
+
+1. 请求方式：GET、POST、HEAD三者之一
+
+2. HTTP 头部信息不超过以下几种字段，**无自定义字段头部**
+
+   ```
+   Accept、Accept-Language、Content-Language、DPR、Downlink、Save-Date、Viewport-Width、Width、Content-Type（之仅限于 text/plain、multipart/from-data、application/x-www-from-urlencoded三者之一）
+   ```
+
+#### 12.7.2 预检请求
+
+只要符合以下任何一个条件的请求，都需要进行预检查请求：
+
+1. 请求方法为：GET、POST、HEAD之外的请求Method类型
+2. 请求头中包含自定头部字段
+3. 向服务器发送了`application/json`格式的数据
+
+在浏览器域服务器正确通信之前，**浏览器会先发送OPTION请求进行预检，以便获知服务器是否允许实际请求**，所以这一次的OPTION请求称为“预检请求”。**服务器成功响应预检请求后，才会发送真正的请求，并且携带真实数据**
+
+![image-20231218211454058](JavaScript.assets/image-20231218211454058.png)
+
+## 13 MySQL模块
+
+### 13.1 安装并配置MySQL模块
+
+#### 13.1.1 安装MySQL模块
+
+```
+D:\PHP\JavaScript\mysql>npm init -y
+D:\PHP\JavaScript\mysql>npm install mysql 
+```
+
+#### 13.1.2 连接Mysql模块并测试
+
+```javascript
+const mysql = require('mysql')
+const db = mysql.createPool({
+    host: '127.0.0.1',
+    user: 'root',
+    password: 'root',
+    database: 'security'
+})
+
+// 测试是否成功连接
+db.query('select database()', (err, result) => {
+    if (err) return console.log(err)
+    console.log(result)
+})
+```
+
+### 13.2 Mysql中的增删改查
+
+#### 13.2.1 查
+
+**注意：**返回的是一个数组
+
+```javascript
+db.query('select * from users', (err, result) => {
+    if (err) return console.log(err.message)
+    console.log(result)
+})
+```
+
+#### 13.2.2 插
+
+node.js 可以使用`?`做占位符填充SQL语句
+
+`result.affectedRows`代表的是影响的行数！
+
+```javascript
+const user = {username: 'Spider', password: 'Aa123456'}
+const sqlStr = 'insert into users (username, password) values (?,?)'
+db.query(sqlStr, [user.username, user.password], (err, result) => {
+    if (err) return console.log(err.message, db.query.sql)
+    if (result.affectedRows === 1){
+        console.log('插入成功！')
+    }
+})
+```
+
+当然也可以使用模板字符串的方式插入数据
+
+```javascript
+const user = {username: 'Spider', password: 'Aa123456'}
+db.query(`insert into users (username, password) values ('${user.username}', '${user.password}')`, (err, result) => {
+    if (err) return console.log(err.message)
+    if (result.affectedRows === 1){
+        console.log('插入成功')
+    }
+})
+```
+
+**便捷写法：**当字段名和要插入的对象键名相同时，即可使用便捷写法，如下：
+
+```javascript
+const user = {username: 'Sugar', password: 'Aa123456'}
+const sqlStr = 'insert into users SET ?'
+db.query(sqlStr, user, (err, result) => {
+    if (err) return console.log(err)
+    if (result.affectedRows === 1){
+        console.log('插入成功')
+    }
+})
+```
+
+#### 13.2.3 改
+
+```javascript
+const user = {id: 19, username: 'Cat', password: '123456'}
+const sqlStr = 'update users set username=?, password=? where id=?'
+db.query(sqlStr, [user.username, user.password, user.id], (err, result) => {
+    if (err) return console.log(err.message)
+    if (result.affectedRows === 1){
+        console.log('修改成功')
+    }
+})
+```
+
+**便捷写法：**更新数据时，如果数据对象的每个属性和数据表的字段一一对应，则可以通过如下方式快速更新数据
+
+```javascript
+const user = {id: 19, username: 'Dog', password: '123456'}
+const sqlStr = 'update users set ? where id=?'
+db.query(sqlStr, [user, user.id], (err, result) => {
+    if (err) return console.log(err.message)
+    if (result.affectedRows === 1){
+        console.log('插入成功')
+    }
+})
+```
+
+#### 13.2.4 删
+
+如果SQL语句中有多个占位符，则必须使用数组为每个占位符指定具体的值；如果SQL语句中只有一个占位符，则可以省略数组
+
+```javascript
+const sqlStr = 'delete from users where id=?'
+db.query(sqlStr, 19, (err, result) => {
+    if (err) return console.log(err)
+    if (result.affectedRows === 1){
+        console.log('删除成功')
+    }
+})
+```
+
+## 14 Web开发模式
+
+### 14.1 服务端渲染的Web开发模式
+
+服务端渲染的概念：服务器发送给客户端的HTML页面，是在服务器通过字符串的拼接，动态生成的。因此，客户端不需要使用AJAX这样的技术额外请求页面的数据。代码如下：
+
+![image-20231218215356286](JavaScript.assets/image-20231218215356286.png)
+
+### 14.2 服务端渲染的优缺点
+
+优点：
+
+1. 前端耗时少：因为服务器复杂动态生成HTML内容，浏览器只需要直接渲染页面即可
+2. 有利于SEO：因为服务器响应的是完整的HTML页面内容，所以爬虫更容易爬取获取信息
+
+缺点：
+
+1. 占用服务端资源：即服务端完成HTML页面内容的拼接。如果请求较多，会对服务端造成一定的访问压力
+2. 不利于前后端分离，开发效率低：使用服务端渲染，则无法进行分工合作，尤其对前端复杂度高的项目，不利于项目高效开发
