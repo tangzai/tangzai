@@ -1849,3 +1849,187 @@ class Error {
    ```
 
 5. 除了新增，会调用修改器，修改更新也会触发修改器； 6. 模型修改器只对模型方法有效，调用数据库的方法是无效的，比如->insert();
+
+# PHP EW_Shop
+
+## 1. PHP Composer
+
+### 1.1 PHP Composer 基础配置
+
+> PHP Composer 安装：phttps://getcomposer.org/download/
+
+**1.1.1 Composer 换源**
+
+```shell
+composer config -g -l				// 查看 composer 配置命令
+composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/				// 修改为阿里云镜像源
+```
+
+### 1.2 Composer常用文件
+
+**1.2.1 composer.json**
+
+![image-20231224160612919](PHPThink.assets/image-20231224160612919.png)
+
+**1.2.2 composer.json常用选项**
+
+![image-20231224160658978](PHPThink.assets/image-20231224160658978.png)
+
+**1.2.3 composer.lock 文件**
+
++ p文件composer.lock会根据composer.json的内容自动生成，和composer.json在同一位置，即在安装完所有需要的包之后，Composer会在composer.lock文件中生成一张标准的包版本的文件，这将锁定所有包的版本。可以使用composer.lock（当然是和composer.json一起）来控制项目的版本。
++ pcomposer.lock与composer.json的关系为，composer.json文件为包的元信息，composer.lock文件同样为包的元信息，但在composer.json文件中可以指定使用不明确的依赖包版本，如“>=1.0”，在composer.lock文件中的会是当前安装的版本。那么当使用Composer安装包时，它会优先从composer.lock 文件读取依赖版本，再根据 composer.json 文件去获取依赖。这确保了该库的每个使用者都能得到相同的依赖版本。这对于团队开发来讲非常重要。
+
+### 1.3 Composer常用命令
+
+![image-20231224161648098](PHPThink.assets/image-20231224161648098.png)
+
+### 1.4 Composer命令的运行流程
+
+在使用composer install、composer update、composer require这3个命令时，都会下载PHP类库。也都有可能要经过这几个步骤。其中，composer update 会将步骤1、步骤2、步骤3、步骤4都执行一遍，所以下载的类库是composer.json配置中匹配搭配的最新类库，而composer install只执行步骤4。 composer require 会将配置写入composer.json，然后执行步骤1、步骤2、步骤3、步骤4。如果想了解不同的包的配置是怎么写的，可以在Packagist.org中找到，因为每个开源项目都有安装和使用方法
+
+![image-20231224161721235](PHPThink.assets/image-20231224161721235.png)
+
+### 1.5 类库的规范
+
++ Composer利用PSR-0和PSR-4，以及PHP5.3的命名空间构造了一个繁荣的 PHP 生态系统。
++ PSR即PHP推荐标准。目前通过审核的有PSR-1至PSR-4，还有最近的PSR-6和PSR-7。重点是成熟的前四个标准，对于初学者来说，可以起到一个很好的代码规范作用。早些时候还有PSR-0规范，但已经废弃并被PSR-4取代。例如，PSR规范描述了从文件路径自动加载类，可与PSR-0规范互操作，可一起使用。PSR规范也描述了自动加载的文件应当放在哪里。 PSR-4规范能够满足面向package的自动加载，它规范了如何从文件路径自动加载类，同时规范了自动加载文件的位置。PSR描述的规范内容很多，具体细节请参考PSR规范文档。
+
+**PSR-0**
+
+![image-20231224162120061](PHPThink.assets/image-20231224162120061.png)
+
+**PSR-4**
+
+![image-20231224162132069](PHPThink.assets/image-20231224162132069.png)
+
+### 1.6 构建自己的 PHP 开发框架
+
+**MVC 设计模式**
+
++ 视图 View：负责前端的可视化，将页面呈现给用户
++ 控制器 Controller：负责任务的分发，将不同的需求分发给不同的模块
++ 模型 Model：不同的模型负责处理不同的工作并将结果返回给控制器
+
+![image-20231224162657630](PHPThink.assets/image-20231224162657630.png)
+
+### 1.7 使用Composer拉框架
+
+#### 1.7.1 路由 noahbuscher/macaw
+
+> 官方教程：https://packagist.p2hp.com/packages/noahbuscher/macaw
+
+**1. 拉取 `noahbuscher/macaw` 包**
+
+```
+composer require noahbuscher/macaw:dev-master
+```
+
+**2. 配置 `.htaccess` 文件**
+
+```
+RewriteEngine On
+RewriteBase /											# 这里指向的是网站的根，如果不同需要修改
+
+# Allow any files or directories that exist to be displayed directly
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteRule ^(.*)$ index.php?$1 [QSA,L]
+```
+
+**3. 测试**
+
+```php
+<?php
+require('vendor/autoload.php');
+
+use NoahBuscher\Macaw\Macaw;
+
+Macaw::get('/', function () {
+    echo "成功！";
+});
+
+Macaw::get('/hello', function () {
+    echo "文件路径：".__FILE__;
+//    echo "Hello World";
+});
+
+Macaw::get('/fun', function () {
+    echo "FUN";
+});
+
+Macaw::dispatch();
+```
+
+**4. 坑点**
+
+1. 不要用PHPStorm自带的Web服务器，因为PHPStorm自带的服务器既不是Apache，也不是Nginx，无法通过配置文件做路由重定向URL，推荐使用PHPStudy
+
+2. 使用PHPStudy的话，尽量将CMS项目直接放到根上，如果不行，那么就在PHPStudy上修改网站根目录
+
+   ![image-20231224183306567](PHPThink.assets/image-20231224183306567.png)
+
+#### 1.7.2 控制器
+
+**1. 编写控制器代码 BaseControllers.php**
+
+```php
+<?php
+namespace controllers;
+
+class BaseControllers{
+    function success($url, $msg){
+        echo "<script>alert(`${msg}`); location.href = `${url}`</script>";
+    }
+
+    function fail($url, $msg){
+        echo "<script>alert(`error: ${msg}`); location.href = `${url}`</script>";
+    }
+}
+```
+
+**2. 编写控制器代码 Hello.php**
+
+```php
+<?php
+namespace controllers;
+
+class Hello extends BaseControllers {
+    function index(){
+        echo "Hello Shock The Boy";
+    }
+}
+```
+
+**3. 修改 composer.json 文件**
+
+使用`composer`管理的项目都不需要使用`use NameSpace`来将指定命名空间的代码导入到当前文件中，只要依据`psr-4`规则编写即可
+
+```json
+{
+    "require": {
+        "noahbuscher/macaw": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            // 凡是访问 controllers 开头的代码都去 ./controllers/ 目录下寻找
+            "controllers\\": "./controllers/"
+        }
+    }
+}
+```
+
+**4. index.php 应用**
+
+```php
+<?php
+require('vendor/autoload.php');
+use NoahBuscher\Macaw\Macaw;
+
+// 回调函数写法 命名空间\类名@fa
+Macaw::get('/func', 'controllers\Hello@index');
+
+Macaw::dispatch();
+```
+
