@@ -1918,6 +1918,8 @@ composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/	
 #### 1.7.1 路由 noahbuscher/macaw
 
 > 官方教程：https://packagist.p2hp.com/packages/noahbuscher/macaw
+>
+> 使用composer来管理项目，不需要使用require或use来导入其他模块，只需修改composer.json文件即可！记得修改完后执行命令：composer dump-autoload
 
 **1. 拉取 `noahbuscher/macaw` 包**
 
@@ -1970,7 +1972,7 @@ Macaw::dispatch();
 
    ![image-20231224183306567](PHPThink.assets/image-20231224183306567.png)
 
-#### 1.7.2 控制器
+#### 1.7.2 构建框架控制器
 
 **1. 编写控制器代码 BaseControllers.php**
 
@@ -2020,6 +2022,12 @@ class Hello extends BaseControllers {
 }
 ```
 
+执行命令：每次修改`composer.json`文件都要使用下面命令来重写`vendor/autoload.php`文件
+
+```
+composer dump-autoload
+```
+
 **4. index.php 应用**
 
 ```php
@@ -2027,9 +2035,377 @@ class Hello extends BaseControllers {
 require('vendor/autoload.php');
 use NoahBuscher\Macaw\Macaw;
 
-// 回调函数写法 命名空间\类名@fa
+// 回调函数写法 命名空间\类名@方法
 Macaw::get('/func', 'controllers\Hello@index');
 
 Macaw::dispatch();
+```
+
+#### 1.7.3 单个文件自动加载
+
+在PHP项目开发中，可能会出现一种小需求，这种小需求只需要使用一个函数就能搞定，并不需要使用类来封装的情况，此时就可以通过导入单个文件来解决
+
+**`helper.php`文件**
+
+使用`if`判断来判断函数是否存在，不存在再创建这个函数，以便后续项目的合并
+
+```php
+<?php
+if (!function_exists('dd')){
+    function dd(...$args){
+        foreach ($args as $value){
+            echo $value;
+        }
+    }
+}
+```
+
+**`composer.json`文件修改**
+
+```json
+{
+  "require": {
+    "noahbuscher/macaw": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "controllers\\": "app/controllers/"
+    },
+      // 添加下面这一配置，来导入单一文件，其中 app/helper.php 为文件路径
+    "files": [
+      "app/helper.php"
+    ]
+  }
+}
+```
+
+**※** 修改完`composer.json`文件后，记得执行命令`composer dump-autoload`来重写`vender/autoload.php`文件！否则不会生效
+
+**应用函数**
+
+此时即可在相应的类下使用函数
+
+```php
+class Hello extends BaseControllers
+{
+    function index()
+    {
+        echo "Hello Shock The Boy";
+        dd(1,2,3,4,5);
+    }
+}
+```
+
+#### 1.7.4 视图twig
+
+**基类初始化twig**
+
+```php
+<?php
+namespace controllers;
+
+class BaseControllers{
+    protected $twig;
+    protected $data = array();
+
+    // 构造函数初始化 twig
+    function __construct(){
+        $loader = new \Twig\Loader\FilesystemLoader(dirname(__DIR__).'/views');
+        $this->twig = new \Twig\Environment($loader, [
+//            'cache' => '/path/to/compliation_cahce'
+        ]);
+    }
+
+    // 渲染函数
+    function display($template){
+//        var_dump($this->data);
+        echo $this->twig->render($template.'.html', $this->data);
+    }
+
+    // twig 数据处理函数
+    // 判断$var是不是数组，是则直接合并到 $this->data，不是则以键值对的方式追加到 $this->data
+    function assign($var, $value=null){
+        if (is_array($var)){
+            $this->data = array_merge($this->data, $var);
+        }else{
+            $this->data[$var] = $value;
+        }
+    }
+}
+```
+
+**控制器**
+
+```php
+<?php
+
+namespace controllers;
+
+class Hello extends BaseControllers
+{
+    function index()
+    {
+//        echo "Hello Shock The Boy";
+		// assign() 传入数据
+        $this->assign('myList', array("aa"=>"bb", "cc"=>"dd", "ee"=>'ff'));
+        $this->assign('title', '首页');
+        $this->display("index");
+    }
+}
+```
+
+**`this->data`结构如下**
+
+![image-20231225164619702](PHPThink.assets/image-20231225164619702.png)
+
+**模板调用**
+
+直接输入键值即可
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+<h1>{{ title }}</h1>
+<ul>
+    {% for key, value in myList %}
+    <li>{{ key }}: {{ value }}</li>
+    {% endfor %}
+</ul>
+</body>
+</html>
+```
+
+#### 1.7.5 数据库模型 catfan/medoo
+
+**安装**
+
+```
+E:\phpstudy\phpstudy\phpstudy_pro\WWW\CMS>composer require catfan/medoo
+```
+
+**composer 导入**
+
+```
+"autoload": {
+    "psr-4": {
+      "controllers\\": "app/controllers/",
+      "models\\": "app/models/"
+    },
+```
+
+重写`autoload.php`文件
+
+```
+composer dump-autoload
+```
+
+**创建数据库基类**
+
+```php
+<?php
+namespace models;
+
+use Medoo\Medoo;							// 导入 Medoo 模块
+class BaseDao extends Medoo{
+    function __construct()
+    {
+        $options = [
+            'type' => 'mysql',
+            'host' => 'localhost',
+            'database' => 'lmonkey',
+            'username' => 'root',
+            'password' => 'root',
+            'prefix' => 'ew_'				// 指定前缀
+        ];
+
+        parent::__construct($options);		// 继承父类的构造方法，相当于python的super
+    }
+}
+
+```
+
+**创建User类**
+
+```php
+<?php
+namespace models;
+
+use models\BaseDao;
+
+class User extends BaseDao{
+
+}
+```
+
+**控制器调用**
+
+```php
+<?php
+namespace controllers;
+// 由于 User 模块与该模块文件不在同一命名空间，所以这里需要使用 use 导入
+use models\User;
+
+class Hello extends BaseControllers
+{
+    function index()
+    {
+        $user = new User();
+//        $user->select(表明, 字段);
+        $data = $user->select('user', '*');
+        $this->assign('users', $data);
+    }
+}
+```
+
+**模板渲染**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+<h1>{{ title }}</h1>
+<ul>
+    {% for item in users %}
+    <li>{{ item.name }}: {{ item.age }}</li>
+    {% endfor %}
+</ul>
+</body>
+</html>
+```
+
+### 1.8 无限分类
+
+#### 1.8.1 无限分类介绍
+
+**例子：家谱树与子孙树**
+
+家谱树是无限极分类的表现形式之一，另一个是子孙树。一开始学习无限极分类时，我时常弄混这两棵树，现在看来自然是明白很多。从汉语的意思也能够看出其中的区别。
+
+家谱，现在很多地方都流行起修家谱，那怎么修家谱，按照我理解，就是给自己找一个祖宗，一代代找上去，形成了一个体系，这样编篡而成的叫家谱。家谱树就与之类似，从某个节点开始向上寻找其父节点，再找父节点的父节点，直到找不到为止。按照这种寻找，形成的一个类似树状的结构，就叫做家谱树。
+
+而子孙树与其相反，子孙树类似于生物书中的遗传图，从某个节点开始寻找它的子节点，再找子节点的子节点，直到寻找完毕。这样形成的树状结构就叫做子孙树。
+
+从上面对家谱树与子孙树的描述，将其转换为代码时，我的第一印象就是利用递归方式，家谱树，找父节点的父节点，子孙树，找子节点的子节点。完全符合递归思想。所以首先我们来说说利用递归方式完成家谱树与子孙树。
+
+**递归方式：家族谱的实现**
+
+为更清楚的讲解，我先将即将分类的数据贴在下面，是关于地址的数据：
+
+```php
+$address = array(
+    array('id'=>1  , 'address'=>'安徽' , 'parent_id' => 0),
+    array('id'=>2  , 'address'=>'江苏' , 'parent_id' => 0),
+    array('id'=>3  , 'address'=>'合肥' , 'parent_id' => 1),
+    array('id'=>4  , 'address'=>'庐阳区' , 'parent_id' => 3),
+    array('id'=>5  , 'address'=>'大杨镇' , 'parent_id' => 4),
+    array('id'=>6  , 'address'=>'南京' , 'parent_id' => 2),
+    array('id'=>7  , 'address'=>'玄武区' , 'parent_id' => 6),
+    array('id'=>8  , 'address'=>'梅园新村街道', 'parent_id' => 7),
+    array('id'=>9  , 'address'=>'上海' , 'parent_id' => 0),
+    array('id'=>10 , 'address'=>'黄浦区' , 'parent_id' => 9),
+    array('id'=>11 , 'address'=>'外滩' , 'parent_id' => 10)
+    array('id'=>12 , 'address'=>'安庆' , 'parent_id' => 1)
+    );
+```
+
+按照上文的介绍，对上面数据进行家谱树无限极分类，假设我们想要寻找`大杨镇`的家谱树，先找到与之相关的信息。
+
+```dart
+'id'=>5  , 'address'=>'大杨镇' , 'parent_id' => 4
+```
+
+可以看出它的父节点的id，即`parent_id == 4`，那么`id==4`的节点就是其父节点，由此找到庐阳区：
+
+```dart
+'id'=>4  , 'address'=>'庐阳区' , 'parent_id' => 3
+```
+
+与上面类似，寻找`id=3`的节点，依次向上寻找，找到`大杨镇`的家谱
+
+#### 1.8.2 无限分类实现
+
+**创建数据表**
+
+```sql
+mysql> desc ew_category;
++---------+---------------+------+-----+---------+----------------+
+| Field   | Type          | Null | Key | Default | Extra          |
++---------+---------------+------+-----+---------+----------------+
+| id      | int(10)       | NO   | PRI | NULL    | auto_increment |
+| catname | varchar(30)   | NO   |     | NULL    |                |
+| pid     | decimal(10,0) | NO   |     | NULL    |                |
+| ord     | decimal(10,0) | NO   |     | NULL    |                |
++---------+---------------+------+-----+---------+----------------+
+4 rows in set (0.00 sec)
+
+mysql> select * from ew_category;
++----+-----------------------+-----+-----+
+| id | catname               | pid | ord |
++----+-----------------------+-----+-----+
+|  1 | 图书首页              |   0 |   0 |
+|  2 | 图书分类              |   1 |   0 |
+|  3 | 出版社                |   1 |   0 |
+|  4 | 计算机类              |   2 |   0 |
+|  5 | 人民邮电出版社        |   3 |   0 |
++----+-----------------------+-----+-----+
+5 rows in set (0.00 sec)
+```
+
+**控制器查询数据**
+
+`lmonkey\CatTree`模块用于做数据的格式化，以便模板的渲染；模块一课件里面有
+
+```php
+<?php
+namespace controllers;
+require dirname(__DIR__).'/class/cattree.php';
+use models\BaseDao;
+use lmonkey\CatTree;
+
+class Category extends BaseControllers{
+    function index(){
+        $db = new BaseDao();
+        $data = $db->select('category', ['id', 'catname', 'pid', 'ord']);
+        $this->assign('treeList',  CatTree::getList($data));
+        $this->display('category/index');
+    }
+}
+```
+
+**模板渲染**
+
+```html
+<table>
+    <thead>
+        <tr>
+            <th>排序</th>
+            <th>列表</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for item in treeList %}
+        <tr>
+            <td>{{ item.ord }}</td>
+            <td>
+                {% for i in 0..item.level*4 %}
+                    &nbsp;
+                {% endfor %}
+                {{ item.catname }}
+            </td>
+            <td>修改/删除</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
 ```
 
