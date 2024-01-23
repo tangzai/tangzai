@@ -844,24 +844,74 @@ del s.silly					# 输出：哇，你杀了个傻瓜！
 class Silly:
     @property
     def silly(self):
+        """
+        将该函数设置为 property 属性，等同于 silly = property(getter)
+        """
         print("你越来越傻了")
         return self._silly
 
     @silly.setter
     def silly(self, value):
+        """
+        设置 silly property 的 setter 方法
+        """
         print(f"你在胡闹 {value}")
         self._silly = value
 
     @silly.deleter
     def silly(self):
+        """
+        设置 silly property 的 deleter 方法
+        """
         print("哇，你杀了个傻瓜！")
         del self._silly
 
 
 s = Silly()
-s.silly = 'bob'			# 输出：你在胡闹 bob
-s.silly					# 输出：你越来越傻了
+s.silly = 'bob'  # 输出：你在胡闹 bob
+s.silly  # 输出：你越来越傻了
+
 ```
+
+### 5.5 决定何时使用property
+
+事实上，方法只是可调用的属性。方法的名字通常都是动词
+
+**属性与property之间的区别在于，当property被读取、赋值或删除时，自动执行某些特定的操作**
+
+一个常见的例子：缓存某个较难计算或者访问需要耗时的值。目标在于，将这个值存于本地以避免重复获取
+
+```python
+import requests
+import time
+
+
+class WebPage:
+    def __init__(self, url):
+        self.url = url
+        self._content = None
+
+    @property
+    def content(self):
+        if not self._content:
+            print("重新获取网页内容中......")
+            self._content = requests.get(self.url).content.decode()
+        return self._content
+
+
+if __name__ == '__main__':                                                                                                                                                                                                                                                                       
+    web = WebPage('http://www.baidu.com')
+    start = time.time()
+    print(web.content)
+    end = time.time() - start
+    print("第一次用时：", end)        # 0.035973548889160156
+    start = time.time()
+    print(web.content)
+    end = time.time() - start
+    print("第二次用时：", end)        # 0.0024101734161376953
+```
+
+
 
 
 
