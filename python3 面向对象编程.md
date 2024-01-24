@@ -911,6 +911,25 @@ if __name__ == '__main__':
     print("第二次用时：", end)        # 0.0024101734161376953
 ```
 
+## 6. python 的数据结构
+
+### 6.1 命名元组
+
+命名元组相较于元组又更强的“可读性”和“便捷性”，可为元组中的每个值赋予一个名字
+
+**命名元组非常适合只有数字的情况**
+
+```python
+from collections import namedtuple
+
+stock = namedtuple('stock', 'symbol current high low')
+stock = stock('FB', '95', '99', '90')
+print(stock)				# 输出：stock(symbol='FB', current='95', high='99', low='90')
+print(stock.current)		# 95
+```
+
+
+
 
 
 
