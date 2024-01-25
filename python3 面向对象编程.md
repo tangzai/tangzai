@@ -928,9 +928,64 @@ print(stock)				# 输出：stock(symbol='FB', current='95', high='99', low='90')
 print(stock.current)		# 95
 ```
 
+### 6.2 字典
 
+对象通过字典来表示属性，其值为属性的值或对象的方法
 
+#### 6.2.1 字典常用方法
 
+**get: 获取字典的指定值**
 
+第一个参数是键名，第二个参数是当键名不存在时所返回的默认值
 
+```python
+dict1 = {'name': 'jack', 'age': 18}
+
+print(dict1)                                # {'name': 'jack', 'age': 18}
+print(dict1.get('phone', 'not Found'))      # not Found
+```
+
+**setdefault: 当键名不存在时，赋值并创建**
+
+如果之前没有设定过值，才将这一键名设定为这一默认值
+
+```python
+dict1 = {'name': 'jack', 'age': 18}
+
+dict1.setdefault('phone', '123456')         # {'name': 'jack', 'age': 18, 'phone': '123456'}
+print(dict1)
+```
+
+**keys: 获取所有的键名**
+
+返回一个包含所有键名的迭代器
+
+```python
+dict1 = {'name': 'jack', 'age': 18, 'phone': '123456', 'email': '123@11.com'}
+
+for key in dict1.keys():
+    print(key)
+```
+
+**values: 获取所有的值**
+
+放回一个包含所有值的迭代器
+
+```python
+dict1 = {'name': 'jack', 'age': 18, 'phone': '123456', 'email': '123@11.com'}
+
+for value in dict1.values():
+    print(value)
+```
+
+**items: 返回键值对**
+
+返回`(key, value)`元组所组成的迭代器
+
+```python
+dict1 = {'name': 'jack', 'age': 18, 'phone': '123456', 'email': '123@11.com'}
+
+for key,value in dict1.items():
+    print(f"key: {key}, value: {value}")
+```
 

