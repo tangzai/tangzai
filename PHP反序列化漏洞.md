@@ -840,7 +840,7 @@ filter函数将传入的 flag 或 php 全部替换成 hack
 构造目标：";s:4:"pass";s:8:"escaping";}
 长度计算：";s:4:"pass";s:8:"escaping";} = 29
 
-方程计算：3x + 27 = 4x
+方程计算：3x + 29 = 4x
 			  x = 29
 即：需要29个php字符串
 最后序列化结果：O:4:"test":2:{s:4:"user";s:116:"phpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphp";s:4:"pass";s:8:"escaping";}";s:4:"pass";s:8:"daydream";}

@@ -989,3 +989,206 @@ for key,value in dict1.items():
     print(f"key: {key}, value: {value}")
 ```
 
+### 6.3 集合
+
+集合和字典一样，是无序的。它们都是利用底层的基于哈希值的数据结构来保证高效。因为它们都是无序的。故集合无法通过索引来查找元素
+
+从下面的方法可以看出，集合是用于和其他集合进行原酸的，而不仅仅是一个容器。如果有一些来自两个不同源的集合，补需要快速以某种形式组合起来，以确定数据是否重合或不同，我们可以利用集合操作来快速比较它们
+
+```python
+set1 = {'三角形', '正方形', '平行四边形'}
+set2 = {'圆形', '三角形', '梯形'}
+
+print(set1.union(set2))                     # 并集        {'圆形', '三角形', '梯形', '正方形', '平行四边形'}
+print(set1.intersection(set2))              # 交集        {'三角形'}
+print(set1.symmetric_difference(set2))      # 补集        {'平行四边形', '圆形', '梯形', '正方形'}
+print(set1.issubset(set2))                  # 判断 set1 是不是 set2 的子集      False
+print(set1.issuperset(set2))                # 判断 set1 是不是 set2 的父集      False
+print(set1.difference(set2))                # 返回存在于 set2 中但又不在 set1 中的元素        {'正方形', '平行四边形'}
+```
+
+在列表中，会经常遇到遍历所有对象直到找到相同的值，而对于集合来说，只需要求出哈希值并检查值是否存在即可。这意味着无论集合有多大，查找一个值是否存在所需要的时间是固定的，但是对于列表来说列表长度越长搜索一个值所需要的时间就越长
+
+在后续的编程中，如果遇到要遍历一个大列表的情况，可以写成下面这样
+
+```python
+list1 = [1, 2, 3, 4, 5, 6]
+set2 = {3}
+
+print(set2.issubset(set(list1)))		# 输出：True
+```
+
+### 6.4 队列
+
+**先进先出原则**
+
+Queue 的容量是“无限”的（直到计算机的内存耗尽为止），不过通常会限定在一个最大的范围。主要的方法有`put()`和`get()`，用于向队列最后添加元素和从队列开头取出元素。如果队列为空（无法取出）或已满（无法添加），无法执行这些方法，那么它们都接收有一个可选参数，用于在这种情况下执行相应的操作**。默认的行为是阻止或阻塞（直到等到 Queue 对象拥有足够的数据或空间来完成这些操作**）。如果传递`block=False`参数，就可以**抛出异常**，或者可以通过传递`timeout`参数来定义一定的等待时间，超时之后才抛出异常
+
+```python
+from queue import Queue
+
+lineup = Queue(maxsize=3)           # 创建队列，最大容量为 3
+# lineup.get(block=False)           # 由于 block=False 所以会抛出异常：_queue.Empty
+
+lineup.put('1')
+lineup.put('2')
+lineup.put('3')
+
+print(lineup.full())                # 输出：True
+
+print(lineup.get())					# 输出：3
+print(lineup.get())					# 输出：2
+print(lineup.get())					# 输出：1
+
+print(lineup.empty())               # 输出：True
+```
+
+### 6.5 栈
+
+**先进后出原则**
+
+用法与`Queue`相同
+
+```python
+from queue import LifoQueue
+
+stack = LifoQueue(maxsize=3)
+
+stack.put('1')
+stack.put('2')
+stack.put('3')
+# stack.put('4', block=False)       # 异常：queue.Full
+
+print(stack.get())                  # 输出：3
+print(stack.get())                  # 输出：2
+print(stack.get())                  # 输出：1
+
+print(stack.empty())
+```
+
+### 6.6 优先级队列
+
+通常是将一个元组存储到优先级队列中，其中元组的第一个元素代表其优先级，第二个元素是数据。优先级队列元素的返回是按照元素的优先级返回的**（优先级越小越大）**
+
+优先级队列总是返回当前队列中最重要的元素，如果队列是空的，`get()`方法将会阻塞（默认情况下）；如果队列非空，就不会阻塞，也不会等待优先级更高的元素添加进来
+
+```python
+import heapq
+
+# 创建一个空的优先级队列
+priority_queue = []
+
+# 向优先级队列中添加元素
+heapq.heappush(priority_queue, (2, 'code'))
+heapq.heappush(priority_queue, (1, 'eat'))
+heapq.heappush(priority_queue, (3, 'sleep'))
+
+# 从优先级队列中移除并返回最小的元素
+print(heapq.heappop(priority_queue))  # 输出：(1, 'eat')
+print(heapq.heappop(priority_queue))  # 输出：(2, 'code')
+print(heapq.heappop(priority_queue))  # 输出：(3, 'sleep')
+```
+
+## 7. Python 面向对象编程
+
+### 7.1 `len()`函数
+
+调用`len()`函数用的是底层类的`__len__`函数，因此`len(myobj)`实际值向的是`MyObj.__len__(myobj)`
+
+### 7.2 反转函数
+
+`reversed()`函数以任何序列作为输入，并返回一个该序列倒叙的复制品。通常用于for循环语句，来从后向前遍历项目
+
+和`len`类似，`reversed`调用传入参数所属类的`__reversed__()`函数。如果这一方法不存在，`reversed`会通过调用`__len__`和`__getitem__`自己构建一个倒序序列
+
+```python
+normal_list = [1,2,3,4,5]
+
+class CustomSequence:
+    def __len__(self):
+        return 5
+
+    def __getitem__(self, item):
+        return f"x{item}"
+
+class FunkyBackwards:
+    def __reversed__(self):
+        return "BACKWORADS"
+
+for seq in normal_list, CustomSequence(), FunkyBackwards():
+    print(f"\n: {seq.__class__.__name__}", end='')
+    for item in reversed(seq):
+        print(item, end='')
+```
+
+### 7.3 枚举
+
+在Python中，`enumerate()`是一个内置函数，用于将一个可迭代的数据对象（如列表、元组或字符串）组合为一个索引序列，同时列出数据和数据下标，一般用在`for`循环当中
+
+```python
+seasons = ['Spring', 'Summer', 'Fall', 'Winter']
+print(list(enumerate(seasons)))  # 输出：[(0, 'Spring'), (1, 'Summer'), (2, 'Fall'), (3, 'Winter')]
+```
+
+```python
+filename = 'D:\Python\python 3 面向对象编程\第六章案例\index.py'
+
+with open(filename) as file:
+    for index, line in enumerate(file):
+        print(f"{index+1} : {line}", end='')
+        
+# 输出：
+1 : from urllib.parse import urlparse
+2 : import requests
+3 : import re
+4 : import sys
+```
+
++ all 和 any，均接收可迭代对象作为参数，如果所有（all）或任一（any）元素为真（例如非空字符串或列表、非零的数字、不是None的对象，或者是文本True时，返回False）
++ `eval exec complie`，可以在解释器中将字符串当作代码执行（特别注意：`complie`也可以）
++ `hasattr getattr setattr delattr` 可以通过字符串名字修改对象的属性
++ zip，以两个或更多序列作为参数并返回一个新的由元组构成的序列，其中每个元组包含每个参数序列中的值
+
+### 7.4 变量参数列表
+
+**`*args`**：接收任意数量的参数并且将它们全部放进一个名为`args`的列表。如果只提供一个参数，它将会是一个只有一个元素的列表；如果不提供任何参数，它将是一个空列表
+
+**`**kwargs`**：接收任意关键字参数，通常用于配置设定
+
+```python
+class Options:
+    default_options = {
+        'port': 21,
+        'host': 'localhost',
+        'username': None
+    }
+
+    def __init__(self, **kwargs):
+        self.options = dict(Options.default_options)
+        self.default_options.update(kwargs)
+```
+
+### 7.5 参数解包
+
+`*`操作符：用于对列表进行解构，得到列表中的每一个元素
+
+`**`操作符：用于对字典进行解构，得到字典中的每一个键值对
+
+```python
+def show_args(arg1, arg2, arg3="THREE"):
+    print(arg1, arg2, arg3)
+
+
+some_args = range(3)
+more_args = {
+    'arg1': 'ONE',
+    'arg2': "TWO"
+}
+
+print("Unpacking a sequence: ", end='')
+show_args(*some_args)                       # 输出：Unpacking a sequence: 0 1 2
+
+print("Unpacking a dict: ", end='')
+show_args(**more_args)                      # 输出：Unpacking a dict: ONE TWO THREE 	
+```
+

