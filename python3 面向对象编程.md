@@ -1192,3 +1192,38 @@ print("Unpacking a dict: ", end='')
 show_args(**more_args)                      # 输出：Unpacking a dict: ONE TWO THREE 	
 ```
 
+## 8. 字符串与序列化
+
+### 8.1 格式化字符串
+
+```python
+orders = [('burger', 2, 5), ('fries', 3.5, 1), ('cola', 1.75, 3)]
+
+print("PRODUCT\tQUANTITY\tPRICE\tSUBTOTAL")
+
+for product, price, quantity in orders:
+    subtotal = price * quantity
+    print("{0:10s}{1: ^9d}    ${2: <8.2f}${3: >7.2f}".format(product, quantity, price, subtotal))
+```
+
+- `{0:10s}`：这表示第一个参数 `product` 是一个字符串（`s`），并且它应该被格式化为宽度为 10 的字段。
+- `{1: ^9d}`：这表示第二个参数 `quantity` 是一个整数（`d`），并且它应该被格式化为宽度为 9 的字段，值在字段中居中（`^`）。
+- `{2: <8.2f}`：这表示第三个参数 `price` 是一个浮点数（`f`），并且它应该被格式化为宽度为 8 的字段，小数点后有两位数字，值在字段中左对齐（`<`）。
+- `{3: >7.2f}`：这表示第四个参数 `subtotal` 是一个浮点数（`f`），并且它应该被格式化为宽度为 7 的字段，小数点后有两位数字，值在字段中右对齐（`>`）。
+
+### 8.2 将文本转换成字节
+
+**`print()`函数默认会以ASCII编码来输出字节对象**
+
+在使用`str.encode()`或`str.decode()`的过程中，可能会遇到错误编码导致报错的情况，可以使用`error`关键字参数来处理
+
+`str.decode('utf-8', error='replace')`
+
+error 四种状态如下：
+
++ `strict`：默认规则，当遇到无法编码或解码的字符时，抛出异常
++ `replace`：当遇到无法编码或解码的字符时，使用另一个字符代替（ASCII编码中使用的时`?`）
++ `ignore`：当遇到无法编码或解码的字符时，保留原样输出
++ `xmlcharrefreplace`：创建一个xml实体表示Unicode字符，这样可以根据XML文档来转换字符串
+
+**`str.encode()和``str.decode()`方法在不指定编码时，默认使用当前平台的编码方法**

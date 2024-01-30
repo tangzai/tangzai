@@ -4818,9 +4818,331 @@ base64编码：
 eyUgcHJpbnQoJycuX19jbGFzc19fLl9fYmFzZV9fLl9fc3ViY2xhc3Nlc19fKClbMjg2XSgnY2F0IC90aGlzX2lzX3RoZV9mbCRAYWcudHh0JyxzaGVsbD1UcnVlLHN0ZG91dD0tMSkuY29tbXVuaWNhdGUoKVswXS5zdHJpcCgpKSAlfQ==
 ```
 
+## BUUOJ [MRCTF2020]套娃
+
+进入查看源码获得第一个关代码
+
+```php
+$query = $_SERVER['QUERY_STRING'];
+
+ if( substr_count($query, '_') !== 0 || substr_count($query, '%5f') != 0 ){
+    die('Y0u are So cutE!');
+}
+ if($_GET['b_u_p_t'] !== '23333' && preg_match('/^23333$/', $_GET['b_u_p_t'])){
+    echo "you are going to the next ~";
+}
+```
+
+```
+$_SERVER['QUERY_STRING']：获得 GET 请求的所有键值对
+
+第一个绕过点：如果 $_GET 请求种带有 _ 就返回 die()
+绕过：%5F, 空格			PHP 会自动将 GET请求 中的空格视为下划线
+
+第二个绕过点：preg_match() %0a绕过，$不会校验行尾的换行
+
+payload：?b u p t=23333%0a
+```
+
+![image-20240130004428067](CTF.assets/image-20240130004428067.png)
+
+查看`secrettw.php`的源码，拿到下一条线索
+
+![image-20240130004512802](CTF.assets/image-20240130004512802.png)
+
+**New Bing解答：**JSFuck是一种基于JavaScript的编程风格，只使用六个不同的字符：`(`, `)`, `[`, `]`, `!` 和 `+`。这种编码方式虽然难以阅读，但是它可以在所有JavaScript环境中运行。
+
+解析 JSFuck 代码有几种方法：
+
+1. **使用浏览器的控制台**：你可以在浏览器（如 Google Chrome 或 Firefox）的开发者工具中的控制台输入 JSFuck 代码，然后按回车键执行。这种方法的优点是简单快捷，但可能需要一些 JavaScript 基础知识。
+2. **使用在线工具**：有一些在线工具可以帮助你解析 JSFuck 代码
+
+直接使用控制台运行这段代码！
+
+![image-20240130004721326](CTF.assets/image-20240130004721326.png)
+
+POST 提交拿到关键源码
+
+<img src="CTF.assets/image-20240130004807555.png" alt="image-20240130004807555" style="zoom:50%;" />
+
+```php
+<?php 
+error_reporting(0); 
+include 'takeip.php';
+ini_set('open_basedir','.'); 
+include 'flag.php';
+
+if(isset($_POST['Merak'])){ 
+    highlight_file(__FILE__); 
+    die(); 
+} 
 
 
+function change($v){ 
+    $v = base64_decode($v); 
+    $re = ''; 
+    for($i=0;$i<strlen($v);$i++){ 
+        $re .= chr ( ord ($v[$i]) + $i*2 ); 
+    } 
+    return $re; 
+}
+echo 'Local access only!'."<br/>";
+$ip = getIp();
+if($ip!='127.0.0.1')
+echo "Sorry,you don't have permission!  Your ip is :".$ip;
+if($ip === '127.0.0.1' && file_get_contents($_GET['2333']) === 'todat is a happy day' ){
+echo "Your REQUEST is:".change($_GET['file']);
+echo file_get_contents(change($_GET['file'])); }
+?> 
+```
 
+首先，要求`$ip=127.0.0.1`，由于`getIP()`方法没给出来，那就只能试了，最后使用`Client-ip: 127.0.0.1`成功绕过（`Client-ip`的请求不能使用Hackbar发送，可能是因为Hackbar并没有准备Client-ip的相关字段方法）
+
+**网络上常见的请求头**
+       1、`X-Forwarded-For`
+X-Forwarded-For 是一个 HTTP 扩展头部。
+
+HTTP/1.1（RFC 2616）协议并没有对它的定义，它最开始是由 Squid 这个缓存代理软件引入。
+
+如今它已经成为事实上的标准，被各大 HTTP 代理、负载均衡等转发服务广泛使用。只有在通过了 HTTP 代理或者负载均衡服务器时才会添加该项。
+
+X-Forwarded-For 请求头格式非常简单：
+
+`X-Forwarded-For: client, proxy1, proxy2`
+
+一般情况下，第一个ip为客户端真实ip，后面的为经过的代理服务器ip。
+
+2、Proxy-Client-IP
+这个一般是经过apache http服务器的请求才会有，用apache http做代理时一般会加上Proxy-Client-IP请求头，而WL- Proxy-Client-IP是他的
+
+3、WL- Proxy-Client-IP
+weblogic插件加上的请求头头
+
+4、HTTP_CLIENT_IP
+有些代理服务器会加上此请求头
+
+5、X-Real-IP
+nginx代理一般会加上此请求头
+
+`file_get_contents($_GET['2333']) === 'todat is a happy day'`这个判断的绕过就要使用PHP伪协议来做了，翻找一下那张图片，只要是能让用户控制输入流的就可以做到`php://input data://`
+
+`file_get_contents(change($_GET['file']));`最后计算出来的结果必须为：`flag.php`，从上面的代码逆回来
+
+```php
+function change($v){ 
+    $v = base64_decode($v); 
+    $re = ''; 
+    for($i=0;$i<strlen($v);$i++){ 
+        $re .= chr ( ord ($v[$i]) + $i*2 ); 
+    } 
+    return $re; 
+}
+```
+
+1. base64 解码
+2. 逐个取出字符，打成ASCII码，然后`+ $i*2`，再转成字符
+3. 返回整个字符串
+
+关键点就在第二步，将`+`变成`-`就好了，逆向计算脚本如下：
+
+```php
+# flag.php
+function change($v){
+    $v = base64_decode($v);
+    var_dump($v);
+    $re = '';
+    for($i=0;$i<strlen($v);$i++){
+        var_dump(ord($v[$i]), $i*2);
+        $re .= chr ( ord ($v[$i]) - $i*2 );
+        var_dump($re);
+    }
+    return $re;
+}
+
+$src = 'ZmxhZy5waHA=';      # flag.php
+var_dump(base64_encode(change($src)));
+```
+
+最后附上完整的HTTP报文
+
+![image-20240130010012561](CTF.assets/image-20240130010012561.png)
+
+## BUUOJ [GWCTF 2019]枯燥的抽奖
+
+### 1. PHP 伪随机数
+
+**mt_rand()函数**
+
+> mt_rand() 函数使用 Mersenne Twister 算法生成随机整数。
+> 使用语法：mt_rand(); or mt_rand(min,max);，生成一个区间内的随机数。
+> 其参数min默认为最小值0，max默认为可生成的随机数最大值2147483647，由mt_getrandmax()函数获得。
+
+**mt_srand()函数**
+
+> mt_srand() 函数播种 Mersenne Twister 随机数生成器。
+> 提示：从 PHP 4.2.0 开始，随机数生成器自动播种，因此没有必要使用该函数。当不使用随机数播种函数srand时，php也会自动为随机数播种，因此是否确定种子都不会影响正常运行。
+
+在php中每一次调用mt_rand()函数，都会检查一下系统有没有播种。（播种为mt_srand()函数完成），当随机种子生成后，后面生成的随机数都会根据这个随机种子生成。所以同一个种子下，随机数的序列是相同的，这就是漏洞点，我们先看两个例子。
+
+```php
+<?PHP
+mt_srand(0);
+echo mt_rand();
+echo mt_rand();
+echo mt_rand();
+?>
+```
+
+
+在上面的代码中，我们把随机数播种为0，每次运行都会获得相同的序列，这就是伪随机：
+
+```php
+963932192
+1273124119
+1535857466
+```
+
+
+当我们去掉mt_srand()函数时，再次重复运行实例，系统会自动为rand函数播种，但也是播种一次。因此多次重复运行的结果也相同，为：
+
+```
+992978829
+928748101
+1380702626
+```
+
+
+**因此在知晓一串随机序列的条件下，基于序列相同的seed爆破就是可能实现的。**
+
+### 2. 解题
+
+进去读一下JS源码能看到一段AJAX代码，跟着这段AJAX代码访问`check.php`就能看到源码
+
+`rand()`函数生成 随机种子 并写入`$_SESSION`，后续根据这个种子生成随机数
+
+```php
+<?php
+#这不是抽奖程序的源代码！不许看！
+header("Content-Type: text/html;charset=utf-8");
+session_start();
+if(!isset($_SESSION['seed'])){
+$_SESSION['seed']=rand(0,999999999);
+}
+
+mt_srand($_SESSION['seed']);
+$str_long1 = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+$str='';
+$len1=20;
+for ( $i = 0; $i < $len1; $i++ ){
+    $str.=substr($str_long1, mt_rand(0, strlen($str_long1) - 1), 1);       
+}
+$str_show = substr($str, 0, 10);
+echo "<p id='p1'>".$str_show."</p>";
+
+
+if(isset($_POST['num'])){
+    if($_POST['num']===$str){x
+        echo "<p id=flag>抽奖，就是那么枯燥且无味，给你flag{xxxxxxxxx}</p>";
+    }
+    else{
+        echo "<p id=flag>没抽中哦，再试试吧</p>";
+    }
+}
+show_source("check.php");
+```
+
+**随机数爆破**
+
+先使用PHP编写程序把给出的部分字符串处理成脚本需要的数据格式，程序源码如下：
+
+```
+<?php
+error_reporting(0);
+$str_long1 = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+$string='tsD5SzCFpA';
+$len1=20;
+for ( $i = 0; $i < $len1; $i++ ){
+$pos=strpos($str_long1,$string[$i]);
+    echo $pos." ".$pos." 0 61 " ;  
+}
+?>
+```
+
+传入脚本执行得出种子。
+
+[![image-20220323192922686](CTF.assets/2293037-20220323212633978-1181329822.png)](https://img2022.cnblogs.com/blog/2293037/202203/2293037-20220323212633978-1181329822.png)
+
+生成完整字符串的代码从check.php中截取就ok，将获得的种子传入拿到完整的字符串。
+
+[![image-20220323193051796](CTF.assets/2293037-20220323212633632-2109253090.png)](https://img2022.cnblogs.com/blog/2293037/202203/2293037-20220323212633632-2109253090.png)
+
+flag，在初始页面源码中可以看到存在另外一校验页面check.php。
+
+[![image-20220323191656856](CTF.assets/2293037-20220323212634843-16914972.png)](https://img2022.cnblogs.com/blog/2293037/202203/2293037-20220323212634843-16914972.png)
+
+[![image-20220323191613173](CTF.assets/2293037-20220323212634323-1067662591.png)](https://img2022.cnblogs.com/blog/2293037/202203/2293037-20220323212634323-1067662591.png)
+
+访问后直接给出了check.php的源码：
+
+```
+<?php
+#这不是抽奖程序的源代码！不许看！
+header("Content-Type: text/html;charset=utf-8");
+session_start();
+if(!isset($_SESSION['seed'])){
+$_SESSION['seed']=rand(0,999999999);
+}
+
+mt_srand($_SESSION['seed']);
+$str_long1 = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+$str='';
+$len1=20;
+for ( $i = 0; $i < $len1; $i++ ){
+    $str.=substr($str_long1, mt_rand(0, strlen($str_long1) - 1), 1);       
+}
+$str_show = substr($str, 0, 10);
+echo "<p id='p1'>".$str_show."</p>";
+
+
+if(isset($_POST['num'])){
+    if($_POST['num']===$str){x
+        echo "<p id=flag>抽奖，就是那么枯燥且无味，给你flag{xxxxxxxxx}</p>";
+    }
+    else{
+        echo "<p id=flag>没抽中哦，再试试吧</p>";
+    }
+}
+show_source("check.php");
+```
+
+可以注意到我们猜测字符串是采用伪随机函数依据种子生成的，所以我们可以利用脚本通过给出的部分字符串逆推出伪随机函数采用的种子（这里脚本采用的是php_mt_seed）。
+
+先使用PHP编写程序把给出的部分字符串处理成脚本需要的数据格式，程序源码如下：
+
+```
+<?php
+error_reporting(0);
+$str_long1 = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+$string='tsD5SzCFpA';
+$len1=20;
+for ( $i = 0; $i < $len1; $i++ ){
+$pos=strpos($str_long1,$string[$i]);
+    echo $pos." ".$pos." 0 61 " ;  
+}
+?>
+```
+
+传入脚本执行得出种子。
+
+[![image-20220323192922686](CTF.assets/2293037-20220323212633978-1181329822-17066224997537.png)](https://img2022.cnblogs.com/blog/2293037/202203/2293037-20220323212633978-1181329822.png)
+
+生成完整字符串的代码从check.php中截取就ok，将获得的种子传入拿到完整的字符串。
+
+[![image-20220323193051796](CTF.assets/2293037-20220323212633632-2109253090-17066224997539.png)](https://img2022.cnblogs.com/blog/2293037/202203/2293037-20220323212633632-2109253090.png)
+
+生成完整字符串的源码（注意PHP版本要符合脚本中给出的版本）
+
+**有点很奇怪的是，我用PHP8和PHP5跑出来的结果并不一样，且只有PHP5的结果能爆破出种子**
 
 # Misc
 
