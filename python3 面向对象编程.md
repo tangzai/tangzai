@@ -1227,3 +1227,72 @@ error 四种状态如下：
 + `xmlcharrefreplace`：创建一个xml实体表示Unicode字符，这样可以根据XML文档来转换字符串
 
 **`str.encode()和``str.decode()`方法在不指定编码时，默认使用当前平台的编码方法**
+
+## 9. 迭代器模式
+
+### 9.1 迭代器
+
+一个类如果拥有`__next__`和`__iter__`方法就可以封装成一个迭代器，并使用`iter()` 函数来获取这个迭代器对象，当我们使用`next()`来获取迭代器的下一个元素时，实际上调用的就是迭代器对象中的`__next__`方法
+
+```python
+class CapitalIterable:
+    def __init__(self, string):
+        self.string = string
+
+    def __iter__(self):
+        return CapitalIterator(self.string)
+
+
+class CapitalIterator:
+    def __init__(self, string):
+        self.words = [w.capitalize() for w in string.split()]
+        self.index = 0
+
+    def __next__(self):
+        if self.index == len(self.words):
+            raise StopIteration()
+
+        word = self.words[self.index]
+        self.index += 1
+        return word
+
+    def __iter__(self):
+        return self
+
+if __name__ == '__main__':
+    iterable = CapitalIterable('the quick brown fox jumps over the lazy dog')
+    iterator = iter(iterable)			# 获取迭代器对象
+    while True:
+        try:
+            print(next(iterator))
+        except StopIteration:
+            break
+            
+    # 也可以直接使用for循环来遍历迭代器
+     for i in iterable:
+        print(i)
+```
+
+### 9.2 列表、集合、字典推导式
+
+具体是哪一类的推导式是根据推导式的特征来判断的，如列表推导式使用的是`[]`，而字典和集合推导式则使用的是`{}`
+
+```python
+from collections import namedtuple
+Book = namedtuple('Book', 'author title genre')
+books = [
+    Book('Pratchett', 'Nightwatch', 'fantasy'),
+    Book('Pratchett', 'Thief Of Time', 'Fantasy'),
+    Book('Le Guin', 'The Dispossessed', 'scifi')
+]
+
+fantasy_genre = [b.genre for b in books]                                    # 列表推导式
+print(fantasy_genre)
+
+fantasy_author = {b.author for b in books if b.genre == 'fantasy'}          # 集合推导式
+print(fantasy_author)
+
+fantasy_titles = {b.title: b for b in books if b.genre == 'fantasy'}        # 字典推导式
+print(fantasy_titles)
+```
+
