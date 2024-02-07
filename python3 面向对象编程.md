@@ -1413,3 +1413,123 @@ print(blue_jays.send(3))
 3
 ```
 
+## 10. python设计模式 I
+
+### 10.1 装饰器
+
+在 Python 中，装饰器是一种特殊类型的函数，它可以修改其他函数的行为。装饰器的工作原理是，它接收一个函数作为输入，然后返回一个新的函数，这个新函数通常会包含一些额外的行为。
+
+下面是一个最简单的装饰器
+
+```python
+def my_decorator(func):
+    def wrapper():
+        print("Something is happening before the function is called.")
+        func()
+        print("Something is happening after the function is called.")
+
+    return wrapper
+
+
+def say_hello():
+    print("Hello!")
+
+
+say_hello = my_decorator(say_hello)     # my_decorator(say_hello) = wrapper()
+say_hello()
+```
+
+### 10.2 python 中的装饰器
+
+python 可以对装饰器做一些特定的语法操作来调用装饰器，这段代码等同于上面的代码
+
+```python 
+def my_decorator(func):
+    def wrapper():
+        print("Something is happening before the function is called.")
+        func()
+        print("Something is happening after the function is called.")
+
+    return wrapper
+
+
+@my_decorator
+def say_hello():
+    print("Hello!")
+
+
+say_hello()
+```
+
+### 10.3 观察者模式
+
+观察者模式在状态监控和事件处理的情况中很有用。用这一模式可以让指定的对象被未知一组“管擦者”对象所监控
+
+**核心对象中的值一旦被修改，就会自动调用观察者来执行任务**
+
+### 10.4 观察者模式例子
+
+观察者模式可以用于被反系统。
+
+`property`的用法忘记的话可以往上面翻翻
+
+代码思路：核心对象的值一旦被修改，就会调用`__update_observer()`函数，`__update_observer()`会遍历所有的观察者，并通过`__call__`方法直接调用，即观察者的接口在`__call__`函数中，后续的逻辑操作就可以在这里面扩展
+
+```python
+class Inventory:
+    def __init__(self):
+        self.observer = []
+        self.__product = None
+        self.__quantity = 0
+
+    def attach(self, observer):
+        self.observer.append(observer)
+
+    @property
+    def product(self):
+        return self.__product
+
+    @product.setter
+    def product(self, value):
+        self.__product = value
+        self.__update_observer()
+
+    @property
+    def quantity(self):
+        return self.__quantity
+
+    @quantity.setter
+    def quantity(self, value):
+        self.__quantity = value
+        self.__update_observer()
+
+    def __update_observer(self):
+        for observer in self.observer:
+            observer()
+
+
+class ConsoleObserver:
+    def __init__(self, inventory):
+        self.inventory = inventory
+
+    # 当类被当成函数执行的时候，自动调用
+    def __call__(self, *args, **kwargs):
+        print(self.inventory.product)
+        print(self.inventory.quantity)
+
+
+if __name__ == '__main__':
+   i = Inventory()
+   c = ConsoleObserver(i)
+   i.attach(c)
+   i.product = "widget"
+
+   i.quantity = 5
+
+# 输出：
+widget
+0
+widget
+5
+```
+

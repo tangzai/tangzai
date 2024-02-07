@@ -789,7 +789,9 @@ var_dump(unserialize($data));
 	方程计算：2x + 22 = 3x
 				  x = 22	
 
-最后序列化结果：O:1:"A":2:{s:2:"v1";s:2:"lslslslslslslslslslslslslslslslslslslslslsls";s:2:"v3";s:3:"123";}";s:2:"v2";s:3:"123";}O:1:"A":2:{s:2:"v1";s:2:"lslslslslslslslslslslslslslslslslslslslslsls";s:2:"v3";s:3:"123";}";s:2:"v2";s:3:"123";}
+最后序列化结果：
+O:1:"A":2:{s:2:"v1";s:2:"lslslslslslslslslslslslslslslslslslslslslsls";s:2:"v3";s:3:"123";}";s:2:"v2";s:3:"123";}
+O:1:"A":2:{s:2:"v1";s:2:"lslslslslslslslslslslslslslslslslslslslslsls";s:2:"v3";s:3:"123";}";s:2:"v2";s:3:"123";}
 
 payload：v1=lslslslslslslslslslslslslslslslslslslslslsls";s:2:"v3";s:3:"123";}lslslslslslslslslslslslslslslslslslslslslsls";s:2:"v3";s:3:"123";}
 payload：v2=随意

