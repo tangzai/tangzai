@@ -123,6 +123,8 @@ if ( !empty($_REQUEST['file'])
 
 **../即回退到上级目录，在url中使用../的时候 ../最前面随便写什么都行，只返回../最后面的文件数据。**
 
+在source.php?后加一个/，这时source.php会被视为一个文件夹，后面每一级的..意为上一层文件夹，通过不断尝试加入../最后可以知道具体的目录层级，以访问到ffffllllaaaagggg。
+
 最后得到`payload`
 
 `file=hint.php?../../../../../../../ffffllllaaaagggg`
