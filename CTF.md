@@ -5374,7 +5374,7 @@ if (isset ($_GET['password']))
 payload：password=9e9%00*-*
 ```
 
-### 文件包含
+## 文件包含
 
 ```php
 <?php error_reporting(0);
@@ -5400,7 +5400,7 @@ payload：
 
 知识点：**include可以不用括号，分号可以用?>代替**
 
-### ASCII码绕过检测
+## ASCII码绕过检测
 
 ```php
 <?php
@@ -5452,6 +5452,99 @@ for($i = 0; $i<129; $i++)
 ```
 urldecode('%0C36')`会被解码为字符串`"\f36"`。当这个字符串在与数字比较时，PHP会尝试将这个字符串转换为数字。在这个转换过程中，PHP会从字符串的开始处读取，直到遇到一个不能被解析为数字的字符。在这个例子中，`\f`（对应于ASCII的换页符）不能被解析为数字，所以它被忽略，剩下的`"36"`被解析为数字36。因此，`urldecode('%0C36') == 36`的结果为`true
 ```
+
+## strcmp() 函数漏洞
+
+> 注：这一个漏洞适用与5.3之前版本的php
+
+```php
+<?php
+$flag = "flag{xxxxx}";
+if (isset($_GET['a'])) {
+if (strcmp($_GET['a'], $flag) == 0) 
+die('Flag: '.$flag);
+else
+print 'No';
+}
+?>
+```
+
+使用GET方法获取参数a，使用strcmp()函数比较`$flag`与用户输入的值。
+
+传入的期望类型是字符串类型的数据 ，但是这个函数当接受到不符合字符串类型的参数就会发生错误，并返回0
+
+所以我们只需要提交一个非字符串类型的参数即可使得判断条件成立，比如使用数组类型
+
+解题方法：
+
+GET请求：?a[]=2
+
+因为strcmp()无法比较数组，则报错并返回0，0==0成立，则输出flag。
+
+## call_user_func()函数 数组调用
+
+### 说明
+
+call_user_func ( [callable](language.types.callable.html) `$callback` [, [mixed](language.pseudo-types.html#language.types.mixed) `$parameter` [, [mixed](language.pseudo-types.html#language.types.mixed) `$...` ]] ) : [mixed](language.pseudo-types.html#language.types.mixed)
+
+第一个参数 `callback` 是被调用的回调函数，其余参数是回调函数的参数。
+
+### 参数
+
+- `callback`
+
+  将被调用的回调函数（[callable](language.types.callable.html)）。
+
+- `parameter`
+
+  0个或以上的参数，被传入回调函数。
+
+```php
+<?php
+error_reporting(E_ALL);
+function increment(&$var)
+{
+    $var++;
+}
+
+$a = 0;
+call_user_func('increment', $a);
+echo $a."\n";
+
+call_user_func_array('increment', array(&$a)); // You can use this instead before PHP 5.3
+echo $a."\n";
+?>
+```
+
+### 例题
+
+```php
+<?php
+error_reporting(0);
+highlight_file(__FILE__);
+class hello {
+    function __wakeup(){
+        die("private class");
+    }
+    static function getFlag(){
+        echo file_get_contents("flag.php");
+    }
+}
+if(strripos($_POST['hello'], ":")>-1){
+    die("private function");
+}
+call_user_func($_POST['hello']);
+```
+
+`array[0]=$classname` 类名
+		`array[1]=say_hello` say_hello()方法
+		`call_user_func`函数里面可以传数组，第一个元素是类名或者类的一个对象，第二个元素是类的方法名，同样可以调用。
+
+```
+payload：hello[0]=hello&hello[1]=getFlag
+```
+
+
 
 # Misc
 
