@@ -2162,23 +2162,7 @@ class Hello extends BaseControllers
 
 直接输入键值即可
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ title }}</title>
-</head>
-<body>
-<h1>{{ title }}</h1>
-<ul>
-    {% for key, value in myList %}
-    <li>{{ key }}: {{ value }}</li>
-    {% endfor %}
-</ul>
-</body>
-</html>
-```
+![image-20240223160052313](PHPThink.assets/image-20240223160052313.png)
 
 #### 1.7.5 数据库模型 catfan/medoo
 
