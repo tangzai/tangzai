@@ -4553,9 +4553,7 @@ if (isset($_REQUEST['cmd'])) {
 
 那么如果要执行其他的命令，就必须指定具体的路径，所以最后的payload：
 
-```
-{%0A"cmd":+"/bin/cat /home/rceservice/flag"%0A}
-```
+![image-20240223155305887](CTF.assets/image-20240223155305887.png)
 
 ## [Zer0pts2020]Can you guess it?
 
