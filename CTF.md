@@ -4518,7 +4518,7 @@ array(1) {
 
 可以看到过滤非常的严格，基本上都过滤死了；那么这里只能绕过`preg_match`
 
-**`preg_match`：只校验第一行内容**，那么如果使用换行，那么就可以绕过过滤；payload：`cmd={%0A"cmd":+"echo $PATH"%0A}`
+![image-20240223155139568](CTF.assets/image-20240223155139568.png)
 
 ```php
 <?php
