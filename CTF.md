@@ -4764,11 +4764,7 @@ hint：my fav word in my fav paper? !,my love is…?, the password is password;
 
 ![image-20240127003930087](CTF.assets/image-20240127003930087.png)
 
-在这之前，要先说一下，通过抓包可以看到返回了Session字段，那么这里也要把Session伪造考虑进去的。（其实是将解码的结果传给`$_SESSION[message]`，前端再通过`$_SESSION[message]`拿到数据），后面解码之后就可以看到了
-
-由于一开始传入`{{7*7}`返回的是`no no no`，所以以为的是把`{}`做了屏蔽，其实这里屏蔽的是`*`，`{{7+7}}`是可以的，然后翻了一下葵花宝典，一开始用的是`{% if true %} 123 {% endif %}`成功！，但是最后直接就拿`{% print() %}`来传入payload了
-
-然后就是走流程了，这里用的模块一样是`Subprocess.popen`来做的，要说一下的是：`{% print(''.__class__.__base__.subclasses__()) %}`这里可能返回的信息太多了，导致前端没有渲染出来，但是在HTTP的Session中是有记录的，直接解码Session就好
+![image-20240223155629840](CTF.assets/image-20240223155629840.png)
 
 <img src="CTF.assets/image-20240127004724994.png" alt="image-20240127004724994" style="zoom:50%;" />
 
