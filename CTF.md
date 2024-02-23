@@ -3823,35 +3823,7 @@ echo urlencode(serialize($a));
 
 进来之后得到源码
 
-```py
-import flask
-import os
-
-app = flask.Flask(__name__)
-
-# 这里可以确定 flag 在配置文件中
-app.config['FLAG'] = os.environ.pop('FLAG')
-
-
-@app.route('/')
-def index():
-    return open(__file__).read()
-
-
-@app.route('/shrine/<path:shrine>')
-def shrine(shrine):
-    def safe_jinja(s):
-        s = s.replace('(', '').replace(')', '')
-        blacklist = ['config', 'self']
-        return ''.join(['{{% set {}=None%}}'.format(c) for c in blacklist]) + s
-
-    return flask.render_template_string(safe_jinja(shrine))
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-```
+![image-20240223154850663](CTF.assets/image-20240223154850663.png)
 
 通过分析源码就可以知道我们要拿到FLASK的配置文件，但是` blacklist = ['config', 'self']`又做了过滤。这里翻了下葵花宝典找到两条payload
 
