@@ -1533,3 +1533,43 @@ widget
 5
 ```
 
+## 11. 测试面向对象程序
+
+### 11.1 单元测试
+
+上下文管理器让我们可以用正常的方式来写代码（直接调用函数或执行代码）。而不需要用另外一个函数来打包
+
+```py
+import unittest
+
+
+def average(seq):
+    return sum(seq / len(seq))
+
+
+class TestAverage(unittest.TestCase):
+    # 这两个方法写法不一样，但是本质上是相同的，可以选择自己喜欢的方式来写
+    def test_zero(self):
+        self.assertRaises(ZeroDivisionError, average, [])
+
+    # 上下文管理器写法
+    def test_with_zero(self):
+        with self.assertRaises(ZeroDivisionError):
+            average([])
+
+
+if __name__ == '__main__':
+    unittest.main()
+
+```
+
+其他常用断言方法：
+
+| 方法                                                         |                             说明                             |
+| :----------------------------------------------------------- | :----------------------------------------------------------: |
+| assertGreater<br />assertGreaterEqual<br />assertLess<br />assertLessEqual<br /> |        接收两个可比较对象，并按照方法名的含义进行比较        |
+| assertIn<br />assertNotIn                                    |             确保元素存在（或不存在）于容器对象中             |
+| assertIsNone<br />assertIsNotNone                            |         确保元素是（或不是）None（而不是其他非真值）         |
+| assertSameElements                                           |           确保两个容器对象包含相同的元素，不计顺序           |
+| assertSequenceEqual<br />assertDictEqual<br />assertSetEqual<br />assertListEqual<br />assertTupleEqual | 确保两个容器拥有同样的元素和顺序。如果不同则列出不同之处。后面4个方法还会比较元素容器类型 |
+
