@@ -1573,3 +1573,40 @@ if __name__ == '__main__':
 | assertSameElements                                           |           确保两个容器对象包含相同的元素，不计顺序           |
 | assertSequenceEqual<br />assertDictEqual<br />assertSetEqual<br />assertListEqual<br />assertTupleEqual | 确保两个容器拥有同样的元素和顺序。如果不同则列出不同之处。后面4个方法还会比较元素容器类型 |
 
+### 11.2 忽略失败的测试
+
+a. `test_fails`: - 这个方法使用了装饰器 `@unittest.expectedFailure`，表示我们预期这个测试会失败。 - 在方法内部，我们使用断言来比较 `False` 和 `True`，这里故意让测试失败。
+
+b. `test_skip`: - 这个方法使用了装饰器 `@unittest.skip("Test is useless")`，表示我们跳过这个测试。 - 不会执行这个测试方法，因为我们已经明确指定它是无用的。
+
+c. `test_skipif`: - 这个方法使用了装饰器 `@unittest.skipIf(sys.version_info.minor == 4, "broken on 3.4")`。 - 如果 Python 版本的次要版本号是 3.4，那么这个测试会被跳过。 - 否则，会执行这个测试方法。
+
+d. `test_skipunless`: - 这个方法使用了装饰器 `@unittest.skipUnless(sys.platform.startswith('linux'), 'broken unless on linux')`。 - 如果当前操作系统不是 Linux，那么这个测试会被跳过。 - 否则，会执行这个测试方法。
+
+```py
+import unittest
+import sys
+
+
+class SkipTests(unittest.TestCase):
+    @unittest.expectedFailure
+    def test_fails(self):
+        self.assertEquals(False, True)
+
+    @unittest.skip("Test is useless")
+    def test_skip(self):
+        self.assertEquals(False, True)
+
+    @unittest.skipIf(sys.version_info.minor == 4, "broken on 3.4")
+    def test_skipif(self):
+        self.assertEquals(False, True)
+
+    @unittest.skipUnless(sys.platform.startswith('linux'), 'broken unless on linux')
+    def test_skipunless(self):
+        self.assertEquals(False, True)
+
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
