@@ -2321,3 +2321,267 @@ for page in range(1, 21):
 
 ```
 
+# 第六章：异步爬虫
+
+## 6.1 协程的基本原理
+
+### 6.1.1. 基础知识
+
++ 阻塞：阻塞状态指程序未得到所需计算机资源时被挂起的状态。程序在此期间，将处于等待状态，无法干别的事情
++ 非阻塞：程序在遇到阻塞的时候，会自动切换干别的事情
++ 多进程：利用CPU的多核优势，同时开启多个进程来完成任务
++ 协程：python中相当于多线程，但是比多线程开销更小，速度更快
+
+### 6.1.2. 协程的用法
+
+* `event_loop`：事件循环，相当于死循环。将函数\任务注册到事件循环上，以对应的处理方法来处理
+* `coroutine`：协程！可以使用`async`关键字来定义一个方法，这个方法在==调用时不会立即执行==，而是返回一个协程对象
+* `task`：任务，对协程对象的进一步封装！以==获取协程对象的状态==
+
+### 6.1.3. 定义协程
+
+定义了`loop`对象之后，调用`create_task`方法，将协程对象转化为task对象，随后打印输出，发现处于`pending`状态。随后将task对象添加到事件循环中执行，并再次打印task对象，发现此时状态为`finished`，同时可以看到结果为1
+
+```py
+import asyncio
+
+async def execute(x):
+    print('Number ', x)
+
+coroutine = execute(1)
+print('Coroutine: ', coroutine)
+print('After calling execute')
+
+loop = asyncio.get_event_loop()
+task = loop.create_task(coroutine)
+print('Task, ', task)
+loop.run_until_complete(task)
+print('Task, ', task)
+print('After calling loop')
+```
+
+运行结果如下：
+
+```
+Coroutine:  <coroutine object execute at 0x000002BAD9210CC8>
+After calling execute
+Task,  <Task pending coro=<execute() running at D:\Python\test.py:3>>
+Number  1
+Task,  <Task finished coro=<execute() done, defined at D:\Python\test.py:3> result=None>
+Agter calling loop
+```
+
+### 6.1.4. 多任务协程
+
+```py
+import asyncio
+import requests
+
+async def request():
+    url = 'http://www.baidu.com'
+    status = requests.get(url)
+    return status.status_code
+
+# 创建任务 asyncio.ensure_future() 会直接返回 task 对象
+tasks = [asyncio.ensure_future(request()) for _ in range(5)]
+print('Task ', tasks)
+
+# 创建事件循环
+loop = asyncio.get_event_loop()
+# 执行事件循环，asyncio.wait() 会阻塞主线程直到事件循环执行完毕
+loop.run_until_complete(asyncio.wait(tasks))
+
+# 执行完毕！使用 task.result() 来获取结果
+for task in tasks:
+    print('Task Result: ', task.result())
+```
+
+### 6.1.5. 使用 aiohttp
+
+**`await`关键字：**用于有阻塞的代码语句前，python在遇到`await`时，会将当前语句执行完毕，并挂起该协程，切换到其他任务
+
+开始运行时，时间循环会执行第一个task，对于第一个task来说，当执行到第一个await跟着的get方法是，它就会被挂起，然后开始执行第二个task，遇到`await session.get(url)`再次挂起，以此类推，直到所有task都被挂起，此时CPU就只能等待直到某个task返回资源
+
+```py
+import asyncio
+import aiohttp
+import time
+
+start = time.time()
+
+
+async def get(url):
+    session = aiohttp.ClientSession()
+    response = await session.get(url)
+    # 必须关闭，否则会报错！
+    await session.close()
+    return response
+
+
+async def request():
+    url = 'https://www.httpbin.org/delay/5'
+    print('Waiting for ', url)
+    response = await get(url)
+    print('Get response from ', url, 'response ', response)
+
+
+tasks = [asyncio.ensure_future(request()) for _ in range(10)]
+loop = asyncio.get_event_loop()
+loop.run_until_complete(asyncio.wait(tasks))
+
+end = time.time()
+print('Cost time: ', end - start)
+```
+
+## 6.2 aiohttp 的使用
+
+### 6.2.1 基本实例
+
+response.text() 返回一个协程对象，所以需要使用 await 修饰；response.status 返回的则是整形状态码，因此不需要使用await；**实际使用需要参考官方文档以判断返回值是否需要用await修饰**
+
+```py
+import asyncio
+import aiohttp
+
+
+async def fetch(session, url):
+    async with session.get(url) as response:
+        # response.text() 返回一个协程对象，所以需要使用 await 修饰；response.status 返回的则是整形状态码，因此不需要使用await
+        return await response.text(), response.status
+
+
+async def main():
+    async with aiohttp.ClientSession() as session:
+        html, status = await fetch(session, 'https://cuiqingcai.com')
+        print(f"html: {html}")
+        print(f"status: {status}")
+
+
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+```
+
+其中以下代码是等价的！这就是为什么要使用`async with`的原因！`async with`能保证协程被正确关闭并返回response
+
+```py
+async with aiohttp.ClientSession() as session:
+	async with session.get('http://httpbin.org/get') as resp:
+
+上面两句代码是否等于下面的代码：
+session = aiohttp.ClientSession()
+response = await session.get(‘http://httpbin.org/get’)
+# 必须关闭，否则会报错！
+await session.close()
+return response
+```
+
+### 6.2.2 URL参数设置
+
+在`aiohttp.ClientSession`对象中设置`param`关键字即可
+
+```py
+import aiohttp
+import asyncio
+
+
+async def main():
+    params = {'name': 'Bob', 'age': 18}
+    async with aiohttp.ClientSession() as session:
+        async with session.get('http://www.httpbin.org/get', params=params) as response:
+            print(await response.text())
+
+
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+```
+
+### 6.2.3 POST 请求
+
+这里对应的请求头：`Content-Type: application/x-www-form-urlencoded`
+
+```py
+import aiohttp
+import asyncio
+
+
+async def main():
+    data = {'name': 'Bob', 'age': 18}
+    async with aiohttp.ClientSession() as session:
+        async with session.post('https://www.httpbin.org/post', data=data) as response:
+            print(await response.text())
+
+
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+```
+
+### 6.2.4 JSON 请求
+
+这里直接使用`json `关键字即可
+
+```py
+import aiohttp
+import asyncio
+
+
+async def main():
+    data = {'name': 'Bob', 'age': 18}
+    async with aiohttp.ClientSession() as session:
+        async with session.post('https://www.httpbin.org/post', json=data) as response:
+            print(await response.text())
+
+
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+```
+
+### 6.2.5 响应
+
+```py
+import aiohttp
+import asyncio
+
+
+async def main():
+    data = {'name': 'Bob', 'age': 18}
+    async with aiohttp.ClientSession() as session:
+        async with session.post('https://www.httpbin.org/post', json=data) as response:
+            print('status: ', response.status)              # 状态码
+            print('headers: ', response.headers)            # 响应头
+            print('body: ', await response.text())          # 响应体
+            print('bytes: ', await response.read())         # 响应体二进制内容
+            print('json: ', await response.json())          # 响应体JSON结果
+
+
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+
+```
+
+### 6.2.6 超时设置
+
+这里设置1秒的超时时间；如果超时，则会抛出`TimeoutError`异常，其类型为：`asyncio.TimeoutError`
+
+```py
+import aiohttp
+import asyncio
+
+
+async def main():
+    try:
+        timeout = aiohttp.ClientTimeout(total=1)
+        async with aiohttp.ClientSession() as session:
+            async with session.get('http://www.httpbin.org/get', timeout=timeout) as response:
+                print('status: ', response.status)
+    except asyncio.TimeoutError as e:
+        print('超时错误')
+
+if __name__ == '__main__':
+    asyncio.get_event_loop().run_until_complete(main())
+```
+
