@@ -2585,3 +2585,599 @@ if __name__ == '__main__':
     asyncio.get_event_loop().run_until_complete(main())
 ```
 
+### 6.2.7 并发限制
+
+1. `CONCURRENCY = 5`：这行代码设置了并发数为5，也就是说，任何时候最多只有5个网络请求在同时进行。
+2. `semaphore = asyncio.Semaphore(CONCURRENCY)`：这行代码创建了一个信号量对象，用于限制并发数。信号量的初始值为5，每当一个网络请求开始时，信号量的值就会减1；当一个网络请求结束时，信号量的值就会加1。
+3. `session = None`：这行代码定义了一个全局变量 `session`，它将在后面被赋值为一个 `aiohttp.ClientSession` 对象。
+4. `async def scrape_api()`：这个函数是一个协程，它使用 `session.get(URL)` 发送一个 GET 请求，并返回响应的文本内容。这个函数使用了 `async with semaphore` 来限制并发数。
+5. `async def main()`：这个函数是主协程，它首先创建一个 `aiohttp.ClientSession` 对象，然后创建1000个 `scrape_api` 协程，并使用 `asyncio.gather` 等待所有协程完成。
+6. `if __name__ == '__main__'`：这个条件语句确保了只有在直接运行这个脚本时，才会执行 `main` 协程。
+
+```py
+import asyncio
+import aiohttp
+
+CONCURRENCY = 5
+URL = 'http://www.baidu.com'
+
+semaphore = asyncio.Semaphore(CONCURRENCY)
+session = None
+
+async def scrape_api():
+    async with semaphore:
+        print('scraping: ', URL)
+        async with session.get(URL) as response:
+            await asyncio.sleep(1)
+            return await response.text()
+
+
+async def main():
+    global session
+    session = aiohttp.ClientSession()
+    scrape_index_task = [asyncio.ensure_future(scrape_api()) for _ in range(1000)]
+    await asyncio.gather(*scrape_index_task)
+
+if __name__ == '__main__':
+    asyncio.get_event_loop().run_until_complete(main())
+```
+
+## 6.3 aiohttp 异步爬取实战
+
+### 6.3.1 基本配置
+
+```py
+import asyncio
+import aiohttp
+import logging
+
+# 定义日志等级和格式化日志输出
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s : %(message)s')
+
+INDEX_URL = 'https://spa5.scrape.center/api/book?limit=18&offset={offset}'
+DETAL_ID = 'view-source:https://spa5.scrape.center/detail/{id}'
+
+PAGE_SIZE = 18
+PAGE_NUMBER = 100
+CONCURRENCY = 5
+```
+
+日志格式化占位符如下：
+
+![image-20240315221538035](Python%20%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91%E5%AE%9E%E6%88%98.assets/image-20240315221538035.png)
+
+### 6.3.2 完整代码
+
+```py
+import asyncio
+import aiohttp
+import logging
+import json
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s : %(message)s')
+
+INDEX_URL = 'https://spa5.scrape.center/api/book?limit=18&offset={offset}'
+DETAL_ID = 'view-source:https://spa5.scrape.center/detail/{id}'
+
+PAGE_SIZE = 18
+PAGE_NUMBER = 100
+# 设置并发数
+CONCURRENCY = 5
+
+semaphore = asyncio.Semaphore(CONCURRENCY)
+session = None
+
+
+async def scrape_api(url):
+    """
+    并发限制函数
+    """
+    async with semaphore:
+        try:
+            logging.info(f"scraping {url}")
+            async with session.get(url) as response:
+                return await response.json()
+        except aiohttp.ClientError:
+            logging.error(f"error occurred while scraping {url}", exc_info=True)
+
+
+async def scrape_index(page):
+    """
+    爬取详情页
+    """
+    url = INDEX_URL.format(offset=PAGE_SIZE * (page - 1))
+    # 这里使用 await 修饰是因为 scrape_api() 返回的是协程对象
+    return await scrape_api(url)
+
+async def main():
+    global session
+    session = aiohttp.ClientSession()
+    # 创建任务，返回Future对象
+    scrape_index_tasks = [asyncio.ensure_future(scrape_index(page)) for page in range(1, PAGE_NUMBER + 1)]
+    # 等待所有任务完成
+    result = await asyncio.gather(*scrape_index_tasks)
+    result = json.dumps(result, ensure_ascii=False, indent=2)
+    logging.info(f"result {result}")
+
+
+
+
+if __name__ == '__main__':
+    asyncio.get_event_loop().run_until_complete(main())
+```
+
+# 第七章： JavaScript 动态渲染页面爬取
+
+虽然我们可以通过分析目标站点的AJAX代码和API规律来爬取目标服务器的数据。但是如果遇到以下情况则该方法失效：
+
++ API接口的访问需要验证，如：Cookie、Token、Twig
++ AJAX数据被加密
+
+此时我们可以使用`Selenium`库来绕过这些限制，通过`Selenium`库来模拟浏览器的运行，然后爬取数据，这样就可以实现在浏览器中看到的内容是什么样的，爬取的源码就是什么样的---**所见即所爬**
+
+## 7.1 Selenium 的使用
+
+### 7.1.1 准备工作
+
+> 报错参考链接：https://www.bytezonex.com/archives/23.html#google_vignette
+
++ 安装Selenium，参考链接：`https://cuiqingcai.com/33043.html`
+
+在安装Selenium的同时还需要安装ChromeDirver，在尝试运行时会报错：
+
+```
+ImportError: urllib3 v2.0 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'OpenSSL 1.1.0j  20 Nov 2018'. See: https://github.com/urllib3/urllib3/issues/2168
+```
+
+原因是`urllib3`只支持`OpenSSL 1.1.1+`，但是现在系统的OpenSSL版本确实`1.1.0`，解决这个错误的方法只有两个：
+
++ 升级OpenSSL（较难）
++ 降级urllib3
+
+这里推荐先尝试降级urllib3！
+
+```
+C:\Users\19374>pip uninstall urllib3
+C:\Users\19374>pip install urllib3==1.26.6
+```
+
+### 7.1.2 基本用法
+
+```py
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+
+browser = webdriver.Chrome()
+try:
+    browser.get('http://www.baidu.com')
+    input = browser.find_element(By.ID, 'kw')
+    # 低版本 selenium 语法
+    # input = browser.find_element_by_id('kw')
+    input.send_keys('Python')
+    input.send_keys(Keys.ENTER)
+    wait = WebDriverWait(browser, 10)
+    wait.until(EC.presence_of_element_located((By.ID, 'content_left')))
+    print(browser.current_url)
+    print(browser.get_cookies())
+    print(browser.page_source)
+finally:
+    browser.close()
+
+```
+
+如果能自动打开浏览器并跳转到百度搜索Python即安装成功！
+
+<img src="Python%20%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91%E5%AE%9E%E6%88%98.assets/image-20240315234354520.png" alt="image-20240315234354520" style="zoom: 50%;" />
+
+### 7.1.3 初始化浏览器对象
+
+selenium 支持的浏览器非常多，包括：Chrome、Firefox、Edge等电脑端浏览器，也有Android、BlackBerry等收集端浏览器；但是这些浏览器是否也需要驱动就不直到了！
+
+```py
+from selenium import webdriver
+
+browser = webdriver.Chrome()
+browser = webdriver.firefox()
+browser = webdriver.Edge()
+browser = webdriver.Safari()
+```
+
+### 7.1.4 访问页面
+
+```py
+from selenium import webdriver
+
+# 创建 Chrome 流量对象
+browser = webdriver.Chrome()
+# 访问百度
+browser.get('http://www.baidu.com')
+# 获取源码
+print(browser.page_source)
+# 关闭liu
+browser.close()
+```
+
+### 7.1.5 获取单个节点
+
+以下是Selenium获取单个节点的所有方法
+
+```
+input_xpath = browser.find_element(By.XPATH, 'value')
+input_xpath = browser.find_element(By.ID, 'value')
+input_xpath = browser.find_element(By.NAME, 'value')
+input_xpath = browser.find_element(By.LINK_TEXT, 'value')
+input_xpath = browser.find_element(By.PARTIAL_LINK_TEXT, 'value')
+input_xpath = browser.find_element(By.TAG_NAME, 'value')
+input_xpath = browser.find_element(By.CLASS_NAME, 'value')
+input_xpath = browser.find_element(By.CSS_SELECTOR, 'value')
+```
+
+### 7.1.6 获取多个节点
+
+要获取多个节点就应该使用`browser.find_elements`，注意这里有`s`，返回一个列表！
+
+```py
+import time
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+browser = webdriver.Chrome()
+browser.get('https://www.dangdang.com/')
+info = browser.find_elements(By.CSS_SELECTOR, 'div')
+print(info)
+
+time.sleep(10)
+browser.close()
+```
+
+### 7.1.7 节点交互
+
+这里自动打开浏览器并跳转到当当网搜索python相关的信息
+
+```py
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+
+
+browser = webdriver.Chrome()
+browser.get('https://www.dangdang.com/')
+input_xpath = browser.find_element(By.XPATH, '//*[@id="key_S"]')
+input_xpath.send_keys('python')
+input_xpath.send_keys(Keys.ENTER)
+
+time.sleep(5)
+browser.close()
+```
+
+### 7.1.8 动作链
+
+如果有一些操作没有特定的执行对象，比如鼠标拖曳、键盘按键等，这些操作需要用另一种方法执行，那就是动作连
+
+```py
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver import ActionChains
+
+browser = webdriver.Chrome()
+url = 'https://www.runoob.com/try/try.php?filename=jqueryui-api-droppable'
+browser.get(url)
+# 切换到 iframeResult 这个子页面中
+# 如果元素在 iframe 标签里面，就需要先执行此操作
+browser.switch_to.frame('iframeResult')
+source = browser.find_element(By.CSS_SELECTOR, '#draggable')
+target = browser.find_element(By.CSS_SELECTOR, '#droppable')
+# 实例化 ActionChains 对象
+action = ActionChains(browser)
+# 声明拖曳对象和拖曳目标
+action.drag_and_drop(source, target)
+# 执行操作
+action.perform()
+```
+
+### 7.1.9 运行 JavaScript
+
+有些操作Selenium没有提供API，例如：下拉进度条，面对这种情况可以模拟运行Javascript实现；
+
+`execute_script('javascript 代码')`
+
+```py
+from selenium import webdriver
+
+
+browser = webdriver.Chrome()
+browser.get('https://www.zhihu.com/')
+# 滚动到页面的最底部
+browser.execute_script('window.scrollTo(0, document.body.scrollHeight)')
+# 弹出弹框
+browser.execute_script('alert("To Bottom")')
+```
+
+### 7.1.10 获取节点信息
+
+可以使用`get_attribute`方法获取节点的属性
+
+```py
+import time
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+
+browser = webdriver.Chrome()
+browser.get('https://spa2.scrape.center/')
+logo_element = browser.find_element(By.XPATH, '//*[@id="header"]/div/div/div/a/img')
+# 获取节点的src属性，即logo的链接地址
+logo = logo_element.get_attribute('src')
+print(logo)
+
+time.sleep(5)
+```
+
+#### 7.1.10.1 获取文本值
+
+```py
+import time
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+
+browser = webdriver.Chrome()
+browser.get('https://spa2.scrape.center/')
+logo_element = browser.find_element(By.CLASS_NAME, 'logo-title')
+# 获取文本值
+print(logo_element.text)
+
+time.sleep(5)
+```
+
+#### 7.1.10.2 获取ID、位置、标签名和大小
+
+```py
+import time
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+
+browser = webdriver.Chrome()
+browser.get('https://spa2.scrape.center/')
+logo_element = browser.find_element(By.CLASS_NAME, 'logo-title')
+# 获取 id
+print(logo_element.id)
+# 获取 位置
+print(logo_element.location)
+# 获取 标签名
+print(logo_element.tag_name)
+# 获取 大小
+print(logo_element.size)
+
+time.sleep(5)
+```
+
+### 7.1.11 切换Frame
+
+网页中有一种节点叫做iframe，也就是子Frame，相当于页面的子页面，它的结构和外部网页的结构完全一致。Selenium打开一个页面后，默认是在父Frame。此时这个页面中如果还有子Frame，它是不能获取子Frame里的节点的，这是就需要使用`switch_to.frame`方法切换 Frame
+
+```py
+import selenium.common
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver import ActionChains
+
+browser = webdriver.Chrome()
+url = 'https://www.runoob.com/try/try.php?filename=jqueryui-api-droppable'
+browser.get(url)
+browser.switch_to.frame('iframeResult')
+
+try:
+    logo = browser.find_element(By.CLASS_NAME, 'logo')
+except selenium.common.exceptions.NoSuchElementException:
+    print('NO LOGO')
+
+# 切换到父frame
+browser.switch_to.parent_frame()
+logo = browser.find_element(By.CLASS_NAME, 'logo')
+print(logo)
+print(logo.text)
+
+```
+
+这里如果子Frame中没有logo，则会输出NO LOGO，并切换回夫frame
+
+### 7.1.12 延时等待
+
+在Selenium中，get方法在网页框架加载结果后才会结束执行，如果我们尝试在get方法执行完毕时获取网页源码，其结果可能并不是浏览器完全加载完成的页面，因为某些页面额外的Ajax请求，页面还会经由Javascript渲染，如果，在必要的时候，我们需要设置浏览器延时等待一定的时间，确保节点已经加载出来
+
+#### 7.1.12.1 隐式等待
+
+使用隐式等待执行测试时，如果Selenium没有在DOM中找到节点，将继续等待，在超出设定时间后，抛出找不到节点的异常。换句话说，在查找节点而节点没有立即出现时，隐式等待回先等待一段时间再查找DOM，默认的等待时间是0
+
+```py
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+browser = webdriver.Chrome()
+browser.implicitly_wait(10)
+browser.get('https://spa2.scrape.center/')
+title_element = browser.find_element(By.XPATH, '//*[@id="index"]/div[1]/div[1]/div[1]/div/div/div[2]/a/h2')
+print(title_element.text)
+```
+
+#### 7.1.12.2 显式等待
+
+隐式等待的效果其实并不好，因为我们只规定了一个固定的时间，而页面的加载时间回受网络条件影响
+
+还有一种更何时的等待方法---显式等待，这种方式会指定要查找的节点和最长等待时间。如果再规定时间内加载处了要查找的节点，就返回这个节点；如果到了规定时间依然没有加载出节点，就抛出超时异常
+
+```py
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+browser = webdriver.Chrome()
+browser.get('https://www.dangdang.com/')
+wait = WebDriverWait(browser, 10)
+# 如果10s内成功加载节点，则返回节点；否则，抛出超时异常
+input_element = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="key_S"]')))
+# 如果10s内是可点击的，则返回节点；否则，抛出超时异常
+button_element = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="form_search_new"]/input[10]')))
+print(input_element, button_element)
+```
+
+**常见等待条件**
+
+1. **title_is**：检查页面标题是否与给定的标题完全匹配。
+2. **title_contains**：检查页面标题是否包含给定的部分标题。
+3. **presence_of_element_located**：检查页面上是否存在指定的元素。
+4. **visibility_of_element_located**：检查指定元素是否可见。
+5. **visibility_of**：检查元素是否可见。
+6. **presence_of_all_elements_located**：检查页面上是否存在所有指定的元素。
+7. **text_to_be_present_in_element**：检查指定元素的文本是否包含给定的文本。
+8. **text_to_be_present_in_element_value**：检查指定元素的值是否包含给定的文本。
+9. **frame_to_be_available_and_switch_to_it**：检查指定的iframe是否可用，并切换到它。
+10. **invisibility_of_element_located**：检查指定元素是否不可见。
+11. **element_to_be_clickable**：检查元素是否可点击。
+12. **staleness_of**：检查元素是否已过时（不再在DOM中）。
+13. **element_to_be_selected**：检查元素是否被选中。
+14. **element_located_to_be_selected**：检查指定元素是否被选中。
+15. **element_selection_state_to_be**：检查元素的选中状态是否与给定的状态匹配。
+16. **element_located_selection_state_to_be**：检查指定元素的选中状态是否与给定的状态匹配。
+17. **alert_is_present**：检查页面上是否存在警告框。
+
+### 7.1.13 前进和后退
+
+平常使用浏览器时，都有前进和后退功能，Selenium也可以完成这个操作
+
+```py
+import time
+
+from selenium import webdriver
+
+
+browser = webdriver.Chrome()
+browser.get('http://www.baidu.com')
+browser.get('http://www.taobao.com')
+browser.get('http://www.python.org')
+# 后退一步
+browser.back()
+time.sleep(1)
+# 前进一步
+browser.forward()
+time.sleep(1)
+browser.close()
+```
+
+### 7.1.14 Cookie
+
+```py
+import time
+
+from selenium import webdriver
+
+
+browser = webdriver.Chrome()
+browser.get('http://www.zhihu.com')
+# 获取cookie
+print(browser.get_cookies())
+# 添加cookie
+browser.add_cookie({'name': 'jack', 'age': 18, 'value': 'germey'})
+print(browser.get_cookies())
+# 删除所有cookie
+browser.delete_all_cookies()
+print(browser.get_cookies())
+```
+
+### 7.1.15 选项卡管理
+
+访问网页时，会开启一个个选项卡，在Selenium中，我们也可以对选项卡做操作
+
+```py
+import time
+
+from selenium import webdriver
+
+
+browser = webdriver.Chrome()
+browser.get('http://www.zhihu.com')
+browser.execute_script('window.open()')
+# 输出所有选项卡，返回一个列表
+print(browser.window_handles)
+# 跳转第二个选项卡
+browser.switch_to.window(browser.window_handles[1])
+browser.get('http://www.baidu.com')
+time.sleep(1)
+# 跳转第一个选项卡
+browser.switch_to.window(browser.window_handles[0])
+browser.get('http://www.python.org')
+time.sleep(1)
+```
+
+### 7.1.16 反屏蔽
+
+现在有很多网址增加了对Selenium的检查，放置一些爬取的恶意爬取，如果检查到有人使用Selenium打开浏览器，就直接屏蔽。
+
+**检测原理：**检测当前浏览器窗口下的`window.navigator`对象中是否包含webdriver属性是否为True
+
+**本地测试：**可以看到返回的时False
+
+![image-20240316164632082](Python%20%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91%E5%AE%9E%E6%88%98.assets/image-20240316164632082.png)
+
+![image-20240316164639935](Python%20%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91%E5%AE%9E%E6%88%98.assets/image-20240316164639935.png)
+
+**Selenium浏览器测试：**
+
+<img src="Python%20%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91%E5%AE%9E%E6%88%98.assets/image-20240316164740135.png" alt="image-20240316164740135" style="zoom: 67%;" />
+
+可以看到返回的时True
+
+<img src="Python%20%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91%E5%AE%9E%E6%88%98.assets/image-20240316164722715.png" alt="image-20240316164722715" style="zoom: 67%;" />
+
+**绕过屏蔽的核心思想是在页面刚加载就将`webdriver`属性设置为空。**但是由于`execute_script`方法是在页面加载完之后才调用的，所以需要使用CDP解决这个问题；即CDP可以做到在页面刚加载就将`webdriver`属性设置为空
+
+```py
+import time
+
+from selenium import webdriver
+from selenium.webdriver import ChromeOptions
+
+option = ChromeOptions()
+option.add_experimental_option('excludeSwitches', ['enable-automation'])
+option.add_experimental_option('useAutomationExtension', False)
+
+browser = webdriver.Chrome(options=option)
+browser.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
+    'source': 'Object.defineProperty(navigator, "webdriver", {get: () => undefined})'
+})
+browser.get('https://antispider1.scrape.center/')
+browser.execute_script('console.log(window.navigator.webdriver)')
+time.sleep(10)
+browser.close()
+
+```
+
+### 7.1.17 无头模式
+
+即在使用Selenium的时候，不弹出窗口，这样做可以减少资源加载的时间和网络带宽
+
+```py
+from selenium import webdriver
+from selenium.webdriver import ChromeOptions
+
+option = ChromeOptions()
+option.add_argument('--headless')
+browser = webdriver.Chrome(options=option)
+browser.set_window_size(1366, 768)
+browser.get('http://www.baidu.com')
+# 将当前浏览器的内容截图并保存为 preview.p
+browser.get_screenshot_as_file('preview.png')
+
+```
+
