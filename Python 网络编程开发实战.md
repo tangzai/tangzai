@@ -2715,6 +2715,11 @@ if __name__ == '__main__':
 
 此时我们可以使用`Selenium`库来绕过这些限制，通过`Selenium`库来模拟浏览器的运行，然后爬取数据，这样就可以实现在浏览器中看到的内容是什么样的，爬取的源码就是什么样的---**所见即所爬**
 
+**总结：**
+
++ `requests`爬取的是 右键->查看网页源代码 的内容，这些内容是网页的初始状态，即没有经过JS渲染的状态
++ `selenium`爬取的是 f12->源代码 的内容，这些内容是经过了JS渲染的代码
+
 ## 7.1 Selenium 的使用
 
 ### 7.1.1 准备工作
@@ -3181,3 +3186,502 @@ browser.get_screenshot_as_file('preview.png')
 
 ```
 
+## 7.2 Pyppeteer 的使用
+
+`Seleniunm`虽然非常强大，但是在使用时并不方便，例如配置环境变量时，需要先安装好相关浏览器，还要下载对应的驱动。此时就可以使用Pyppeter
+
+### 7.2.1 Pyppeteer 介绍
+
+Pyppeteer 的背后实际上有一个i类似于Chrome的浏览器——Chrominu，它执行一些操作，从而进行网页渲染。Chrominu其实就是Chrome测试版本，两款浏览器同根同源，浏览器的很多新功能都会现在Chromium实现，待稳定后再移植到Chrome
+
+Pyppeteer就是以来Chromium浏览器运行的。如果第一次运行Pyppeteer的时候，没有安装Chromium浏览器，程序就会帮我们自动安装和配置好！
+
+### 7.2.2 Pyppeteer 安装
+
+> 安装教程：https://cuiqingcai.com/31088.html
+
+### 7.2.3 快速上手
+
+获取`class='item'`下的`class='name'`的所有元素的文本内容
+
+```py
+import asyncio
+from pyppeteer import launch
+from pyquery import PyQuery as pq
+
+
+async def main():
+    # 新建浏览器对象
+    browser = await launch()
+    # 新建选项卡
+    page = await browser.newPage()
+    # 访问url
+    await page.goto('https://spa2.scrape.center/')
+    # 调用选择器筛选节点
+    await page.waitForSelector('.item .name')
+    # 获取页面内容（JS加载完之后的）
+    doc = pq(await page.content())
+    # 获取节点文本内容
+    names = [item.text() for item in doc('.item .name').items()]
+    print('Name: ', names)
+    await browser.close()
+
+asyncio.get_event_loop().run_until_complete(main())
+
+```
+
+设置了窗口大小、保存了页面截图、执行JavaScript语句并返回了对应的数据。其中，在screenshot方法里，通过path参数用于转入页面截图的保存路径
+
+```py
+import asyncio
+from pyppeteer import launch
+
+width,height = 1366,768
+
+async def main():
+    browser = await launch()
+    page = await browser.newPage()
+    await page.setViewport({'width': width, 'height': height})
+    await page.goto('https://spa2.scrape.center/')
+    await page.waitForSelector('.item .name')
+    await asyncio.sleep(2)
+    await page.screenshot(path='example.png')
+    dimensions = await page.evaluate('''() => {
+        return {
+            width: document.documentElement.clientWidth,
+            height: document.documentElement.clientHeight,
+            deviceScaleFactor: window.devicePixelRatio,
+        }
+    }''')
+
+    print(dimensions)
+    await browser.close()
+
+
+asyncio.get_event_loop().run_until_complete(main())
+```
+
+![example](Python%20%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91%E5%AE%9E%E6%88%98.assets/example.png)
+
+### 7.2.4 launch 方法
+
+> launch方法链接：https://pyppeteer.github.io/pyppeteer/reference.html#launcher
+
+**launch方法的参数**
+
+- `ignoreHTTPSErrors`(bool): 是否忽略 HTTPS 错误。默认为 `False`.
+- `headless`(bool): 是否启用无头模式，即无见面模式。如果devtools参数是True，该参数就会被设置未False，否则为True，即默认开启无头模式
+- `executablePath`(str)：要运行的 Chromium 或 Chrome 可执行文件的路径，可以指定为已有的` Chromium`或`Chrome`。
+- `slowMo`(int|float)：通过传入指定的时间，可以减缓Pyppeteer的一些模拟操作
+- `args`(List[str])：传递给浏览器进程的附加参数（标志）。
+- `ignoreDefaultArgs`(bool): 是否忽略Pyppeteer的默认参数。如果使用这个参数，那么最好通过args设置一些参数，那么最好通过args设置一些参数，否则可能会出现一些意想不到的问题；小心使用。
+- `handleSIGINT`(bool)：按 Ctrl+C 关闭浏览器进程。默认为 `True`.
+- `handleSIGTERM`(bool)：在 SIGTERM 时关闭浏览器进程。默认为`True`.
+- `handleSIGHUP`(bool)：在 SIGHUP 上关闭浏览器进程。默认为 `True`.
+- `dumpio`(bool): 是否将浏览器进程 stdout 和 stderr 通过管道传输到`process.stdout`和`process.stderr`。默认为`False`.
+- `userDataDir`(str)：用户数据目录的路径，可以保留一些个性化配置和操作记录。
+- `env`(dict)：指定浏览器可见的环境变量。默认与 python 进程相同。
+- `devtools`(bool)：是否为每个选项卡自动打开 DevTools 面板。如果有此选项`True`，则该`headless`选项将被设置 `False`。
+- `logLevel`(int|str)：打印日志的日志级别。默认与root logger记录器相同。
+- `autoClose`(bool)：脚本完成后自动关闭浏览器进程。默认为`True`.
+- `loop`(asyncio.AbstractEventLoop)：事件循环（**实验性**）。
+
+### 7.2.5 无头模式
+
+`headless=False`即关闭无头模式，此时会弹出浏览器窗口
+
+```py
+import asyncio
+from pyppeteer import launch
+
+
+async def main():
+    await launch(headless=False)
+    await asyncio.sleep(10)
+
+
+asyncio.get_event_loop().run_until_complete(main())
+```
+
+### 7.2.6 调试模式
+
+即打开网页的同时一起打开调试窗口，如果`devtools=True`，那么无头模式就会被关闭，界面始终会显示出来
+
+```py
+import asyncio
+from pyppeteer import launch
+
+
+async def main():
+    browser = await launch(devtools=True)
+    page = await browser.newPage()
+    await page.goto('http://www.baidu.com')
+    await asyncio.sleep(20)
+
+
+asyncio.get_event_loop().run_until_complete(main())
+
+```
+
+<img src="Python%20%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91%E5%AE%9E%E6%88%98.assets/image-20240317170612765.png" alt="image-20240317170612765" style="zoom:50%;" />
+
+### 7.2.7 禁用提示条
+
+就是将这个提示条自动关掉，代码如下：
+
+![image-20240317170710236](Python%20%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91%E5%AE%9E%E6%88%98.assets/image-20240317170710236.png)
+
+```py
+import asyncio
+from pyppeteer import launch
+
+
+async def main():
+    browser = await launch(headless=False, args=['--disable-infobars'])
+    page = await browser.newPage()
+    await page.goto('http://www.baidu.com')
+    await asyncio.sleep(20)
+
+
+asyncio.get_event_loop().run_until_complete(main())
+
+```
+
+### 7.2.8 防止检测
+
+Pyppeteer的Page对象有一个动作`evaluateOnNewDocument`的方法，意思是在每次加载网页的时候执行某条语句，这里可以利用它执行隐藏`webdriver`属性的命令
+
+```py
+import asyncio
+from pyppeteer import launch
+
+
+async def main():
+    browser = await launch(headless=False, args=['--disable-infobars'])
+    page = await browser.newPage()
+    await page.evaluateOnNewDocument('Object.defineProperty(navigator, "webdriver", {get: () => undefined})')
+    await page.goto('https://antispider1.scrape.center/')
+    await asyncio.sleep(20)
+
+
+asyncio.get_event_loop().run_until_complete(main())
+
+```
+
+### 7.2.9 页面大小设置
+
+我们可以发现整个浏览器的窗口要比显示内容的窗口大。这个情况北非每个页面都会出现。这是可以设置窗口大小，调用Page对象的`setVieport`方法即可
+
+```py
+import asyncio
+from pyppeteer import launch
+
+# 网页宽高的定义
+width, height = 1366, 768
+
+
+async def main():
+    browser = await launch(headless=False, args=['--disable-infobars', f'--width-size={width},{height}'])
+    page = await browser.newPage()
+    await page.setViewport({'width': width, 'height': height})
+    await page.evaluateOnNewDocument('Object.defineProperty(navigator, "webdriver", {get: () => undefined})')
+    await page.goto('https://antispider1.scrape.center/')
+    await asyncio.sleep(20)
+
+
+asyncio.get_event_loop().run_until_complete(main())
+```
+
+### 7.2.10 用户数据持久化
+
+很多时候在关闭浏览器并再次打开时，它依然处于登录状态。这是因为淘宝一些关键Cookie已经保存到本地了，再次登录的时候可以直接读取并保持登录状态。Pyppeteer的`userDataDir`参数则可以做到这一点
+
+```py
+import asyncio
+from pyppeteer import launch
+
+width,height = 1800,1440
+
+async def main():
+    browser = await launch(headless=False, userDataDir='./userdata', args=['--disable-infobars'])
+    page = await browser.newPage()
+    await page.setViewport({'width': width, 'height': height})
+    await page.evaluateOnNewDocument('Object.defineProperty(navigator, "webdriver", {get: () => undefined})')
+    await page.goto('http://www.taobao.com/')
+    await asyncio.sleep(200)
+
+
+asyncio.get_event_loop().run_until_complete(main())
+
+```
+
+首先运行这段代码，然后登录一次淘宝，这时候可以观察到当前运行目录下多了一个userdata文件夹，再次登录的时候可以看到状态是已登录的状态
+
+### 7.2.11 开启无痕模式
+
+Chrome浏览器有无痕模式，其好处就是环境比较干净，不与其他浏览器示例共享Cache、Cookie等内容，可以通过`evaluateOnNewDocument`创建
+
+```py
+import asyncio
+from pyppeteer import launch
+
+width,height = 1800,1440
+
+async def main():
+    browser = await launch(headless=False, args=['--disable-infobars', f"--window-size={width},{height}"])
+    # 创建无痕模式，返回context对象
+    context = await browser.createIncognitoBrowserContext()
+    # 利用context对象新建一个无痕窗口
+    page = await context.newPage()
+    await page.setViewport({'width': width, 'height': height})
+    await page.evaluateOnNewDocument('Object.defineProperty(navigator, "webdriver", {get: () => undefined})')
+    await page.goto('http://www.taobao.com/')
+    await asyncio.sleep(10)
+
+
+asyncio.get_event_loop().run_until_complete(main())
+
+```
+
+### 7.2.12 关闭
+
+调用`close()`方法关闭浏览器
+
+```py
+import asyncio
+from pyppeteer import launch
+
+async def main():
+    browser = await launch()
+    page = await browser.newPage()
+    await page.goto('http://www.baidu.com')
+    # 关闭浏览器
+    await page.close()
+
+
+asyncio.get_event_loop().run_until_complete(main())
+```
+
+### 7.2.13 Page
+
+Page 即页面，对应一个网页、一个选项卡
+
+#### 7.2.13.1 选择器
+
+J 方法，给他传入一个选择器，就能但会匹配到的第一个节点，等价于`querySelector`方法
+
+JJ 方法，给他传入一个选择器，会返回符合选择器的所有节点组成的列表，等价于`querySelectorAll`方法
+
+```py
+import asyncio
+from pyppeteer import launch
+
+
+async def main():
+    browser = await launch()
+    page = await browser.newPage()
+    await page.goto('https://spa2.scrape.center/')
+    await page.waitForSelector('.item .name')
+    j_result1 = await page.J('.item .name')
+    j_result2 = await page.querySelector('.item .name')
+    j_result3 = await page.JJ('.item .name')
+    j_result4 = await page.querySelectorAll('.item .name')
+    print(f"j_result1: {j_result1}")
+    print(f"j_result2: {j_result2}")
+    print(f"j_result3: {j_result3}")		
+    print(f"j_result4: {j_result4}")
+    await browser.close()
+
+
+asyncio.get_event_loop().run_until_complete(main())
+```
+
+```
+j_result1: <pyppeteer.element_handle.ElementHandle object at 0x000001D496A0E630>
+j_result2: <pyppeteer.element_handle.ElementHandle object at 0x000001D496A17278>
+j_result3: [<pyppeteer.element_handle.ElementHandle object at 0x000001D496A17860>, <pyppeteer.element_handle.ElementHandle object at 0x000001D496A1D2E8>]
+j_result4: [<pyppeteer.element_handle.ElementHandle object at 0x000001D496A0EEF0>, <pyppeteer.element_handle.ElementHandle object at 0x000001D496A0EB70>]
+```
+
+#### 7.2.13.2 选项卡操作
+
+选项卡的切换，先调用pages方法获取所有打开的页面，然后选择第一个页面调用其`bringToFront`方法即可
+
+```py
+import asyncio
+from pyppeteer import launch
+
+
+async def main():
+    browser = await launch(headless=False)
+    page = await browser.newPage()
+    await page.goto('http://www.baidu.com')
+    page = await browser.newPage()
+    await page.goto('http://www.taobao.com')
+    # 获取所有选项卡
+    pages = await browser.pages()
+    print(f"pages: {pages}")
+    # 获取第1个选项卡
+    page1 = pages[1]
+    # 跳转到第一个选项卡
+    await page1.bringToFront()
+    await asyncio.sleep(20)
+
+
+asyncio.get_event_loop().run_until_complete(main())
+```
+
+#### 7.2.13.3 页面操作
+
+```py
+import asyncio
+from pyppeteer import launch
+
+
+async def main():
+    browser = await launch(headless=False)
+    page = await browser.newPage()
+    await page.goto('http://www.baidu.com')
+    await page.goto('http://www.taobao.com')
+    # 后退
+    await page.goBack()
+    # 前进
+    await page.goForward()
+    # 刷新
+    await page.reload()
+    # 保存PDF
+    await page.pdf()
+    # 截图
+    await page.screenshot()
+    # 设置页面HTML
+    await page.setContent('<h2>Hello World</h2>')
+    # 设置 User-Agent
+    await page.setUserAgent('Python')
+    # 设置 请求头
+    await page.setExtraHTTPHeaders(headers={})
+    await page.close()
+    await browser.close()
+    await asyncio.sleep(5)
+
+
+asyncio.get_event_loop().run_until_complete(main())
+```
+
+#### 7.2.13.4 点击
+
+Pyppeteer 同样可以模拟点击，调用其click方法即可
+
+```py
+import asyncio
+from pyppeteer import launch
+from pyquery import PyQuery as pq
+
+
+async def main():
+    browser = await launch(headless=False)
+    page = await browser.newPage()
+    await page.goto('https://spa2.scrape.center/')
+    await page.waitForSelector('.item .name')
+    await page.click('.item .name', options={
+        'button': 'right',      # 鼠标右键
+        'clickCount': 1,
+        'delay': 3000       # 毫秒
+    })
+
+    await asyncio.sleep(5)
+
+asyncio.get_event_loop().run_until_complete(main())
+```
+
+这里click方法中的第一个参数就是选择器，即在哪里操作。第二个参数就是几项配置
+
++ button: 鼠标按钮，取值有 left（鼠标左键）、middle（鼠标中键）、right（鼠标右键）
++ clickCount：点击次数，取值有1或2，表示单击或双击
++ delay：延迟点击
+
+#### 7.2.13.5 输入文本
+
+pyppeteer也可以输入文本，使用type方法即可
+
+```py
+import asyncio
+from pyppeteer import launch
+from pyquery import PyQuery as pq
+
+
+async def main():
+    browser = await launch(headless=False)
+    page = await browser.newPage()
+    await page.goto('https://www.baidu.com/'
+    # 获取元素并输入文本
+    await page.type('#kw', 'python')
+
+    await asyncio.sleep(100)
+    await page.close()
+
+asyncio.get_event_loop().run_until_complete(main())
+```
+
+#### 7.2.13.5 获取文本内容
+
+```py
+import asyncio
+from pyppeteer import launch
+from pyquery import PyQuery as pq
+
+
+async def main():
+    browser = await launch(headless=False)
+    page = await browser.newPage()
+    await page.goto('https://spa2.scrape.center/')
+    print('HTML: ', await page.content())		# JS渲染后的文本内容
+    print('Cookie: ', await page.cookies())
+    await browser.close()
+
+asyncio.get_event_loop().run_until_complete(main())
+```
+
+#### 7.2.13.6 执行
+
+我们可以调用`evlaute`方法执行Javascript语句并获取对应结果
+
+```py
+import asyncio
+from pyppeteer import launch
+from pyquery import PyQuery as pq
+
+width,height = 2000,768
+
+async def main():
+    browser = await launch(headless=False)
+    page = await browser.newPage()
+    await page.goto('https://spa2.scrape.center/')
+    await page.waitForSelector('.item .name')
+    await asyncio.sleep(2)
+    dimensions = await page.evaluate('''() => {
+        return {
+            width: document.documentElement.clientWidth,
+            height: document.documentElement.clientHeight,
+            deviceScaleFactor: window.devicePixelRatio
+        }
+    }''')
+    print(dimensions)
+    await browser.close()
+
+asyncio.get_event_loop().run_until_complete(main())
+```
+
+另外，`exposeFunction、evaluateOnNewDocument、evaluateHandle`方法可以了解下
+
+#### 7.2.13.7 延时等待
+
+`waitForSelector`可以让页面等待某些符合条件的节点加载出来再返回结果，如果找到符合条件的节点，就立马返回结果，否则等待直到超时
+
++ `waitForSelector`：等待某个Javascript方法执行完毕并返回结果
++ `waitForNavigation`：等待页面跳转，如果没加载出来，就报错
++ `waitForRequest`：等待某个特定的请求发出
++ `waitForResponse`：等待某个特定的请求对应的响应
++ `waitFor`：通用的等待方法
++ `waitForXPath`：等待符合XPath的节点加载出来
+
+## 7.3 Selenium 爬取实战
