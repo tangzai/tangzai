@@ -3684,4 +3684,211 @@ asyncio.get_event_loop().run_until_complete(main())
 + `waitFor`：通用的等待方法
 + `waitForXPath`：等待符合XPath的节点加载出来
 
-## 7.3 Selenium 爬取实战
+## 7.3 CSS 位置偏移反爬案例分析与爬取实战
+
+> p282
+
+有些网站会在css中设置偏移量，导致爬出来的数据的是乱序的，如下：
+
+![image-20240320154910947](Python%20%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91%E5%AE%9E%E6%88%98.assets/image-20240320154910947.png)
+
+```py
+from selenium import webdriver
+from pyquery import PyQuery as pq
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+
+browser = webdriver.Chrome()
+browser.get('https://antispider3.scrape.center/')
+WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.item')))
+html = browser.page_source
+# 对html进行解析
+doc = pq(html)                      
+names = doc('.item .name')
+# names.items() 返回一个生成器
+for name in names.items():
+    print(name.text())
+
+browser.close()
+```
+
+输出：
+
+```
+Wonder
+清 白 家 风
+法 终 老 宠 （ 下 的 妃 结 ） 篇 上 册
+册 己 知 为 士 二 （ ） 全
+那 些 年 ， 我 们 一 起 追 的 女 孩
+非 册 ） 全 我 倾 三 （ 城
+些 那 儿 朝 事 明
+的 你 笑 和 忘 书 我
+小 集 王 一 全 波 卷 第
+心 动 然 怦
+龙枪编年史（全3册）
+册 三 全 （ 传 奇 龙 枪 ）
+街 之 明 黎
+及 学 其 理 心 知 示 启 认
+银河帝国2：基地与帝国
+银 国 ： 帝 河 基 地
+学 材 下 - 文 级 四 年 解 小 教 全 语
+越界言论（第3卷）
+```
+
+最后处理代码
+
+```py
+import re
+
+from selenium import webdriver
+from pyquery import PyQuery as pq
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+
+
+def parse_name(name_html):
+    has_whole = name_html('.whole')
+    if has_whole:
+        return name_html.text()
+    else:
+        chars = name_html('.char')
+        items = []
+        for char in chars.items():
+            items.append({
+                # 获取每一个字
+                'text': char.text().strip(),
+                # 获取每个字的CSS样式偏移量
+                'left': int(re.search('(\d+)px', char.attr('style')).group(1))
+            })
+
+        # 排序
+        items = sorted(items, key=lambda x: x['left'], reverse=False)
+        return ''.join([item.get('text') for item in items])
+
+
+browser = webdriver.Chrome()
+browser.get('https://antispider3.scrape.center/')
+WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.item')))
+html = browser.page_source
+doc = pq(html)
+names = doc('.item .name')
+for name_html in names.items():
+    name = parse_name(name_html)
+    print(name)
+
+browser.close()
+```
+
+# 第八章：验证码的识别
+
+## 8.1 使用OCR技术识别图形验证码
+
+### 8.1.1 准备工作
+
+这里要安装`tesserocr`库，且这个库的安装没有那么简单，需要参考链接：`https://cuiqingcai.com/31102.html`
+
+报错参考链接：https://blog.csdn.net/lemon9597/article/details/129967795
+
+### 8.1.2 处理验证码
+
+本节测试图片：
+
+![download](Python%20%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91%E5%AE%9E%E6%88%98.assets/download.png)
+
+```py
+import tesserocr
+from PIL import Image
+
+# 打开图片
+image = Image.open('download.png')
+# 识别验证码
+result = tesserocr.image_to_text(image)
+print(result)
+```
+
+输出
+
+```py
+_0 291
+```
+
+可以看到识别劫夺有偏差，这是因为图片里多余的点对识别造成了干扰，需要做额外处理。把干扰信息去掉。
+
+首先将保存的验证码图片转化为数组，看一下维度
+
+```py
+import tesserocr
+from PIL import Image
+import numpy as np
+
+image = Image.open('download.png')
+print(np.array(image).shape)		# (38, 112, 4)
+print(image.mode)					# RGBA
+```
+
+从结果可以看出，这个图片是三维数组，38和12代表图片的高和宽，4则是每个像素点的表示向量。为什么是4呢？因为最后一维是一个长度为4的数组，分别代表R（红色）、G（绿色）、B（蓝色）、A（透明度），即一个像素点由4个数字表示。那为什么是RGBA而不是RGB或其他呢？因为image.mode是RGBA，即有透明通道的真彩色
+
+mode属性定义了图片的类型和像素的位宽，一共有9种类型
+
++ 1：像素用来1位表示，Python种表示True和False，即二值化
++ L：像素用8位表示，取值为0~255，表示灰度图像，数字越小，颜色越黑
++ P：像素用8位表示，即调色板数据
++ RGB：像素用3*8位表示，即真彩色
++ RGBA：像素用4*8位表示，即有透明通道的真彩色
++ CMYK：像素用4*8位表示，即有印刷四色模式
++ YCbCr：像素用3*8位表示，即彩色视频格式
++ I：像素用32位整形表示
++ F：像素用32位浮点型表示
+
+为了方便处理，可以把RGBA转化位更简单的L，即把图片转化为灰度图像。往图片对象的convert方法中传入L即可，代码如下：
+
+```py
+import tesserocr
+from PIL import Image
+import numpy as np
+
+image = Image.open('download.png')
+# 转换图片格式
+image = image.convert('L')			
+print(np.array(image).shape)		# (38, 112)
+print(image.mode)					# L
+```
+
+也可以往convert方法中传入1，即把图片二值化处理，代码如下：
+
+```py
+import tesserocr
+from PIL import Image
+import numpy as np
+
+image = Image.open('download.png')
+image = image.convert('1')			
+print(np.array(image).shape)			# (38, 112)
+print(image.mode)						# L
+```
+
+我们选择把图片转化为灰度图像，然后根据阈值删除图片中的干扰点，代码如下：
+
+```py
+import tesserocr
+from PIL import Image
+import numpy as np
+
+image = Image.open('download.png')
+image = image.convert('L')
+# 阈值设置：可以通过调试阈值来提高识别的成功率
+threshold = 100
+array = np.array(image)
+# 灰度大于阈值的图片的像素设置为255，表示白色，否则设置为0，表示黑色
+array = np.where(array > threshold, 255, 0)
+image = Image.fromarray(array.astype('uint8'))
+# 以防结果有空格，所以这里要去掉空格
+print(tesserocr.image_to_text(image).replace(' ', ''))			# 输出
+image.show()
+```
+
+处理结果
+
+![image-20240320165947537](Python%20%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91%E5%AE%9E%E6%88%98.assets/image-20240320165947537.png)
