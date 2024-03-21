@@ -3892,3 +3892,168 @@ image.show()
 处理结果
 
 ![image-20240320165947537](Python%20%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91%E5%AE%9E%E6%88%98.assets/image-20240320165947537.png)
+
+### 8.1.3 识别实战
+
+```py
+import re
+import time
+from PIL import Image
+import numpy as np
+import tesserocr
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import selenium.common.exceptions
+from io import BytesIO
+from retrying import retry
+
+
+# todo: 验证码处理模块
+def preprocess(image, threshold):
+    image = image.convert('L')
+    array = np.array(image)
+    array = np.where(array > threshold, 255, 0)
+    image = Image.fromarray(array.astype('uint8'))
+    return image
+
+
+# retry装饰器，如果函数返回False，会再次执行该函数，直到函数返回True。stop_max_attempt_number 为最大执行次数
+@retry(stop_max_attempt_number=10, retry_on_result=lambda x: x is False)
+def login(username, passwd):
+    browser = webdriver.Chrome()
+    browser.get('https://captcha7.scrape.center/')
+    wait = WebDriverWait(browser, 10)
+    username_input = wait.until(EC.presence_of_element_located(
+        (By.XPATH, '//*[@id="app"]/div[2]/div/div/div/div/div/form/div[1]/div/div/input')))
+    password_input = wait.until(EC.presence_of_element_located((By.XPATH,
+                                                                '//*[@id="app"]/div[2]/div/div/div/div/div/form/div[2]/div/div/input')))
+    captcha_input = wait.until(EC.presence_of_element_located(
+        (By.XPATH, '//*[@id="app"]/div[2]/div/div/div/div/div/form/div[3]/div/div/div[1]/div/input')))
+    username_input.send_keys(username)
+    password_input.send_keys(passwd)
+
+    # todo: 验证码预处理
+    captcha = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#captcha')))
+    image = Image.open(BytesIO(captcha.screenshot_as_png))
+    captcha_text = tesserocr.image_to_text(image)
+    # 将所有不是字母和数字的字符替换为空
+    captcha_text = re.sub('[^A-Za-z0-9]', '', captcha_text)
+    captcha_input.send_keys(captcha_text)
+    wait.until(EC.presence_of_element_located(
+        (By.XPATH, '//*[@id="app"]/div[2]/div/div/div/div/div/form/div[4]/div/button'))).click()
+
+    try:
+        wait.until(EC.presence_of_element_located(
+            (By.XPATH, '//h2[contains(.,"登录成功")]')))
+        time.sleep(5)
+        browser.close()
+        return True
+    except selenium.common.exceptions.TimeoutException:
+        return False
+
+
+if __name__ == '__main__':
+    login('admin', 'admin')
+
+```
+
+## 8.2 使用OpenCV识别滑动验证码缺口
+
+### 8.2.1 基本原理
+
+具体步骤为：
+
+1. 对验证码图片进行高斯模糊滤波处理、消除部分噪声干扰
+2. 利用边缘检测算法，通过调整响应阈值识别出验证码图片中滑块的边缘
+3. 基于上一步得到的个个边缘轮廓信息、对比面积、位置、周长等特征，筛选出最可能的轮廓，得到缺口位置
+
+### 8.2.2 准备工作
+
+> 安装教程：https://cuiqingcai.com/31074.html
+
+### 8.2.3 基础知识
+
+#### 8.2.3.1 高斯滤波
+
+高斯滤波用来除去图片中的一些噪声，减少噪声干扰，其实就是吧一张图片模糊化，为下一步边缘检测做好铺垫
+
+```py
+def GussianBlur(src. ksize. sigmaX, dst=None, sigmaY=None, borderType=None)
+```
+
++ `src`：需要处理的图片
++ `ksize`：高斯滤波处理所用的高斯内核大小。需要传入一个元组，包含X和Y两个元素
++ `sigmaX`：高斯内核函数在X方向上的标准偏差
++ `sigmaY`：高斯内核函数在Y方向上的标准偏差。如哦`sigmaY`为0，就将他设为`sigmaX`；若`sigmaX`和`sigmaY`都是0，就通过`ksize`计算出`sigmaX`和`sigmaY`
+
+`ksize`可以取做`(5,5)`，`sigmaX`可以取做0，经过高斯滤波处理后，图片会边模糊
+
+#### 8.2.3.2 边缘检测
+
+由于验证码图片里的目标缺口通常具有比较明显的边缘，所以借助一些边缘检测算法，再加上跳转阈值是可以找出缺口位置的。目前应用比较广泛的边缘检测算法是`Canny`，这是`John F. Canny`于1986年开发出来的一个多级边缘检测算法，效果很不错。OpenCV也实现了算法，方法名就叫`Canny`
+
+```py
+def Canny(image, threshold1, threshold2, edges=None, apertureSize=None, L2gradient=None)
+```
+
++ `image`：需要处理的图片
++ `threshold1、threshold2`：两个阈值，分别是最小判定临界点和最大判定临界点
++ `apertureSize`：用于查找图片渐变的索贝尔内核的大小
++ `L2gradient`：用于查找梯度幅度的等式
+
+通常来说，只需要设置threshold1和threshold2的值即可，其数值大小需要视具体图片而定，这里可以分别取为200和450.经过边缘检测算法的处理后会保留下一些比较明显的边缘信息
+
+#### 8.2.3.3 轮廓提取
+
+进行边缘检测处理后，可以看到图片中保留比较明显的边缘信息，下一步可以利用OpenCV技术提取出这些边缘的轮廓，这需要用到`findContours`
+```py
+def findContours(image, mode, method, contours=None, hierarchy=None, offset=None)
+```
+
++ `image`：需要处理的图片
++ `mode`：用于定义轮廓的检索模式
++ `method`：用于定义轮廓的近似方法
+
+这里。我们将`mode`设置为`RETR_CCOMP`，将`method`设置为`CHAIN_APPROX_SIMPLE`，具体的选择标准参考OpenCV官方文档
+
+#### 8.2.3.4 外接矩形
+
+提取到边缘轮廓后，可以计算出轮廓的外接矩形，一遍我们更具面积和周长等参数判断提取到的轮廓是不是目标缺口的轮廓。计算外接矩形使用的方法是`boundingRect`，其声明如下：
+
+```py
+def boundingRect(array)
+```
+
+这个方法只有一个参数，就是array，它可以是一个灰度图或者2D点集。
+
+#### 8.2.3.5 轮廓面积
+
+我们可以根据面积和周长等筛选缺口所在的位置，于是需要用到计算面积的方法`countourArea`
+
+```py
+def contourArea(countour, oriented=None)
+```
+
++ `countour`：轮廓信息
++ `oriented`：方向标识符，默认值为False，若取True，则该方法会返回一个待符号的面积值，正负取值于轮廓的方向（顺时针还是逆时针）。若取False，则面积会以绝对值形式返回
+
+返回值就是轮廓的面积
+
+#### 8.2.3.6 轮廓周长
+
+同理，周长也有对应的计算方法，叫做`arcLength`
+
+```py
+def arcLength(curve, closed)
+```
+
++ `curve`：轮廓信息
++ `closed`：轮廓是否封闭
+
+返回值就是轮廓的周长
+
+![img](data:image/png;base64,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)
+
