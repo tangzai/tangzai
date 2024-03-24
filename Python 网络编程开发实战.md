@@ -4083,7 +4083,7 @@ def get_pos(imageSrc):
         area = cv2.contourArea(contour)
         # 计算周长
         perimeter = cv2.arcLength(contour, True)
-        # 给定一个面积和周长的阈值，计算公式为 (边长-5)^2 * (边长-5)^2 < (边长+5)^2 * (边长+5); 周长同理; 如果出现return 0的情况，则需要扩大
+        # 给定一个面积和周长的阈值，计算公式为 (边长-5)^2 * (边长-5)^2 < (边长+5)^2 * (边长+5); 周长同理; 如果出现return 0的情况，则需要扩大阈值
         if 5625 < area < 7225 and 300 < perimeter < 340:
             x, y, w, h = cv2.boundingRect(contour)
             cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
