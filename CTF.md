@@ -7247,6 +7247,10 @@ flag: TNG{e99be155-93c1-44e1-8da9-c1f1a44c773f}
 
 ## DataCon showmeadmin
 
+> 参考：https://blog.csdn.net/weixin_51804748/article/details/122642151
+>
+> https://blog.csdn.net/m0_73847654/article/details/134719390?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-1-134719390-blog-122642151.235^v43^pc_blog_bottom_relevance_base4&spm=1001.2101.3001.4242.1&utm_relevant_index=4
+
 ### 1. 前置知识
 
 #### 1.1 [Soap](https://so.csdn.net/so/search?q=Soap&spm=1001.2101.3001.7020) SSRF
