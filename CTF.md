@@ -4957,7 +4957,7 @@ echo mt_rand();
 ```
 
 
-当我们去掉mt_srand()函数时，再次重复运行实例，系统会自动为rand函数播种，但也是播种一次。因此多次重复运行的结果也相同，为：
+当我们去掉mt_srand()函数时，再次重复运行实例，系统会自动为rand函数播种，那么每次获得的序列都不相同
 
 ```
 992978829
@@ -7588,6 +7588,162 @@ XXE注入，并利用XXE扫描内网，这里的思路跟SSRF是一样的
 
 ![image-20240424211850922](CTF.assets/image-20240424211850922.png)
 
+## [De1CTF 2019]SSRF Me 1
+
+> 参考：https://sora.zip/article/CTF/WriteUp/22-12-10/[De1CTF%202019]SSRF%20Me.md
+
+源码如下：
+
+```py
+#!/usr/bin/env python
+#encoding=utf-8
+from flask import Flask
+from flask import request
+import socket
+import hashlib
+import urllib
+import sys
+import os
+import json
+import imp
+
+imp.reload(sys)
+
+app = Flask(__name__)
+secert_key = os.urandom(16)
+
+class Task:
+    def __init__(self, action, param, sign, ip):
+        self.action = action
+        self.param = param
+        self.sign = sign
+        self.sandbox = md5(ip)
+        if(not os.path.exists(self.sandbox)): #SandBox For Remote_Addr
+            os.mkdir(self.sandbox)
+
+    def Exec(self):
+        result = {}
+        result['code'] = 500
+        if (self.checkSign()):
+            if "scan" in self.action:
+                tmpfile = open("./%s/result.txt" % self.sandbox, 'w')
+                resp = scan(self.param)
+                if (resp == "Connection Timeout"):
+                    result['data'] = resp
+                else:
+                    print(resp)
+                    tmpfile.write(resp)
+                    tmpfile.close()
+                    result['code'] = 200
+            if "read" in self.action:
+                f = open("./%s/result.txt" % self.sandbox, 'r')
+                result['code'] = 200
+                result['data'] = f.read()
+                if result['code'] == 500:
+                    result['data'] = "Action Error"
+        else:
+            result['code'] = 500
+            result['msg'] = "Sign Error"
+            return result
+
+    def checkSign(self):
+        if (getSign(self.action, self.param) == self.sign):
+            return True
+        else:
+            return False
+
+#generate Sign For Action Scan.
+@app.route("/geneSign", methods=['GET', 'POST'])
+def geneSign():
+    param = urllib.request.unquote(request.args.get("param", ""))
+    action = "scan"
+    return getSign(action, param)
+
+@app.route('/De1ta',methods=['GET','POST'])
+def challenge():
+    action = urllib.request.unquote(request.cookies.get("action")) # Get action from cookie
+    param = urllib.request.unquote(request.args.get("param", "")) # Get param from url query
+    sign = urllib.request.unquote(request.cookies.get("sign")) # Get sign from cookie
+    ip = request.remote_addr
+    if(waf(param)):
+        return "No Hacker!!!!"
+    task = Task(action, param, sign, ip)
+    return json.dumps(task.Exec())
+
+@app.route('/')
+def index():
+    return open("code.txt","r").read()
+
+def scan(param):
+    socket.setdefaulttimeout(1)
+    try:
+        return urllib.request.urlopen(param).read()[:50]
+    except:
+        return "Connection Timeout"
+
+def getSign(action, param):
+    return hashlib.md5(secert_key + param + action).hexdigest()
+
+def md5(content):
+    return hashlib.md5(content).hexdigest()
+
+def waf(param): # param should not start with gopher or file
+    check=param.strip().lower()
+    if check.startswith("gopher") or check.startswith("file"):
+        return True
+    else:
+        return False
+
+if __name__ == '__main__':
+    app.debug = False
+    app.run(host='0.0.0.0',port=80)
+```
+
+**提示：**flag in `./flag.txt`
+
+这里一开始我想的是用`dict://`拿到web端口号再用`http://`读flag的，但是后面扫了好久没扫出来，由于看到waf函数这里过滤了`file://`，所以我想不到除了用`http://`读还能怎么办，直到看到了下面这句话，虽然我也不知道对不对~~~
+
+这波是吃了文化的亏，`python2`的`urlopen`原来不指定协议的时候默认就是`file`协议QAQ
+
+但是直接访问`flag.txt`的话确实是返回200的，这里也证明了`flag.txt`确实被读到了并且写进了`result.txt`
+
+![image-20240424235916215](CTF.assets/image-20240424235916215.png)
+
+这里我一开始也以为只能生成`scan`的签名，但是其实当`param='flag.txtread'  ---> hashlib.md5(secert_key + 'flag.txtread' + 'scan')`，就能生成能同时执行`read 和 scan`方法的签名
+
+```py
+#generate Sign For Action Scan.
+@app.route("/geneSign", methods=['GET', 'POST'])
+def geneSign():
+    param = urllib.request.unquote(request.args.get("param", ""))
+    action = "scan"					# 写死  action = "scan"	
+    return getSign(action, param)
+
+def getSign(action, param):
+    return hashlib.md5(secert_key + param + action).hexdigest()		# param 可控，可拼接
+```
+
+以此当`/De1ta'`路由的`action='readscan' and param='flag.txt'`的时候，就刚好接上了这个签名，此时由于`acrion='readscan'`，`EXEC`就会执行完`scan`方法后继续执行`read`方法，这样就做到一个请求同时执行了两个方法并将flag返回！
+
+```py
+@app.route('/De1ta',methods=['GET','POST'])
+def challenge():
+    action = urllib.request.unquote(request.cookies.get("action")) # readscan
+    param = urllib.request.unquote(request.args.get("param", "")) # Get param from url query
+    sign = urllib.request.unquote(request.cookies.get("sign")) # Get sign from cookie
+    ip = request.remote_addr
+    if(waf(param)):
+        return "No Hacker!!!!"
+    task = Task(action, param, sign, ip)
+    return json.dumps(task.Exec())
+```
+
+![image-20240425000633078](CTF.assets/image-20240425000633078.png)
+
+![image-20240425000642878](CTF.assets/image-20240425000642878.png)
+
+
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解
@@ -8122,3 +8278,102 @@ Command line : "C:\Users\Rick\AppData\Local\Temp\RarSFX0\vmware-tray.exe"
 
 ```
 
+## DataCon eazy_volatility
+
+> 参考：https://www.poboke.com/crack-encrypted-zip-file-with-plaintext-attack.html
+>
+> https://github.com/jas502n/sangfor/blob/master/1earn/Security/BlueTeam/%E5%8F%96%E8%AF%81.md#%E7%88%86%E7%A0%B4%E5%8E%8B%E7%BC%A9%E5%8C%85
+
+下载附件拿到一个`raw`后缀的文件，用volatility打开，imageinfo分析
+
+![img](CTF.assets/171402373065512.png)
+
+拿到`profile`之后`psscan`看进程
+
+![img](CTF.assets/17140237306451.png)
+
+这里首先能看到`7zFM.exe`的进程，下面还有一个`notepad.exe`
+
+记事本的内容的话，我用`memdump`转存notepad进程的内存文件和notepad都不能看到里面的信息
+
+内存取证的话一般看到`7zFM.exe`这种压缩包的进程，基本上就能确定内存里面肯定有一个压缩包的，使用`cmdline`可以看到`7zFM.exe`对压缩包文件的操作，这里就可以看到`flag.zip`压缩包文件的路径了
+
+![img](CTF.assets/17140237306462.png)
+
+`filescan`获取内存地址，这里`R--rwd`代表的是权限的意思，其中三位一组，大写代表的是文件所有者的权限，小写代表的是其他用户的权限
+
+![img](CTF.assets/17140237306463.png)
+
+`dumpfiles`转存下来并解压
+
+![img](CTF.assets/17140237306464.png)
+
+可以看到里面有两个文件，其中`inside.zip`是一个加密的压缩包
+
+![img](CTF.assets/17140237306465.png)
+
+![img](CTF.assets/17140237306476.png)
+
+直接开可以看到里面的内容，flag是在压缩包里面的
+
+![img](CTF.assets/17140237306477.png)
+
+后面再在内存文件里面找了好久都没有找到inside.zip的密码，基本上确定密码不在内存文件里面了~~~
+
+后面我也不会了，那些杂项隐写啥的菜的要死~~~
+
+没办法，题还是要做的，然后去翻，翻所有内存取证的关于压缩包的wp，看了一遍，查到CTF里压缩包的破解有3种方法：
+
+1. 硬爆破（试过，不行）
+2. 伪加密（现学现卖，还是不行）
+3. 明文攻击（现学现卖，过了）
+
+明文攻击主要利用大于 12 字节的一段已知明文数据进行攻击，从而获取整个加密文档的数据。也就是说，如果我手里有一个未知密码的压缩包和压缩包内某个文件的一部分明文（不一定非要从头开始，能确定偏移就行），那么我就可以通过这种攻击来解开整个压缩包。比如压缩包里有一个常见的 license 文件，或者是某个常用的 dll 库，或者是带有固定头部的文件（比如 xml、exe、png 等容易推导出原始内容的文件），那么就可以运用这种攻击。当然，前提是压缩包要用 ZipCrypto 加密。
+
+刚好第一层压缩包里面有一个`note.txt`，inside.txt 里面也有一个note.txt，如果它们的内容是一样的话，就可以断定我们已知的明文是大于12个字节的
+
+```PHP
+┌──(kali㉿kali)-[~/桌面/test]
+└─$ zipinfo inside.zip
+Archive:  inside.zip
+Zip file size: 11817 bytes, number of entries: 2
+-rw-a--     6.3 fat    14376 Bx defN 21-Nov-05 04:12 flag.docx
+-rw-a--     6.3 fat       26 Bx stor 21-Nov-05 03:21 note.txt
+2 files, 14402 bytes uncompressed, 11513 bytes compressed:  20.1%
+```
+
+可以看到，`secrets.zip`压缩里包含了两个文件：`advice.jpg`和`spiral.svg`。 第5列为`Bx`，开头的大写字母`B`代表文件被加密了，需要密码才能解压。 第6列的`defN`代表`advice.jpg`被压缩，`stor`代表`spiral.svg`未压缩。
+
+> `defN`是`deflated (normal)`的缩写，表示压缩方式是`deflated`，压缩类型是`normal`。 `stor`是`none (stored)`的缩写，表示文件未压缩，只进行存储。
+
+要进行破解的话，我们必须要知道至少12个字节的明文。通常知道的连续明文越多，破解的速度就越快。加上`-n`参数是为了让文本末尾不产生换行符。把推测的明文保存在`plain.txt`文件种
+
+![img](CTF.assets/17140237306478.png)
+
+执行明文攻击！这里成功拿到了密钥
+
+```
+$ ../bkcrack -C secrets.zip -c spiral.svg -p plain.txt
+```
+
+> 命令的格式为：bkcrack -C 加密的压缩包 -c 存在明文的文件 -p 存储了明文的文本
+
+![img](CTF.assets/17140237306479.png)
+
+假设zip压缩包里的所有文件都使用了相同的密钥，那么我们可以使用新密码来将`secret.zip`存储为一个新的加密压缩包。
+
+例如使用`easy`作为新密码，执行命令：
+
+```
+COPY$ ../bkcrack -C secrets.zip -k c4490e28 b414a23d 91404b31 -U secrets_with_new_password.zip easy
+```
+
+> 命令格式为：bkcrack -C 加密的压缩包 -k 3个密钥 -U 新的压缩包 新密码
+
+执行后会得到一个`secrets_with_new_password.zip`压缩包，使用`easy`密码就可以解压出所有文件。通过密钥修改压缩包密码
+
+![img](CTF.assets/171402373064810.png)
+
+解压成功打开flag.docx，这里的字一开始是白色的，搞得我以为是什么word 隐写，吓我一跳~
+
+![img](CTF.assets/171402373064811.png)
