@@ -8377,3 +8377,54 @@ COPY$ ../bkcrack -C secrets.zip -k c4490e28 b414a23d 91404b31 -U secrets_with_ne
 解压成功打开flag.docx，这里的字一开始是白色的，搞得我以为是什么word 隐写，吓我一跳~
 
 ![img](CTF.assets/171402373064811.png)
+
+## DataCon Quest-Crash
+
+> 参考：https://ek1ng.com/%E8%99%8E%E7%AC%A6CTF%202022%20Quest-Crash%20wp.html
+
+**KEY*查询会导致redis锁，这个时候发起大量GET，然后这些GET要等KEY*查询结束后才会进来，这时候可以可以让redis压力突然增大，可能就会寄**
+
+进来得到下面这个页面，看描述信息好像是爆破redis，下面有一些按钮，主要的功能就是创建键值对并且提供查询的功能（说白了就是爆破，搞破坏~）
+
+![img](CTF.assets/17142447867812.png)
+
+由于SYSINFO是查询系统信息的，这里感觉它应该不是对redis做操作，所以这里不理他，然后把所有能发的包都丢上去，线程拉大，最后成功拿到FLAG
+
+![img](CTF.assets/17142447867781.png)
+
+主要发送`KEY SET GET`这三个数据包，其中，SET长度给长点3000-4000，KEY的线程最好是SET或GET的两倍，**GETFLAG一定要发送！！！靠刷网页刷不出FLAG**
+
+## DataCon ICS Scavengers
+
+下载附件拿到数据包，点击统计 -> 协议分级 可以看到整个数据包的协议。可以看到主要是TPKE和Modbus协议，百度了一下，看懂了又好像没看懂~
+
+![img](CTF.assets/17142451701807.png)
+
+直接最蠢的方法，一个个流看，第2个流可以看到一串base64
+
+![img](CTF.assets/17142451701808.png)
+
+第34个流可以看到另一串flag
+
+![img](CTF.assets/17142451701809.png)
+
+由于直接看流会过掉一些错误的数据包，所以回去看一些wireshark做了黑色标记的数据包，看到一张被base64编码的图片
+
+![img](CTF.assets/171424517018010.png)
+
+将内容复制出来还原
+
+```Python
+import base64
+src = 'base64 数据'
+
+data = base64.b64decode(src)
+with open('ctf.jpg', 'wb') as f:
+    f.write(data)
+```
+
+![img](CTF.assets/171424517018011.png)
+
+```PHP
+THUCTF{It_is_fun_to_mess_and_play_with_wireshark}
+```
