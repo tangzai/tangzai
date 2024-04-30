@@ -348,7 +348,7 @@ int main() {
 
 ### 4.2 printf函数与getchar函数
 
-3.1.2 常用输出控制符
+**常用输出控制符**
 
 | 转换说明 | 输出                                                         |
 | -------- | ------------------------------------------------------------ |
@@ -364,13 +364,603 @@ int main() {
 | %i       | 有符号十进制整数（与%d相同）                                 |
 | %o       | 无符号八进制整数                                             |
 | %p       | 指针                                                         |
-|          |                                                              |
+| %s       | 字符串                                                       |
+| %u       | 无符号十进制整数                                             |
+| %x       | 无符号十六进制整数，使用十六进制0f                           |
+| %X       | 无符号十六进制整数，使用十六进制0F                           |
+| %%       | 打印一个百分号                                               |
+
+**printf()中的标记**
+
+| 修饰符 | 含义                                                         |
+| ------ | ------------------------------------------------------------ |
+| -      | 待打印项左对齐。即，从字段的左侧开始打印该项。示例：“%-10s”  |
+| +      | 有符号值若为正，则在值前面显示加号；若为负，则在值前面显示减号。示例：“%+6.2f” |
+| 空格   | 空格	有符号值若为正，则在值前面显示前导空格（不显示任何字符）；若为负，则在值前面显示减号+标记覆盖一个空格。示例：“%6.2f” |
+| #      | 把结果转化成另一种形式。如果是%o格式，则以0开始；如果是%x或%X格式，则以0x或0X开始；对于所有的浮点数格式，#保证了即使后面没有任何数字，也打印一个小数点字符。对于%g和%G格式，#防止结果后面的0被删除。示例：“%#o”、“%8.0f”、“%+#10.3e” |
+| 0      | 对于数值格式，用前导0代替空格填充字段宽度。对于整数格式，如果出现-标记或指定精度，则忽略该标记 |
+
+**printf附加格式**
+
+| 字符                | 含义                                                         |
+| ------------------- | ------------------------------------------------------------ |
+| 1（字母1）          | 附加在d,u,x,o签前面，表示长整数                              |
+| -                   | 左对齐                                                       |
+| m（代表一个整数）   | 数据最小宽度                                                 |
+| 0（数字0）          | 将输出的前面补上0知道占满指定列宽为止，不可以搭配使用-       |
+| m,n（代表一个整数） | m指定域宽，即对应的输出项在输出设备上所占的字符数，n值精度，用于说明输出的实型数的小数位数。对数值型的来说，未指定n时，隐含的精度为n=6位 |
+
+### 4.3 putchar和getchar函数
+
+```c
+#include <stdio.h>
+
+int main() {
+    char ch = 'a';
+    putchar(ch);			// 输出一个字符
+    char ch2 = getchar();   // 接收一个字符
+    putchar(ch2);			
+    return 0;
+}
+```
+
+## 5. 类型转换
+
+隐式转换：遵循一定的规则，由编译系统自动完成（自动四舍五入）
+
+强制类型转换：把表达式的运算结果前置转换为许哦徐的数据类型（不做四舍五入）
+
+类型转换原则：占用内存字节数少（值域小）的类型，像占用内存字节数多（值域大）的类型转换，以保证精度不降低
+
+![image-20240429223650965](C%E8%AF%AD%E8%A8%80.assets/image-20240429223650965.png)
+
+```c
+#include <stdio.h>
+
+int main() {
+    float a = 3.14f;
+    printf("%d", (int)a);       // 3
+    return 0;
+}
+```
+
+## 6. 程序流程结构
+
+### 6.1 if语句
+
+```
+if(条件表达式1){}else if(条件表达式2)else{}
+```
+
+```c
+#include <stdio.h>
+
+int main() {
+    int score = 80;
+    if (score > 90){
+        printf("优秀");
+    } else if(score < 90 && score > 60){
+        printf("良好");
+    } else{
+        printf("不及格");
+    }
+    return 0;
+}
+```
+
+### 6.2 三目运算符
+
+```
+条件表达式 ? True : False
+```
+
+```c
+#include <stdio.h>
+
+int main() {
+    int num1 = 80;
+    int num2 = 60;
+    int result = num1 > num2 ? 1 : 0;
+    printf("%d", result);
+
+    return 0;
+}
+```
+
+### 6.3 switch 语句
+
+```c
+#include <stdio.h>
+
+int main() {
+    int choice = 1;;
+
+    switch (choice) {
+        case 1:
+            printf("选择1");
+            break;
+        case 2:
+            printf("选择2");
+            break;
+        default:
+            printf("没有选择");
+            break;
+    }
+    return 0;
+}
+```
+
+### 6.4 while循环语句
+
+```c
+#include <stdio.h>
+
+int main() {
+    int i = 1;
+
+    while (i <= 10){
+        printf("%d\n", i);
+        i++;
+    }
+    return 0;
+}
+```
+
+### 6.5 do...while...
+
+```c
+#include <stdio.h>
+
+int main() {
+    int i = 1;
+
+    do {
+        printf("%d\n", i);
+        i++;
+    } while (i <= 10);
+    return 0;
+}
+```
+
+### 6.6 for循环
+
+```c
+#include <stdio.h>
+
+int main() {
+    for (int i = 0; i < 10; ++i) {
+        printf("%d\n", i);
+    }
+    return 0;
+}
+```
+
+### 6.7 跳转语句goto、break、continue
+
+这里只介绍goto
+
+```c
+#include <stdio.h>
+
+int main() {
+    printf("1");
+    goto FLAG;
+    printf("2");
+    printf("3");
+    printf("4");
+    FLAG:
+    printf("5");
+    printf("6");
+    return 0;
+}
+
+# 输出：
+1
+5
+6
+```
+
+## 7. 数组和字符串
+
+### 7.1 数组的定义和使用
+
+**数组就是在内存中连续的相同类型的变量空间**。同一个数组所有的成员都是相同的数据类型，同时所有的成员在呢次中的地址是连续的
+
+```
+数组在内存中的大小 = 元素类型 * 元素个数
+```
+
+```c
+#include <stdio.h>
+
+int main() {
+    int arr[10] = {0,1,2,3,4,5,6,7,8,9};
+    // 通过数组下标取值
+    printf("%d\n", arr[5]);
+    // 通过数组下标赋值
+    arr[5] = 100;
+
+    // 数组大小
+    printf("元素大小=%d\n", sizeof arr);
+    // 元素大小
+    printf("元素大小=%d\n", sizeof arr[0]);
+    // 元素个数
+    printf("元素个数=%d\n", sizeof arr / sizeof arr[0]);
+
+    // 循环遍历数组
+    for (int i = 0; i < sizeof arr / sizeof arr[0]; ++i) {
+        printf("%d\n", arr[i]);
+    }
+
+    // 数组下标越界
+    printf("%d\n", arr[-1]);        // 报错；这里跟python不同，python是倒取，C语言是没有这个下标
+    return 0;
+}
+```
+
+### 7.2 数组倒置
+
+```c
+#include <stdio.h>
+
+int main() {
+    int arr[10] = {0,1,2,3,4,5,6,7,8,9};
+    int i = 0;
+    int j = sizeof arr / sizeof arr[0] - 1;
+
+    while (i < j){
+        int tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+
+        i++;
+        j--;
+    }
+
+    for (int k = 0; k < sizeof arr / sizeof arr[0]; ++k) {
+        printf("%d\n", arr[k]);
+    }
+    return 0;
+}
+```
+
+### 7.3 二维数组
+
+```
+arr[行][列] = {}
+```
+
+```c
+#include <stdio.h>
+
+int main() {
+    int arr[2][3] = {{1,2,3}, {4,5,6}};
+    // 数组行数
+    printf("数组行数 = %d\n", sizeof arr / sizeof arr[0]);
+    printf("数组列数 = %d\n", sizeof arr[0] / sizeof arr[0][0]);
+
+    // 二位数组遍历
+    for (int i = 0; i < sizeof arr / sizeof arr[0]; ++i) {
+        for (int j = 0; j < sizeof arr[0] / sizeof arr[0][0]; ++j) {
+            printf("%d\n", arr[i][j]);
+        }
+    }
+
+    // address: arr = arr[0] = arr[0][0]
+    printf("%p\n", &arr);               // 0000002b56bff9d0
+    printf("%p\n", &arr[0]);            // 0000002b56bff9d0
+    printf("%p\n", &arr[0][0]);         // 0000002b56bff9d0
+
+    return 0;
+}
+```
+
+### 7.4 多维数组
+
+超过2维的数组就叫多维数组
+
+```c
+#include <stdio.h>
+
+int main() {
+    int arr[2][3][4] = {
+            {
+                    {1, 2, 3, 4},
+                    {5, 6, 7, 8},
+                    {9, 10, 11, 12}
+            },
+            {
+                    {11, 12, 13, 14},
+                    {15, 16, 17, 18},
+                    {19, 20, 21, 22}
+            }
+    };
+
+    for (int i = 0; i < sizeof arr / sizeof arr[0]; ++i) {
+        for (int j = 0; j < sizeof arr[0] / sizeof arr[0][0]; ++j) {
+            for (int k = 0; k < sizeof arr[0][0] / sizeof arr[0][0][0]; ++k) {
+                printf("%d\t", arr[i][j][k]);
+            }
+            printf("\n");
+        }
+    }
+    return 0;
+}
+```
+
+### 7.5 字符数组与字符串
+
+#### 7.5.1 字符数组与字符串区别
+
++ C语言中没有字符串这种数据类型，可以通过char的数组替代
++ 字符串一定是一个char的数组，但char的数组未必是字符串
++ **数字0（和字符`\0`等价）结尾的char数组就是一个字符串**，但如果char数组没有以数字0结尾，那么就不是一个字符串，只是普通字符数组，所以**字符串是一种特殊char的数组**
+
+```c
+#include <stdio.h>
+
+int main() {
+    char arr1[6] = {'h', 'e', 'l', 'l', 'o'};       // 数据不够，后面自动补0
+    char arr2[] = "hello";		// 后面自带 \
+
+    // \0 = 0 但不等于 '0'(字符串)
+    printf("%s\n", arr1);       // hello
+    printf("%s\n", arr2);       // hello
+    return 0;
+}
+```
+
+### 7.6 字符串的输入输出
+
+#### 7.6.1 `gets()`
+
+```
+#include <stdio.h>
+char *gets(char *s);
+功能：从标准输入读入字符，并保存到指定的内存空间，直到出现换行符或读到文件结尾为止
+参数：
+	s: 字符串首地址
+返回值：
+	成功：读入的字符串
+	失败：NULL
+```
+
+`gets(str)`与s`can("%s", str)`的区别：
+
++ `gets(str)`允许输入的字符串含有空格
++ `scanf("%s", str)`不允许含有空格
+
+注意：由于`scanf()`和`gets()`无法直到字符串s大小，必须遇到换行符或读到文件结尾为止才接收输入，因此容易导致字符数组越界（缓冲区溢出）的情况
+
+```c
+#include <stdio.h>
+
+int main() {
+    char arr[100];
+
+    // 获取用户输入，直到出现换行为止
+    gets(arr);
+    printf("%s", arr);
+
+    // 获取用户输入，直到出现换行为止，与gets()功能一样
+    scanf("%[^\n]", arr);
+    printf("%s", arr);
+
+    return 0;
+}
+```
+
+#### 7.6.2 `fgets()`
+
+```
+#include <stdio.h>
+char *fgets(char *s, int size, FILE * stream)
+
+功能：从stream指定的文件内容读入字符，保存到所指定的内存空间，直到出现换行符，读到文件结尾或是已读了size - 1个字符为止，最后追自动加上字符\0作为字符串结束
+参数：
+	s：字符串
+	size：指定最大读取字符串的长度(size - 1)
+	stream：文件指针，如果读键盘输入的字符串，固定写stdin
+返回值：
+	成功：成功读取的字符串
+	读到文件尾或出错
+```
+
+`fgets()`在读取一个用户通过键盘输入的字符串的时候，同时把用户输入的回车也作为字符串的一部分。通过scanf和gets输入一个字符串的时候，不包含结尾的`\n`，**但通过fgets结尾多了`\n`**。fgets()函数是安全的，不存在缓冲区溢出的问题
+
+#### 7.6.3 `puts`
+
+```
+#include <stdio.h>
+int puts(const char *s);
+功能：标砖设备输出字符串，在输出完成后自动输出一个\n
+参数：
+	s：字符串首地址
+返回值：
+	成功：非负数
+	失败：-1
+```
+
+```c
+#include <stdio.h>
+
+int main() {
+    char arr[10];
+    gets(arr);
+    puts(arr);          // 输出自带换行
+
+    return 0;
+}
+```
+
+#### 7.6.4 `fputs`
+
+```
+#include <stdio.h>
+int fputs(const char * str, FILE * stream)
+功能：将str所指定的字符串写入到stream指定的文件中，字符串结束符\0不写入文件
+
+参数：
+	str：字符串
+	stream：文件指针，如果把字符串输出到屏幕，固定为stdout
+返回值：
+	成功：0
+	失败：-1
+```
 
 
-​	
-​	
-%s	字符串
-%u	无符号十进制整数
-%x	无符号十六进制整数，使用十六进制0f
-%X	无符号十六进制整数，使用十六进制0F
-%%	打印一个百分号
+
+```
+#include <stdio.h>
+
+int main() {
+    char arr[10];
+
+    fgets(arr, sizeof arr, stdin);
+    fputs(arr, stdout);
+
+    return 0;
+}
+```
+
+#### 7.6.5 strlen
+
+```
+#include <string.h>
+size_t strlen(const char * s);
+功能：计算指定字符串的长度，不包含字符串结束符\0
+参数：
+	s:字符串首地址
+返回值：
+	字符串的长度，size_t为unsigned int类型
+```
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    char arr[] = "hello world";
+    // 返回字符串长度，返回 unsigned int
+    unsigned int len = strlen(arr);
+    printf("%d", len);
+    return 0;
+}
+```
+
+## 8. 函数
+
+### 8.1 案例：随机数
+
+```
+#include <time.h>
+time_t time(time_t *t);
+功能：获取当前系统事件
+参数：常设置为NULL
+返回值：当前系统事件 time_t 相当于long类型，单位为秒
+
+#include <stdlib.h>
+void srand(unsigned int seed);
+功能：用来设置rand()产生随机数相同的随机种子
+参数：如果每次seed相等，rand()产生随机数相等
+返回值：无
+
+#include <stdlib.h>
+int rand(void);
+功能：返回一个随机数值
+参数：无
+返回值：随机数
+```
+
+### 8.2 C语言函数注意事项
+
+1. 形参列表：在定义函数时指定的形参，在未出现函数调用时，它们并不占内存中的存储单元，因此称它们形式参数或虚拟参数，简称形参，表示它们并不是实际存在的数据，**所以形参里的变量不能赋值**
+
+2. 返回值：函数的返回值时通过函数中的return语句获得的，return后面的值可以是一个表达式
+
+   尽量保证return语句中表达式的值和函数返回是同一类型
+
+### 8.3 无参函数和有参函数
+
+```c
+#include <stdio.h>
+
+// 无参函数
+void void_fuc(void){
+    printf("This is void_func\n");
+}
+
+int arg_add(int a, int b){
+    return a + b;
+}
+
+int main(){
+    void_fuc();
+    int sum = arg_add(10, 20);
+    printf("%d\n", sum);
+    return 0;
+}
+```
+
+### 8.4 exit 函数
+
+该函数用于将程序退出
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+void quit(){
+    exit(0);
+}
+
+int main(){
+    quit();     // 执行到这里，程序就会退出
+    return 0;
+}
+
+
+```
+
+## 9. 多文件编程
+
+### 9.1 分文件编程
+
+```c
+# fun.h
+#pragma once
+extern int arg_add(int a, int b);		// 函数声明
+
+# func.c
+int arg_add(int a, int b){
+    return a + b;
+}
+
+# test.c
+#include <stdio.h>
+#include "fun.h"		// 导入自定义头文件
+
+
+int main(){
+    printf("max = %d", arg_add(10, 30));
+}
+
+```
+
+### 9.2 防止头文件重复包含
+
+为了避免同一个文件被include多次，`C/C++`中有两种方式，一张是`#ifndef`方式，一种是`#pragme once`方式，相当于php的`include_onice`
+
+```c
+# 方法一
+#ifndef __SOMEFILE_H__
+extern int arg_add(int a, int b);
+#endif
+```
+
+```c
+# 方法二
+#pragma once
+extern int arg_add(int a, int b);		// 函数声明
+```
+
