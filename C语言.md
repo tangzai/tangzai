@@ -964,3 +964,374 @@ extern int arg_add(int a, int b);
 extern int arg_add(int a, int b);		// 函数声明
 ```
 
+## 10. 指针
+
+### 10.1 数据在内存中的存储
+
+以Windows为例，Liunx可能会不同
+
+```c
+#include <stdio.h>
+
+
+int main() {
+    int a = -666985;
+    printf("%p\n", &a);
+    getchar();
+    return 0;
+}
+
+// 这里 a = -666985
+a原码：		1000 0000 0000 1010 0010 1101 0110 1001
+a反码：		1111 1111 1111 0101 1101 0010 1001 1010
+a补码：		1111 1111 1111 0101 1101 0010 1001 1011
+a补码十六进制：   F    F    F    5    D    2    9    7
+Windows以小端存储的形式，即以字节为单位从后往前写，得：97 D2 F5 FF
+```
+
+![image-20240430221517226](C%E8%AF%AD%E8%A8%80.assets/image-20240430221517226.png)
+
+```c
+#include <stdio.h>
+
+
+int main() {
+    int a = 1000;
+    printf("%p\n", &a);
+    getchar();
+    return 0;
+}
+
+
+// 这里 a = 1000
+整数的原码、反码、补码都相同，得：
+a = 			0000 0000 0000 0000 0000 0011 1110 1000
+a补码的十六进制：    0   0    0    0    0    3    E    8
+Windows以小端存储的形式，即以字节为单位从后往前写，得：E8 03 00 00
+```
+
+![image-20240430221834657](C%E8%AF%AD%E8%A8%80.assets/image-20240430221834657.png)
+
+### 10.2 指针基础知识
+
+```c
+#include <stdio.h>
+
+
+int main() {
+    int a = 1000;
+    // 指针变量的定义：数据类型* 为指针变量，要存什么类型的指针就要声明什么数据类型的指针变量
+    int* p = &a;
+
+    printf("%p\n", &a);     // 00000020cd7ff7d4
+    printf("%p\n", p);      // 00000020cd7ff7d4
+
+    // 指针变量间接修改变量的值：*p 为取值，即从 p 所记录的地址中取值
+    *p = 50;
+    printf("%d\n", a);      // 50
+    printf("%d\n", *p);     //50
+
+    // 指针大小：64位系统的指针大小为8（8字节），32为系统的指针大小为4（4字节）
+    printf("%d\n", sizeof(int*));       // 00 00 00 20 cd 7f f7 d4 = 8byte
+    return 0;
+}
+
+```
+
+### 10.3 野指针和空指针
+
+指针变量也是变量，是变量就可以任意赋值，不要越界即可（32位为4字节，64位为8字节），但是，**任意数值赋值给指针变量没有意义，因为这样的指针就成了野指针**，此指针指向的区域是未知（操作系统不允许操作此指针指向的内存区域）。所以，**野指针不会直接引发错误，操作野指针指向的内存区域才会出问题**
+
+```c
+#include <stdio.h>
+
+
+int main() {
+    // 野指针：指针变量指向一个未知的空间
+    int* p = 100;       // Unable to read memory
+    // 操作系统将 0-255 作为系统占用不允许访问操作
+    // 操作野指针对应的内存空间可能报错
+    getchar();
+
+    return 0;
+}
+```
+
+但是，野指针和有效指针变量保存的都是数值，为了标志此指针变量没有指向任何变量（空闲可用），C语言中，可以把NULL赋值给此指针，这样就标志此指针为空指针，没有任何指针
+
+```c
+#include <stdio.h>
+
+
+int main() {
+    // 空指针是指内存地址编号为0的空间
+    int* p = NULL;
+    // 操作空指针对应的空间一定会报错
+    *p = 100;                       // err
+    // 空指针可以用作条件判断
+    if (p == NULL){
+        printf("空指针");
+    }
+    return 0;
+}
+
+```
+
+### 10.4 万能指针
+
+`void *`指针可以指向任意变量的内存空间
+
+```c
+#include <stdio.h>
+
+
+int main() {
+    int a = 100;
+    // 万能指针可以接收任意类型变量的内存地址
+    void* p = &a;
+    // 在通过万能指针修改变量的指时 需要找到变量对应的指针类型
+    *(int *) p = 200;
+    printf("%d\n", a);				// 200
+    printf("%d\n", *(int *)p);		// 200
+    return 0;
+}
+```
+
+### 10.5 const 修饰的指针
+
+在编辑程序时，指针作为函数参数，如果不想修改指针对应内存空间的值，需要使用const修饰指针数据类型
+
+```c
+#include <stdio.h>
+
+
+int main() {
+    int a = 10;
+    int b = 20;
+
+    // const 修饰指针类型：可以修改指针变量的值，不可以修改指针指向内存空间的值
+    const int *p = &a;
+    p = &b;
+    printf("%d\n", *p);
+
+    // 可以修改指针指向内存空间的值：不可以修改指针变量的值
+    int* const p1 = &a;
+    *p1 = 200;
+    printf("%d\n", *p1);
+
+    // const 修改指针变量和指针类型：两个都不可以改
+    const int* const p2 = &a;
+    // * 是降维度，& 是升维度
+    int **pp2 = &p2;
+    // **pp2 --> &p2 --> &a, &a = 300;
+    **pp2 = 300;
+    printf("%d\n", a);
+    return 0;
+}
+
+```
+
+## 11. 指针和数组
+
+### 11.1 指针和数组的关系
+
+```c
+#include <stdio.h>
+
+
+int main() {
+    int arr[11] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+    int* p = &arr;
+
+    for (int i = 0; i < sizeof arr / sizeof arr[0]; ++i) {
+        printf("%d\n", *p ++);
+    }
+
+    // 000000ff119ffdd8 - 000000ff119ffdb0 = 0x28 = 0010 1000 = 32 + 8 = 40 / sizeof(int) = 10，得到步长！
+    // 两个指针相减 等到的结果是两个指针的偏移量（步长）
+    int step = p - arr;
+    printf("p = %p\n", p);          // p = 000000ff119ffdd8
+    printf("arr = %p\n", arr);      // arr = 000000ff119ffdb0
+    printf("step = %p\n", &step);   // step = 000000ff119ffdac
+
+//    printf("%p", *(int *)(p-arr));
+
+    // 查看两个指针地址详减的结果
+    printf("%p\n", (void *)p - (void *)arr);
+
+    // 指针p是变量，arr是常量
+    printf("指针size: %d\n", sizeof p);			// 指针size: 8
+    printf("数组size: %d\n", sizeof arr);			// 数组size: 44
+    return 0;
+}
+
+```
+
+### 11.2 数组做为函数的形参
+
+```c
+#include <stdio.h>
+
+// 数组作为形参会退化为指针
+void func(int arr[], int len) {
+    for (int i = 0; i < len; ++i) {
+        printf("%d\n", *(arr + i));
+    }
+}
+
+int main() {
+    int arr[] = {1,2,3,4,5,6,7,8};
+    func(arr, sizeof arr / sizeof arr[0]);
+    return 0;
+}
+
+```
+
+### 11.3 指针加减运算
+
+#### 11.3.1 指针的运算
+
++ 指针计算不是简单的整数相加
++ 如果是一个 `int *`，`+1`的结果是增加一个int的大小
++ 如果是一个`char *`，`+1`的结果是增加一个char的大小
+
+**Tips：**运算符是否可以对指针操作取决于运算的结果的指针是否是野指针！如果是野指针就是不允许，因为野指针没有意义
+
+### 11.4 指针的加法运算案例
+
+```c
+#include <stdio.h>
+
+// 数组作为形参会退化为指针
+void copy1(char *dest, char *src) {
+    int i = 0;
+    // *(src + i) = src[i]
+    while (src[i] != '\0') {
+        dest[i] = src[i];
+        i++;
+    }
+    dest[i] = '\0';
+}
+
+void copy2(char *dest, char *src) {
+    int i = 0;
+    while (*(src + i)) {
+        *(src + i) = *(dest + i);
+        i++;
+    }
+    *(dest + i) = '\0';
+}
+
+void copy3(char *dest, char *src) {
+    while (*src) {
+        *dest = *src;
+        dest++;
+        src++;
+    }
+    *dest = '\0';
+}
+
+int main() {
+    char arr[] = "LOVE YOU";
+    char dest[100];
+    copy1(dest, arr);
+    copy2(dest, arr);
+    copy3(dest, arr);
+    printf("%s", dest);
+    return 0;
+}
+
+```
+
+### 11.5 指针数组
+
+指针数组，它是数组，数组的每个元素都是指针类型
+
+```c
+#include <stdio.h>
+
+
+int main() {
+    // 指针数组
+    int a = 10;
+    int b = 20;
+    int c = 30;
+    int* arr[] = {&a, &b, &c};
+
+    // 遍历指针数组
+    for (int i = 0; i < sizeof arr / sizeof arr[0]; ++i) {
+        printf("%d\n", *arr[i]);
+    }
+
+    int arr1[3] = {1,2,3};
+    int arr2[3] = {4,5,6};
+    int arr3[3] = {7,8,9};
+    // 指针数组是一个特殊的二维数组
+    int* address_arr[] = {&arr1, &arr2, &arr3};
+    for (int i = 0; i < sizeof address_arr / sizeof address_arr[0]; ++i) {
+        for (int j = 0; j <= sizeof address_arr[0] / sizeof *(address_arr[0]); ++j) {
+            // 下面写法都意义：arr[i] = *(arr + i)
+            printf("%d\n", address_arr[i][j]);
+            printf("%d\n", *(*(address_arr +i) + j));
+        }
+    }
+    return 0;
+}
+
+```
+
+## 12. 指针和函数
+
+### 12.1 函数形参改变实参的值
+
+```c
+#include <stdio.h>
+
+void swap(int* num1, int* num2){
+    int tmp = *num1;
+    *num1 = *num2;
+    *num2 = tmp;
+}
+
+int main() {
+    int a = 10;
+    int b = 20;
+    swap(&a, &b);
+    printf("a=%d, b=%d", a, b);
+    return 0;
+}
+```
+
+### 12.2 数组名的函数参数
+
+数组名做函数参数，函数的形参会退化为指针
+
+```c
+#include <stdio.h>
+
+// todo: 字符串追加函数
+void append(char *char1, char *char2) {
+    while (*char1) {
+        // 指针 + sizeof char
+        char1++;
+    }
+
+    while (*char2) {
+        *char1 = *char2;
+        char1++;
+        char2++;
+    }
+    *char1 = '\0';
+}
+
+int main() {
+    char arr1[] = "hello";
+    char arr2[] = " world";
+    append(arr1, arr2);
+    printf("%s\n", arr1);
+    puts(arr1);
+    return 0;
+}
+
+```
+
