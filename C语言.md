@@ -574,6 +574,7 @@ int main() {
 #include <stdio.h>
 
 int main() {
+    //C语言中数组的大小的定义只能是chang'lian
     int arr[10] = {0,1,2,3,4,5,6,7,8,9};
     // 通过数组下标取值
     printf("%d\n", arr[5]);
@@ -1101,6 +1102,8 @@ int main() {
 
 在编辑程序时，指针作为函数参数，如果不想修改指针对应内存空间的值，需要使用const修饰指针数据类型
 
+`const`修改数据类型不能修改指针指向的值，`const`修改变量不能修改变量的值，`const`修饰的常量可以通过加一级指针修改
+
 ```c
 #include <stdio.h>
 
@@ -1334,4 +1337,29 @@ int main() {
 }
 
 ```
+
+## 13. 指针和字符串
+
+### 13.1 主函数参数
+
+```c
+#include <stdio.h>
+// int argc 表示传递参数的个数
+// char* argv[]={'test.exe' '-o' '111' '222'} 表示参数的具体内容
+int main(int argc, char* argv[]) {
+    for (int i = 0; i < argc; ++i) {
+        printf("%s\n", argv[i]);
+    }
+    return 0;
+}
+
+// 输出
+D:\Clan>test.exe -o 111 222
+test.exe
+-o
+111
+222
+```
+
+### 13.2 字符串函数
 
