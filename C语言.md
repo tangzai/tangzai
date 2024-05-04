@@ -574,7 +574,7 @@ int main() {
 #include <stdio.h>
 
 int main() {
-    //C语言中数组的大小的定义只能是chang'lian
+    //C语言中数组的大小的定义只能是常量！
     int arr[10] = {0,1,2,3,4,5,6,7,8,9};
     // 通过数组下标取值
     printf("%d\n", arr[5]);
@@ -1362,4 +1362,387 @@ test.exe
 ```
 
 ### 13.2 字符串函数
+
+#### 1)`strcpy()`
+
+```
+#include <string.h>
+char* strcpy(char* dest, consr char* src);
+功能：把src所指向的字符串复制到dest所指向的空间中，\0也会拷贝过去
+参数：
+	dest：目的字符串首地址
+	src：源字符首地址
+返回值：
+	成功：返回dest字符串的首地址
+	失败：NULL
+```
+
+注意：如果参数dest所指的内存空间不够大，可能会造成缓冲区溢出的情况
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(int argc, char *argv[]) {
+    char src[] = "hello world";
+    char dst[100] = {0};
+
+    strcpy(dst, src);
+    printf("%s\n", dst);
+    return 0;
+}
+```
+
+#### 2)`strncpy()`
+
+```
+#include <string.h>
+char* strncpy(char* dest, const char* src, size_t n);
+功能：把src所指向的字符串复制到dest所指向的空间中，\0也会拷贝过去
+参数：
+	dest：目的字符串首地址
+	src：源字符首地址
+	n：指定需要拷贝字符串个数
+返回值：
+	成功：返回dest字符串的首地址
+	失败：NULL
+```
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(int argc, char *argv[]) {
+    char src[] = "hello world";
+    char dst[100] = {0};
+
+    strncpy(dst, src, 5);
+    printf("%s\n", dst);
+    return 0;
+}
+```
+
+#### 3)`strcat()`
+
+```
+#include <string.h>
+char *strcat(char* dest, const char* src);
+功能：将src字符串连接到dest的尾部，\0也会追加过去
+参数：
+	dest：目的字符串首地址
+	src：源字符串首地址
+返回值：
+	成功：返回dest字符串的首地址
+	失败：NULL
+```
+
+注意：如果参数dest所指的内存空间不够大，可能会造成缓冲区溢出的情况
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(int argc, char *argv[]) {
+    char dest[] = "hello";
+    char src[] = "world";
+
+    strcat(dest, src);
+    printf("%s", dest);
+    return 0;
+}
+```
+
+#### 4)`strncat()`
+
+```c
+#include <string.h>
+char *strcat(char* dest, const char* src);
+功能：将src字符串连接到dest的尾部，\0也会追加过去
+参数：
+	dest：目的字符串首地址
+	src：源字符串首地址
+    n：指定需要追加字符串个数
+返回值：
+	成功：返回dest字符串的首地址
+	失败：NULL
+```
+
+#### 5)`strcmp()`
+
+```
+#include <string.h>
+int strcmp(const char* s1, consr char* s2);
+功能：比较s1和s2的大小，比较的是字符ASCII码大小
+参数：
+	s1：字符串1首地址
+	s2：字符串2首地址
+返回值：
+	相等：0
+	大于 >0：在不同操作系统strcmp结果会不同，返回ASCII值
+	小于 <0
+```
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(int argc, char *argv[]) {
+    char dest[] = "hello";
+    char src[] = "hello";
+
+    printf("%d", strcmp(dest, src));        // 0
+    return 0;
+}
+```
+
+#### 6)`strncmp()`
+
+```
+#include <string.h>
+int strcmp(const char* s1, consr char* s2, size_t n);
+功能：比较s1和s2的指定长度的大小，比较的是字符ASCII码大小
+参数：
+	s1：字符串1首地址
+	s2：字符串2首地址
+	n：指定的长度
+返回值：
+	相等：0
+	大于 >0：在不同操作系统strcmp结果会不同，返回ASCII值
+	小于 <0
+```
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(int argc, char *argv[]) {
+    char dest[] = "hello";
+    char src[] = "hell";
+
+    printf("%d", strncmp(dest, src, 4));        // 0
+    return 0;
+}
+```
+
+#### 7)`sprintf()`
+
+```
+#include <stdio.h>
+int sprintf(char* str, consr char* format, ...);
+功能：根据参数formart字符串来转换并格式化数据，然后将结果输出到str指定的空间中，直到出现字符串结束符\0为止
+参数：
+	str：字符串首地址
+	format：字符串格式，用法和printf()一样
+返回值：
+	成功：实际格式化的字符个数
+	失败：-1
+```
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(int argc, char *argv[]) {
+    char ch[100] = {0};
+    sprintf(ch, "hello world");
+    printf("%s\n", ch);                     // hello world
+    sprintf(ch, "%d + %d = %d", 1, 1, 1 + 1);
+    printf("%s\n", ch);                     // 1 + 1 = 2
+    return 0;
+}
+```
+
+#### 8)`sscanf()`
+
+```
+#include <stdio.h>
+int sscanf(const char* str, const char* format, ...);
+功能：从str指定的字符串读取数据，并根据参数format字符串来转换并格式化数据
+参数：
+	str：指定的字符串首地址
+	format：字符串格式，用法和scanf()一样
+返回值：
+	成功：参数数目，成功转换的值的个数
+	失败：-1
+```
+
+```c
+#include <stdio.h>
+
+int main(int argc, char *argv[]) {
+    char ch[] = "2+2=4";
+    int a;
+    int b;
+    int c;
+    sscanf(ch, "%d+%d=%d", &a, &b, &c);
+    printf("%d\n", a);          // 2
+    printf("%d\n", b);          // 2
+    printf("%d\n", c);          // 4
+    return 0;
+}
+```
+
+#### 9)`strchr()`
+
+```
+#include <string.h>
+char* strchr(const char* s, int c);
+功能：在字符串s中查找字母出现的位置
+参数：
+	s：字符串首地址
+	c：匹配字母（字符）
+返回值：
+	成功：返回第一次出现的c地址(地址)
+	失败：NULL
+```
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(int argc, char *argv[]) {
+    char ch[] = "abcdefg";
+    char need = 'c';
+    printf("%p", strchr(ch, need));     // 000000b6c63ffc29
+    return 0;
+}
+```
+
+#### 10)`strstr()`
+
+```
+#include <string.h>
+char* strstr(consr char* haystack, const char* needle);
+功能：在字符串haystack中查找字符串needle出现的位置
+参数：
+	haystack：源字符串首地址
+	needle：匹配字符串首地址
+返回值：
+	成功：返回第一次出现needle地址
+	失败：NULL
+```
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(int argc, char *argv[]) {
+    char ch[] = "abcdefg";
+    char need[] = "efg";
+    printf("%p", strstr(ch, need));     // 000000d3451ffabc
+    return 0;
+}
+```
+
+#### 11)`strtok()`
+
+```
+#include <string.h>
+char* strtok(char* str, const char *delim);
+功能：将字符串分割成一个个片段。当strtok()在参数s的字符串中发现参数delim中包含的分割字符时，则会将字符改成\0字符，当连续出现多个时只替换第一个为\0
+参数：
+	str：指向要分割的字符串
+	delim：为分割字符串中包含的所有字符
+返回值：
+	成功：分割后字符串首地址
+	失败：NULL
+```
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(int argc, char *argv[]) {
+    char url[] = "www.baidu.com";
+    char* p = strtok(url, ".");         // www
+    printf("%s\n", p);
+    p = strtok(NULL, ".");              // baidu
+    printf("%s\n", p);
+    p = strtok(NULL, ".");              // com
+    printf("%s\n", p);
+    return 0;
+}
+```
+
+#### 12)`atoi()`
+
+```
+#include <stdlib.h>
+int atoi(const char* nptr);
+功能：atoi()会扫描nptr字符串，跳过前面的空格字符，直到遇到数字或正负号才开始做转换，而遇到非数字或字符串结束符\0才结束转换，并将结果返回返回值
+参数：nptr：待转换的字符串
+返回值：成功转换后整数
+```
+
+类似的函数有：
+
++ `atof()`：把一个小数形式的字符串转换为一个浮点数
++ `atol()`：把一个字符串转换为long类型
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+int main(int argc, char *argv[]) {
+    char ch[] = "123456abc";		// 123456
+    printf("%d", atoi(ch));
+    return 0;
+}
+```
+
+## 14. 内存管理
+
+### 14.1 静态全局变量
+
++ `static`局部变量的作用域也是在定义的函数内有效
++ `static`局部变量的生命周期和程序运行周期一样，同时`static`局部变量的值只初始化一次，但可以赋值多次
++ `static`局部变量若未赋值以处值，则有系统自动赋值’数值型变量字符赋初值0，字符型变量赋空字符
+
+```c
+#include <stdio.h>
+
+// static关键字声明局部变量：只能在函数内部使用
+// static关键字声明全局变量：只能在本文件中使用
+void func(){
+    // 静态变量只会初始化一次，可以多次赋值，有点像python的 yield 关键字，保存 变量状态
+    // 生命周期：从程序创建到程序销毁
+    static int num = 10;
+    num++;
+    printf("%d\n", num);
+}
+
+int main(int argc, char *argv[]) {
+    for (int i = 0; i < 10; ++i) {
+        func();
+    }
+    return 0;
+}
+```
+
+### 14.2 全局函数和静态函数
+
+在C语言中函数默认都是全局的，使用关键字static可以将函数声明为静态，函数定义为static就意外着这个函数只能在定义这个函数的文件中使用，在其他文件中不能调用，即使在其他文件中声明这个函数都没用
+
+对于不同文件中的static函数名字可以相同
+
+![image-20240503011642053](C%E8%AF%AD%E8%A8%80.assets/image-20240503011642053.png)
+
+### 14.3 `extren`全局声明
+
+`extern int a;`声明一个变量，这个全局变量在别的文件中已经定义了，这里时声明，而不是定义
+
+```c
+#func.c
+int a = 10;
+
+# test.c
+#include <stdio.h>
+
+extern int a;
+int main(int argc, char *argv[]) {
+    printf("%d", a);
+    return 0;
+}
+```
 
