@@ -1746,3 +1746,518 @@ int main(int argc, char *argv[]) {
 }
 ```
 
+### 14.4 内存分区
+
+C代码经过**预处理、编译、汇编、链接**4步后生成一个可执行程序
+
+在Windows下，程序是一个普通的可执行文件，一下列出一个二进制可执行文件的基本情况
+
+![image-20240504231803551](C%E8%AF%AD%E8%A8%80.assets/image-20240504231803551.png)
+
+通过上图可知，在没有运行程序前，也就是说程序没有加载到内存，可执行程序内部已经分号3端信息，分别为**代码区（text）、数据区（data）和未初始化数据区（bss）**3个部分（有些人直接把data和bss合起来叫做静态区或全局区）
+
+![image-20240504232630865](C%E8%AF%AD%E8%A8%80.assets/image-20240504232630865.png)
+
++ 代码区（text segment）
+
+  加载的是可执行文件代码段，所有的可执行代码都加载到代码区，这块内存是不可以在运行期间修改的
+
++ 未初始化数据区（BSS）
+
+  加载的是可执行文件BSS段，位置可以分开亦可以紧靠数据段，存储于数据段的数据（全局初始化，静态未初始化数据）的生存周期为整个程序运行过程
+
++ 全局初始化数据区/静态数据区（data segment）
+
+  加载的是可执行文件的数据段，存储于数据段（全局初始化，静态初始化数据，文字常量（只读））数据的生存周期为整个程序运行过程
+
++ 栈区（stack）
+
+  栈是一种先进后出的内存结构。由编译器自动分配释放，存储函数的参数值、返回值、局部变量等。在程序运行过程中实时加载和释放，因此，局部变量的生成周期为申请到释放该段栈空间（默认大小：1M）
+
++ 堆区（heap）
+
+  堆是一个大容器，它的容器要远远大于栈，但没有栈那样先进后出的顺序。用于动态内存分配。堆在内存中位于BSS区和栈区之间。一般由程序员分配和释放，若程序员不释放，程序结束时由操作系统回收
+
+### 14.5 存储类型总结
+
+| 类型            | 作用域   | 生命周期       | 存储位置                      |
+| --------------- | -------- | -------------- | ----------------------------- |
+| auto 变量       | 一对{}内 | 当前函数       | 栈区                          |
+| static 局部变量 | 一对{}内 | 整个程序运行期 | 初始化data段，未初始化在BSS段 |
+| extern 变量     | 整个程序 | 整个程序运行期 | 初始化data段，未初始化在BSS段 |
+| static 全局变量 | 当前文件 | 整个程序运行期 | 初始化data段，未初始化在BSS段 |
+| extren 变量     | 整个程序 | 整个程序运行期 | 代码区                        |
+| static 函数     | 当前文件 | 整个程序运行期 | 代码区                        |
+| register 变量   | 一对{}内 | 当前函数       | 运行时存储在CPU寄存器         |
+| 字符串常量      | 当前文件 | 整个程序运行期 | data 段                       |
+
+### 14.6 堆区内存分配和释放
+
+#### 1)`malloc()`
+
+```
+#include <stdlib.h>
+
+void* malloc(size_t size);
+功能：在内存的动态存储区（堆区）中分配一块长度为size字节的连续区域，用来存放类型说明符指定的类型。分配的内存空间内容不确定，一般使用memset初始化
+参数：
+	size：需要分配内存大小（单位：字节）
+返回值：
+	成功：分配空间的起始地址
+	失败：NULL
+```
+
+#### 2)`free()`
+
+```
+#include <stdlib.h>
+void free(void* ptr);
+功能：释放ptr所指向的一块内存空间，ptr是一个任意类型的指针变量，执行被释放区域的首地址。对同一内存空间多次释放会出错
+参数：
+	ptr：需要释放空间的首地址，被释放区应该是由malloc函数所分配的区域
+返回值：无
+```
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int main(int argc, char *argv[]) {
+    // 开辟堆空间
+    int* p = (int* )malloc(sizeof (int ));
+    // 通过指针向堆空间赋值
+    *p = 4;
+    printf("%d\n", *p);
+    // 释放堆空间
+    free(p);
+    return 0;
+}
+```
+
+### 14.7 内存操作函数
+
+#### 1)`memset()`
+
+```
+#include <string.h>
+void* memset(void* s, int c, size_t n);
+功能：将s的内存区域的前n个字节以参数c填入
+参数：
+	s：需要操作内存s的首地址
+	c：填充的字符，c虽然参数为int，但必须是unsigned char，范围为0~255
+	n：指定需要设置的大小
+返回值：s的首地址
+```
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+
+int main(int argc, char *argv[]) {
+    int* p = (int* )malloc(sizeof (int ) * 10);
+    // 向指针 p 的40个字节写入10个int 0
+    memset(p, 0, 40);
+    for (int i = 0; i < 10; ++i) {
+        printf("%d\n", p[i]);       // 0 0 ... 0 0
+    }
+    free(p);
+    return 0;
+}
+```
+
+#### 2)`memcpy()`
+
+```
+#include <string.h>
+void* memcpy(void* dest, const void* src, size_t n);
+功能：拷贝src所指的内存内容的前n个字符到dest所值的内存地址上
+参数：
+	dest：目的内存首地址
+	src：源内存首地址，注意：dest和src所指的内存空间不可重叠，可能会导致程序报错
+返回值：dest的首地址
+```
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+
+int main(int argc, char *argv[]) {
+    int ch[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int *p = (int *) malloc(sizeof(int) * 10);
+    memcpy(p, ch, sizeof(int) * 10);
+    for (int i = 0; i < 10; ++i) {
+        printf("%d\n", p[i]);
+    }
+    free(p);
+    return 0;
+}
+```
+
+#### 3)`memmove()`
+
+`memmove()`功能用法和`memcpy()`一样，区别在于：dest和src所指的内存空间重叠时，`memmove()`任然能处理，不过执行效率比`memcpy()`低些
+
+#### 4)`memcmp()`
+
+```
+#include <string.h>
+int memcmp(const void* s1, const void* s2, size_t n);
+功能：比较s1和s2所指向内存区域的前n个字节
+参数：
+	s1：内存首地址1
+	s2：内存首地址2
+	n：需比较前n个字节
+返回值：
+	相等：=0
+	大于：>0
+	小于：<0
+```
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+
+int main(int argc, char *argv[]) {
+    int ch1[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int ch2[] = {1, 2, 3, 4, 5};
+    int res1 = memcmp(ch1, ch2, 20);        // 0
+    printf("%d\n", res1);
+    int res2 = memcmp(ch1, ch2, 24);        // -1
+    printf("%d\n", res2);
+    return 0;
+}
+```
+
+### 14.8 二级指针对应的堆空间
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+
+int main(int argc, char *argv[]) {
+    // 堆开辟二级指针
+    int** p =(int **) malloc(sizeof (int* ) * 5);
+
+    // 循环开辟一级指针
+    for (int i = 0; i < 5; ++i) {
+        p[i] = (int* ) malloc(sizeof (int ) * 5);
+    }
+
+    // 循环为一级指针所指向的数组赋值
+    for (int i = 0; i < 5; ++i) {
+        for (int j = 0; j < 5; ++j) {
+            p[i][j] = i * j;
+        }
+    }
+
+    // 循环输出一级指针所指向的数组的值
+    for (int i = 0; i < 5; ++i) {
+        for (int j = 0; j < 5; ++j) {
+            printf("%d  ", p[i][j]);
+        }
+        printf("\n");
+    }
+
+    // 释放一级指针
+    for (int i = 0; i < 5; ++i) {
+        free(p[i]);
+    }
+
+    // 释放二级指针
+    free(p);
+    return 0;
+}
+```
+
+## 15. 符合类型（自定义类型）
+
+### 15.1 结构体
+
+#### 15.1.1 概述
+
+数组：描述一组具有相同类型数据的有序集合，用于处理大量相同类型的数据运算
+
+有时我们需要将不同类型的数据组合成一个有机的整体，如：一个学生有学号/姓名/年龄/地址等属性，显然单独定义以上变量比较繁琐，数据不便于管理
+
+C语言中给出了另一种构造数据类型——结构体
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+struct student{
+    char name[21];
+    int age;
+    int score;
+    char address[51];
+};
+
+int main(int argc, char *argv[]) {
+    struct student stu1;
+//    stu1.name = "张三";        // err, stu1.name是指针，不允许直接赋值
+    strcpy(stu1.name, "张三");
+    stu1.age = 18;
+    stu1.score = 100;
+    strcpy(stu1.address, "龙翔大道2188号");
+
+    printf("姓名：%s\n", stu1.name);
+    printf("年龄：%d\n", stu1.age);
+    printf("分数：%d\n", stu1.score);
+    printf("地址：%s\n", stu1.address);
+
+    // 方法二
+    struct student stu2 = {"李四", 22, 60, "龙翔大道8812号"};
+    printf("姓名：%s\n", stu2.name);
+    printf("年龄：%d\n", stu2.age);
+    printf("分数：%d\n", stu2.score);
+    printf("地址：%s\n", stu2.address);
+    return 0;
+}
+```
+
+#### 15.1.2 结构体数组
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+struct student{
+    char name[21];
+    int age;
+    int score;
+    char address[51];
+};
+
+int main(int argc, char *argv[]) {
+    // 创建结构体数组
+    struct student stu[3] = {
+            {"张三", 18, 100, "龙翔大道2188号"},
+            {"李四", 28, 10, "龙翔大道88号"},
+            {"王五", 38, 40, "龙翔大道28号"}
+    };
+
+    // 循环打印出结构体数组的内容
+    for (int i = 0; i < sizeof stu / sizeof stu[0]; ++i) {
+        printf("姓名：%s\n", stu[i].name);
+        printf("年龄：%d\n", stu[i].age);
+        printf("分数：%d\n", stu[i].score);
+        printf("地址：%s\n", stu[i].address);
+        printf("\n");
+    }
+    return 0;
+}
+```
+
+#### 15.1.3 开辟堆空间存储结构体
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+struct student {
+    char name[21];
+    int age;
+    int score;
+    char address[51];
+};
+
+int main(int argc, char *argv[]) {
+    struct student *p = (struct student *) malloc(sizeof(struct student) * 3);
+    for (int i = 0; i < 3; ++i) {
+        strcpy(p[i].name, "张三");
+        p[i].age = 18;
+        p[i].score = 100;
+        strcpy(p[i].address, "龙翔大道2188号");
+    }
+
+    for (int i = 0; i < 3; ++i) {
+        printf("姓名：%s\n", p[i].name);
+        printf("年龄：%d\n", p[i].age);
+        printf("分数：%d\n", p[i].score);
+        printf("地址：%s\n", p[i].address);
+        printf("\n");
+    }
+    return 0;
+}
+```
+
+#### 15.1.4 结构体嵌套
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+struct subject {
+    int language;
+    int math;
+    int english;
+};
+
+struct student {
+    char name[21];
+    int age;
+    struct subject stu_score;
+    char address[51];
+};
+
+int main(int argc, char *argv[]) {
+    struct student stu = {"张三", 17, {80, 70, 99}, "龙翔大道2188号"};
+    printf("姓名：%s\n",stu.name);
+    printf("年龄：%d\n", stu.age);
+    printf("语文分数：%d\n", stu.stu_score.language);
+    printf("数学分数：%d\n", stu.stu_score.math);
+    printf("英语分数：%d\n", stu.stu_score.english);
+    printf("地址：%s\n", stu.address);
+    return 0;
+}
+```
+
+#### 15.1.5 结构体和指针
+
+结构体中带有指针变量
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+struct student {
+    char* name;
+    int age;
+    int score;
+    char* address;
+};
+
+int main(int argc, char *argv[]) {
+    struct student stu;
+    // 由于 name 和 address 都是指针变量，所以这里都要赋值为指针
+    stu.name = (char *) malloc(sizeof (char ) * 21);
+    stu.address = (char *) malloc(sizeof (char ) * 51);
+
+    // 对指针所指向的数据赋值
+    strcpy(stu.name, "张三");
+    strcpy(stu.address, "龙翔大道2188号");
+    stu.age = 18;
+    stu.score = 80;
+    printf("姓名：%s\n", stu.name);
+    printf("年龄：%d\n", stu.age);
+    printf("分数：%d\n", stu.score);
+    printf("地址：%s\n", stu.address);
+
+    free(stu.name);
+    free(stu.address);
+    return 0;
+}
+```
+
+指针操作结构体
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+struct student {
+    char name[21];
+    int age;
+    int score;
+    char address[51];
+};
+
+int main(int argc, char *argv[]) {
+    struct student stu = {"张三", 18, 80, "龙翔大道2188号"};
+    struct student* p = &stu;
+
+    printf("姓名：%s\n", (*p).name);
+    printf("年龄：%d\n", (*p).age);
+    printf("分数：%d\n", (*p).score);
+    printf("地址：%s\n", (*p).address);
+    return 0;
+}
+```
+
+### 15.2 联合体
+
++ 联合 union 是一个能在同一个存储空间存储不同类型数据的类型
++ 联合体所占的内存长度等于其最长成员的长度倍数，也有叫做共用体
++ 同一内存段可以用来存放几种不同类型的成员，但每一瞬间只有一种起作用
++ 共用体变量中起作用的成员是最后一次存放的成员，在存入一个新的成员后原有的成员的值会被覆盖
++ 共用体变量的地址和它的各成员的地址都是同一地址
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+union Var{
+    int a;
+    float b;
+    short c;
+    double d;
+};
+
+int main(int argc, char *argv[]) {
+    union Var var;
+    var.a = 10;
+    var.b = 3.14f;
+
+    printf("%d\n", var.a);      // 1078523331
+//    在存入一个新的成员后原有的成员的值会被覆盖
+    printf("%f\n", var.b);      // 3.140000
+
+    printf("size: %d", sizeof var);     // size: 8
+    return 0;
+}
+```
+
+### 15.3 typedf
+
+`typedf`为C语言的关键字，作用是为一种数据类型（基本类型或自定义数据类型）定义一个新名字，不能创建新类型
+
++ 与`#define`不同，`typedf`仅限于数据类型，而不是能是表达式或具体的值
++ `#define`发生在预处理，`typedf`发生在编译阶段
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+// 定义C语言关键字
+typedef struct student s_stu;
+
+struct student {
+    char name[21];
+    int age;
+    int score;
+    char address[51];
+};
+
+int main(int argc, char *argv[]) {
+    s_stu stu = {"张三", 18, 80, "龙翔大道2188号"};
+    struct student* p = &stu;
+
+    printf("姓名：%s\n", (*p).name);
+    printf("年龄：%d\n", (*p).age);
+    printf("分数：%d\n", (*p).score);
+    printf("地址：%s\n", (*p).address);
+    return 0;
+}
+```
+
+
+
+
+
