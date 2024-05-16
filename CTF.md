@@ -9775,6 +9775,20 @@ print("rc4加密后的url编码:" + enc_url)
 
 另外这里尝试通过模板注入漏洞去对PING码做攻击，但是失败了。问题好像是出现在我的`machine_id`
 
+## BUUOJ [GYCTF2020]EasyThinking
+
+> ThinkPHP 6.0.1 漏洞分析(任意文件操作)：https://cloud.tencent.com/developer/article/1610844
+
+进来做信息搜集的时候发现一个报错：这里基本上可以确定考的就是`ThinkPHP 6.0`的漏洞了，剩下就是去找到他要考的漏洞跟着做就行
+
+![image-20240516215756495](CTF.assets/image-20240516215756495.png)
+
+登录的时候拦截请求报文，将Cookie修改一下：
+
+
+
+
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解
