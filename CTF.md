@@ -9785,6 +9785,98 @@ print("rc4加密后的url编码:" + enc_url)
 
 登录的时候拦截请求报文，将Cookie修改一下：
 
+![img](CTF.assets/5865a8d603d54cdbaf93f743ca9f688e.png)
+
+PHP的PHPSESSID机制：一个session ID对应一个session文件，且这个session ID就是文件名，只要这里把Session ID改为PHP后缀即刻（源码要求长度必须为32）
+
+![img](CTF.assets/59f67d7b321046dd831960459a42d52e.png)
+
+后续的Search部分，会将查找内容写入Session中，再在个人中心展示出来，所以我们只要在Search处写入一句话木马即可
+
+![image-20240516220422808](CTF.assets/image-20240516220422808.png)
+
+ThinkPHP的Session文件位置为：`/runtime/session/sess_sessionID`，跟着访问即可
+
+![image-20240516220537055](CTF.assets/image-20240516220537055.png)
+
+这里也是禁用了所有的命令执行函数，需要上蚁剑的`disable_funcion`插件来过
+
+![image-20240516220625698](CTF.assets/image-20240516220625698.png)
+
+## BUUOJ [GKCTF 2021]easycms
+
+题目名字可以看到是一个cms系统，进入首页滚到最下面可以看到是：蝉知7.7
+
+直接Google一下可以发现一个RCE漏洞，跟着复现就好了
+
+登录后台`/admin`，账号密码：`admin:12345`
+
+可以看见相较于上一个版本多了一个需要文件存在才能进行模板修改
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210718100456526.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NvbGl0dWRp,size_16,color_FFFFFF,t_70#pic_center)
+
+而刚好微信模块就存在此功能，点击设置，微信设置，下面先随便填写保存
+
+![202107181005091](CTF.assets/202107181005091.png)
+
+再点击已完成接入
+
+![20210718100514526](CTF.assets/20210718100514526.png)
+
+在原始ID这里进行输入`../../../system/tmp/kzgi.txt/0`最后那个txt名称为之前修改模板提示的文件
+
+![在这里插入图片描述](CTF.assets/20210718100520851.png)
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210718100526244.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NvbGl0dWRp,size_16,color_FFFFFF,t_70#pic_center)
+
+我们跟踪此过程在system/module/wechat/model.php下面computeQRCodeFile函数
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210718100532675.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NvbGl0dWRp,size_16,color_FFFFFF,t_70#pic_center)
+
+这里没对文件路径做限制，这个$public->account参数也就是上面填写的原始ID，../../../system/tmp/kzgi.txt/0
+
+接下来我们点击设计->高级
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2021071810053964.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NvbGl0dWRp,size_16,color_FFFFFF,t_70#pic_center)
+
+在下面输入<?php system("whoami");?>，成功执行
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2021071810054640.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NvbGl0dWRp,size_16,color_FFFFFF,t_70#pic_center)
+
+## BUUOJ [GXYCTF2019]StrongestMind
+
+![image-20240517162301045](CTF.assets/image-20240517162301045.png)
+
+由于request写了两次没写出来，懒得排了，直接用selenium，顺便当回顾一下
+
+```py
+import time
+import re
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+browser = webdriver.Chrome()
+wait = WebDriverWait(browser, 10)
+browser.get('http://b388baae-7a51-40ad-af7f-71ade3683507.node5.buuoj.cn:81/index.php')
+try:
+    while True:
+        value_xpath = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body > center")))
+        print(value_xpath.text)
+        expression = re.search("(\d.*? \d+)", value_xpath.text)
+        answer = eval(str(expression.group(1)))
+        print(f"{expression.group(1)} = {answer}")
+
+        input_element = wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/center/form/input")))
+        input_element.send_keys(answer)
+        input_element.send_keys(Keys.ENTER)
+except:
+    pass
+```
+
 
 
 
