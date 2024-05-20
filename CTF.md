@@ -10483,7 +10483,61 @@ print(''.join(result))
 
 ![image-20240515103210653](CTF.assets/image-20240515103210653.png)
 
+## BUUOJ sqltest
 
+> 第一次做大流量的流量分析，所以记录一下
+
+看payload很明显是SQL的布尔盲注，分析一下可以知道，response报文的`length`为1095的时候为true，1027的时候为false
+
+![image-20240520193500563](CTF.assets/image-20240520193500563.png)
+
+这里当然硬看也可以，但是38位的flag，本身就有点多，而且感觉硬看的话就没有意义了，所以还是得写脚本
+
+首先用tshark将HTTP报文过滤出来，并且序号是大于6274，因为6274之后的流量才是爆破flag的流量
+
+```shell
+┌──(kali㉿kali)-[~/桌面/misc]
+└─$  tshark -Y "http" -r sqltest.pcapng |awk '$1 >= 6274' > flow.txt
+```
+
+得到的结果长这样~
+
+![image-20240520193817140](CTF.assets/image-20240520193817140.png)
+
+然后用python格式化一下，这里我是通过多次正则匹配或者是多次替换才处理成这样的，本身正则比较菜
+
+![image-20240520193834954](CTF.assets/image-20240520193834954.png)
+
+最后说一下脚本思路，跟布尔盲注脚本差不多，先创建两个变量：`min`, `max`，当请求结果为true时，min等于这个ASCII值，否则max等于这个ASCII值，最后max-min等于1的话，结果就是max的值
+
+```py
+import re
+
+flag = ''
+for i in range(1, 39):
+    min = 0
+    max = 0
+    with open('res.txt', 'r') as f:
+        data = re.compile(
+            "ascii\(substr\(\(\(select concat_ws\(char\(94\), flag\)  from db_flag.tb_flag  limit 0,1\)\), {}, 1\)\)>.*".format(str(i))).findall(
+            f.read())
+
+        for i in data:
+            ascii_num = re.search(">(\d+)", i)
+            if 'true' in i[-5:]:
+                min = int(ascii_num.group(1))
+            else:
+                max = int(ascii_num.group(1))
+
+    print(min, max)
+
+    if max - min == 1:
+        flag += chr(max)
+
+print(flag)
+```
+
+![image-20240520194145491](CTF.assets/image-20240520194145491.png)
 
 
 
