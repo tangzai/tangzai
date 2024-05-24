@@ -10494,11 +10494,93 @@ le .htaccess
 filename=.htaccess&content=php_value%20auto_prepend_fil%5C%0Ae%20.htaccess%0A%23%3C%3Fphp%20system('cat /fla?')%3B%3F%3E%5C
 ```
 
+## BUUOJ [HarekazeCTF2019]Avatar Uploader 1
 
+进来是一个上传口，试过一些正常的上传手法都不行，后面看wp说有源码的~~~
 
+```php
+<?php
+error_reporting(0);
 
+require_once('config.php');
+require_once('lib/util.php');
+require_once('lib/session.php');
 
+$session = new SecureClientSession(CLIENT_SESSION_ID, SECRET_KEY);
 
+// check whether file is uploaded
+if (!file_exists($_FILES['file']['tmp_name']) || !is_uploaded_file($_FILES['file']['tmp_name'])) {
+  error('No file was uploaded.');
+}
+
+// check file size
+if ($_FILES['file']['size'] > 256000) {
+  error('Uploaded file is too large.');
+}
+
+// check file type
+$finfo = finfo_open(FILEINFO_MIME_TYPE);
+$type = finfo_file($finfo, $_FILES['file']['tmp_name']);
+finfo_close($finfo);
+if (!in_array($type, ['image/png'])) {
+  error('Uploaded file is not PNG format.');
+}
+
+// check file width/height
+$size = getimagesize($_FILES['file']['tmp_name']);
+if ($size[0] > 256 || $size[1] > 256) {
+  error('Uploaded image is too large.');
+}
+
+# 这里的FLAG1就已经是完整的Flag了
+if ($size[2] !== IMAGETYPE_PNG) {
+  // I hope this never happens...
+  error('What happened...? OK, the flag for part 1 is: <code>' . getenv('FLAG1') . '</code>');
+}
+
+// ok
+$filename = bin2hex(random_bytes(4)) . '.png';
+move_uploaded_file($_FILES['file']['tmp_name'], UPLOAD_DIR . '/' . $filename);
+
+$session->set('avatar', $filename);
+flash('info', 'Your avatar has been successfully updated!');
+redirect('/');
+
+```
+
+主要要绕过的是`finfo()`和`getimagesize()`函数的验证，`finfo()`需要要求读取到的MIME类型位`image/png`，
+
+对于getimagesize() 函数返回的数组：
+
+```php
+Array
+(
+    [0] => 290
+    [1] => 69
+    [2] => 3
+    [3] => width="290" height="69"
+    [bits] => 8
+    [mime] => image/png
+)
+```
+
+结果解释：
+
+索引 0 给出的是图像宽度的像素值
+		索引 1 给出的是图像高度的像素值
+		索引 2 给出的是图像的类型，返回的是数字，其中1 = GIF，2 = JPG，3 = PNG，4 = SWF，5 = PSD，6 = BMP，7 = TIFF(intel byte 		order)，8 = TIFF(motorola byte order)，9 = JPC，10 = JP2，11 = JPX，12 = JB2，13 = SWC，14 = IFF，15 = WBMP，16 = XBM
+		索引 3 给出的是一个宽度和高度的字符串，可以直接用于 HTML 的 <image> 标签
+		索引 bits 给出的是图像的每种颜色的位数，二进制格式
+		索引 channels 给出的是图像的通道值，RGB 图像默认是 3
+		索引 mime 给出的是图像的 MIME 信息，此信息可以用来在 HTTP Content-type 头信息中发送正确的信息，如：header("Content-type: image/jpeg");
+
+总结就是`finfo()`这里要获取到的MIME类型位png文件，`$size[2] !== IMAGETYPE_PNG`这里又要为True~（即不是png文件）
+
+**绕过思路：**`finfo()`校验的是文件头，那么需要先保证头文件一定是png的头，第二是`getimagesize`在叫校验文件头的同时还会校验文件16字节之后的宽高值（不懂可以看看PNG文件二进制信息图）；那么只要我们将16字节之后的数据删掉，`getimagesize`读不到宽高就会返回false成功绕过if判断
+
+随便找张png文件，只保留第一行的内容，其他删掉就行
+
+![image-20240524123450006](CTF.assets/image-20240524123450006.png)
 
 # Misc
 
