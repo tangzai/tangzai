@@ -5563,3 +5563,263 @@ app.use((err, req, res, next) => {
 })
 ```
 
+# Vue
+
+## 1. Vue 实例
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+<!--    Vue 占位符-->
+    {{msg}}
+</div>
+</body>
+</html>
+
+<!--导入Vue包-->
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script>
+    // 创建 vue 实例
+    const app = new Vue({
+        // 指定挂载点（选择器）
+        el: "#app",
+        // 指定数据
+        data: {
+            msg: 'Hello Wotld'
+        }
+    });
+</script>
+```
+
+官网中分别由开发板和生成环境版本提供使用：其中生产版本没有警告功能！学习的话推荐用开发板
+
+![image-20240527205717086](JavaScript.assets/image-20240527205717086.png)
+
+## 2. 插值表达式
+
+表达式：识可以被求值的代码，JS引擎会将其计算出一个结果
+
+```
+语法：{{表达式}}
+```
+
+```html
+<p>{{Nickname}}</p>
+<p>{{desc.toUpperCase()}}</p>
+<p>{{age >= 18 ? '成年' : '未成年'}}</p>
+<p>{{friend.name}}</p>
+```
+
+注意点：
+
+1. 使用的数据要存在
+2. 支持的是表达式，不识语句`if for`
+3. 不能再标签属性中使用`{{}}`
+
+## 3. Vue 响应式特性
+
+Vue会实时监视数据的变化并作出响应式处理
+
+```
+# Vue 数据访问
+实例.属性名
+# Vue 数据修改
+实例.属性名 = “值”
+```
+
+![image-20240527211917235](JavaScript.assets/image-20240527211917235.png)
+
+## 4. 内置指令
+
+### 4.1 v-html
+
+Vue有很多内置指令来完成不同的功能:https://cn.vuejs.org/api/built-in-directives.html#built-in-directives
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+    <!--    更新元素的html-->
+    <div v-html="msg"></div>
+</div>
+</body>
+</html>
+
+<!--导入Vue包-->
+<script src="src/vue.js"></script>
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            msg: "<a href='http://www.baidu.com'>百度一下</a>"
+        }
+    })
+</script>
+```
+
+### 4.2 v-show
+
+基于表达式值的真假性，来改变元素的可见性。
+
+`v-show` 通过设置内联样式的 `display` CSS 属性来工作，当元素可见时将使用初始 `display` 值。当条件改变时，也会触发过渡效果。
+
+![image-20240527214255666](JavaScript.assets/image-20240527214255666.png)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+<!--    更新元素的html-->
+    <div v-show="msg">Hello World</div>
+</div>
+</body>
+</html>
+
+<!--导入Vue包-->
+<script src="src/vue.js"></script>
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            msg: false
+        }
+    })
+</script>
+```
+
+### 4.3 v-if
+
+基于表达式值的真假性，来条件性地渲染元素或者模板片段。
+
+当 `v-if` 元素被触发，元素及其所包含的指令/组件都会销毁和重构。如果初始条件是假，那么其内部的内容根本都不会被渲染。
+
+可用于 `<template>` 表示仅包含文本或多个元素的条件块。
+
+当条件改变时会触发过渡效果。
+
+当同时使用时，`v-if` 比 `v-for` 优先级更高。我们并不推荐在一元素上同时使用这两个指令 — 查看[列表渲染指南](https://cn.vuejs.org/guide/essentials/list.html#v-for-with-v-if)详情。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+<!--    更新元素的html-->
+    <div v-if="msg">Hello World</div>
+</div>
+</body>
+</html>
+
+<!--导入Vue包-->
+<script src="src/vue.js"></script>
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            msg: true
+        }
+    })
+</script>
+```
+
+### 4.4 v-else-if
+
+限定：上一个兄弟元素必须有 `v-if` 或 `v-else-if`。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+    <p v-if="sex == 1">男</p>
+    <p v-else>女</p>
+    <p v-if="score >= 90">优秀</p>
+    <p v-else-if="score >= 70">良好</p>
+    <p v-else-if="score >= 60">优秀</p>
+</div>
+</body>
+</html>
+
+<!--导入Vue包-->
+<script src="src/vue.js"></script>
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            sex: 1,
+            score: 88
+        }
+    })
+</script>
+```
+
+### 4.5 v-on
+
+给元素绑定事件监听器。
+
+- **缩写：**`@`
+
+- **详细信息**
+
+  事件类型由参数来指定。表达式可以是一个方法名，一个内联声明，如果有修饰符则可省略。
+
+  当用于普通元素，只监听[**原生 DOM 事件**](https://developer.mozilla.org/en-US/docs/Web/Events)。当用于自定义元素组件，则监听子组件触发的**自定义事件**。
+
+  当监听原生 DOM 事件时，方法接收原生事件作为唯一参数。如果使用内联声明，声明可以访问一个特殊的 `$event` 变量：`v-on:click="handle('ok', $event)"`。
+
+  `v-on` 还支持绑定不带参数的事件/监听器对的对象。请注意，当使用对象语法时，不支持任何修饰符。
+
+```html
+# v-on:事件名=“内联语句” xie
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+    <button v-on:click="count--">-</button>
+    {{count}}
+<!--    v-on: 的简写-->
+    <button @click="count++">+</button>
+</div>
+</body>
+</html>
+
+<!--导入Vue包-->
+<script src="src/vue.js"></script>
+<script>
+const app = new Vue({
+    el: '#app',
+    data: {
+        count: 100
+    }
+})
+</script>
+```
+
