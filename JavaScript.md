@@ -5793,8 +5793,9 @@ Vue有很多内置指令来完成不同的功能:https://cn.vuejs.org/api/built-
 
   `v-on` 还支持绑定不带参数的事件/监听器对的对象。请注意，当使用对象语法时，不支持任何修饰符。
 
+**`v-on:事件名=“内联语句” 写法`**
+
 ```html
-# v-on:事件名=“内联语句” xie
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5822,4 +5823,181 @@ const app = new Vue({
 })
 </script>
 ```
+
+**`v-on:事件名="methods"`**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+    <button @click="fn">显示/隐藏</button>
+    <p v-show="flag">Hello World</p>
+</div>
+</body>
+</html>
+
+<!--导入Vue包-->
+<script src="src/vue.js"></script>
+<script>
+const app = new Vue({
+    el: '#app',
+    data: {
+        flag: true
+    },
+    methods: {
+        fn(){
+            // flag 取反
+            // this 指向的是当前实例（对象）
+            this.flag = !this.flag
+        }
+    }
+})
+</script>
+```
+
+**`v-on`调用传参**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+    <div id="box">
+        <h1>小黑自动贩卖机</h1>
+        <button @click="buy(3)">可乐3元</button>
+        <button @click="buy(11)">咖啡11元</button>
+    </div>
+    <p>剩余金额：{{money}}元</p>
+</div>
+
+</body>
+</html>
+
+<!--导入Vue包-->
+<script src="src/vue.js"></script>
+<script>
+const app = new Vue({
+    el: '#app',
+    data: {
+        money: 100
+    },
+    methods: {
+        buy(price){
+            this.money -= price
+        }
+    }
+})
+</script>
+```
+
+### 4.6 v-bind
+
+动态的绑定一个或多个 attribute，也可以是组件的 prop
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+    <button v-bind:value="msg">按钮</button>
+<!--    简写形式-->
+    <button :value="msg">按钮</button>
+</div>
+
+</body>
+</html>
+
+<!--导入Vue包-->
+<script src="src/vue.js"></script>
+<script>
+const app = new Vue({
+    el: '#app',
+    data: {
+        msg: "submit"
+    }
+})
+</script>
+```
+
+### 4.7 v-for
+
+`item`为元素，`index`为索引
+
+```
+v-for = "(item, index) in 数组"
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+    <p>水果店</p>
+    <ul>
+        <li v-for="(item, index) in fruits">{{item}}</li>
+<!--        简写-->
+        <li v-for="item in daily">{{item}}</li>
+    </ul>
+</div>
+</body>
+</html>
+
+<!--导入Vue包-->
+<script src="src/vue.js"></script>
+<script>
+const app = new Vue({
+    el: '#app',
+    data: {
+        fruits: ['苹果', '榴莲', '香蕉', '草莓', '西瓜'],
+        daily: ['纸巾', '垃圾袋']
+    }
+})
+</script>
+```
+
+`v-for` 的默认方式是尝试就地更新元素而不移动它们。要强制其重新排序元素，你需要用特殊 attribute `key` 来提供一个排序提示：
+
+```html
+<div v-for="item in items" :key="item.id">
+  {{ item.text }}
+</div>
+```
+
+注意点：
+
++ key的值只能是字符串或数字类型
++ key的值必须具有唯一性
++ 推荐使用id作为key（唯一），不推荐使用index作为key（会变化，不对应）
+
+### 4.8 v-model
+
+在表单输入元素或组件上创建双向绑定。
+
+- **期望的绑定值类型**：根据表单输入元素或组件输出的值而变化
+- **仅限：**
+  - `<input>`
+  - `<select>`
+  - `<textarea>`
+  - components
+- **修饰符**
+  - [`.lazy`](https://cn.vuejs.org/guide/essentials/forms.html#lazy) - 监听 `change` 事件而不是 `input`
+  - [`.number`](https://cn.vuejs.org/guide/essentials/forms.html#number) - 将输入的合法字符串转为数字
+  - [`.trim`](https://cn.vuejs.org/guide/essentials/forms.html#trim) - 移除输入内容两端空格
 
