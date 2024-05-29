@@ -5792,6 +5792,57 @@ Vue有很多内置指令来完成不同的功能:https://cn.vuejs.org/api/built-
   当监听原生 DOM 事件时，方法接收原生事件作为唯一参数。如果使用内联声明，声明可以访问一个特殊的 `$event` 变量：`v-on:click="handle('ok', $event)"`。
 
   `v-on` 还支持绑定不带参数的事件/监听器对的对象。请注意，当使用对象语法时，不支持任何修饰符。
+  
+- **修饰符**
+
+  - `.stop` - 调用 `event.stopPropagation()`。
+  - `.prevent` - 调用 `event.preventDefault()`。
+  - `.capture` - 在捕获模式添加事件监听器。
+  - `.self` - 只有事件从元素本身发出才触发处理函数。
+  - `.{keyAlias}` - 只在某些按键下触发处理函数。
+  - `.once` - 最多触发一次处理函数。
+  - `.left` - 只在鼠标左键事件触发处理函数。
+  - `.right` - 只在鼠标右键事件触发处理函数。
+  - `.middle` - 只在鼠标中键事件触发处理函数。
+  - `.passive` - 通过 `{ passive: true }` 附加一个 DOM 事件。
+
+```html
+<!-- 方法处理函数 -->
+<button v-on:click="doThis"></button>
+
+<!-- 动态事件 -->
+<button v-on:[event]="doThis"></button>
+
+<!-- 内联声明 -->
+<button v-on:click="doThat('hello', $event)"></button>
+
+<!-- 缩写 -->
+<button @click="doThis"></button>
+
+<!-- 使用缩写的动态事件 -->
+<button @[event]="doThis"></button>
+
+<!-- 停止传播 -->
+<button @click.stop="doThis"></button>
+
+<!-- 阻止默认事件 -->
+<button @click.prevent="doThis"></button>
+
+<!-- 不带表达式地阻止默认事件 -->
+<form @submit.prevent></form>
+
+<!-- 链式调用修饰符 -->
+<button @click.stop.prevent="doThis"></button>
+
+<!-- 按键用于 keyAlias 修饰符-->
+<input @keyup.enter="onEnter" />
+
+<!-- 点击事件将最多触发一次 -->
+<button v-on:click.once="doThis"></button>
+
+<!-- 对象语法 -->
+<button v-on="{ mousedown: doThis, mouseup: doThat }"></button>
+```
 
 **`v-on:事件名=“内联语句” 写法`**
 
@@ -5903,6 +5954,97 @@ const app = new Vue({
 
 动态的绑定一个或多个 attribute，也可以是组件的 prop
 
+- **缩写：**
+
+  - `:` 或者 `.` (当使用 `.prop` 修饰符)
+  - 值可以省略 (当 attribute 和绑定的值同名时) 3.4+
+
+- **期望：**`any (带参数) | Object (不带参数)`
+
+- **参数：**`attrOrProp (可选的)`
+
+- **修饰符**
+
+  - `.camel` - 将短横线命名的 attribute 转变为驼峰式命名。
+  - `.prop` - 强制绑定为 DOM property。3.2+
+  - `.attr` - 强制绑定为 DOM attribute。3.2+
+
+- **用途**
+
+  当用于绑定 `class` 或 `style` attribute，`v-bind` 支持额外的值类型如数组或对象。详见下方的指南链接。
+
+  在处理绑定时，Vue 默认会利用 `in` 操作符来检查该元素上是否定义了和绑定的 key 同名的 DOM property。如果存在同名的 property，则 Vue 会将它作为 DOM property 赋值，而不是作为 attribute 设置。这个行为在大多数情况都符合期望的绑定值类型，但是你也可以显式用 `.prop` 和 `.attr` 修饰符来强制绑定方式。有时这是必要的，特别是在和[自定义元素](https://cn.vuejs.org/guide/extras/web-components.html#passing-dom-properties)打交道时。
+
+  当用于组件 props 绑定时，所绑定的 props 必须在子组件中已被正确声明。
+
+  当不带参数使用时，可以用于绑定一个包含了多个 attribute 名称-绑定值对的对象。
+
+- **示例**
+
+  template
+
+  ```html
+  <!-- 绑定 attribute -->
+  <img v-bind:src="imageSrc" />
+  
+  <!-- 动态 attribute 名 -->
+  <button v-bind:[key]="value"></button>
+  
+  <!-- 缩写 -->
+  <img :src="imageSrc" />
+  
+  <!-- 缩写形式的动态 attribute 名 (3.4+)，扩展为 :src="src" -->
+  <img :src />
+  
+  <!-- 动态 attribute 名的缩写 -->
+  <button :[key]="value"></button>
+  
+  <!-- 内联字符串拼接 -->
+  <img :src="'/path/to/images/' + fileName" />
+  
+  <!-- class 绑定 -->
+  <div :class="{ red: isRed }"></div>
+  <div :class="[classA, classB]"></div>
+  <div :class="[classA, { classB: isB, classC: isC }]"></div>
+  
+  <!-- style 绑定 -->
+  <div :style="{ fontSize: size + 'px' }"></div>
+  <div :style="[styleObjectA, styleObjectB]"></div>
+  
+  <!-- 绑定对象形式的 attribute -->
+  <div v-bind="{ id: someProp, 'other-attr': otherProp }"></div>
+  
+  <!-- prop 绑定。“prop” 必须在子组件中已声明。 -->
+  <MyComponent :prop="someThing" />
+  
+  <!-- 传递子父组件共有的 prop -->
+  <MyComponent v-bind="$props" />
+  
+  <!-- XLink -->
+  <svg><a :xlink:special="foo"></a></svg>
+  ```
+
+  `.prop` 修饰符也有专门的缩写，`.`：
+
+  template
+
+  ```
+  <div :someProperty.prop="someObject"></div>
+  
+  <!-- 等同于 -->
+  <div .someProperty="someObject"></div>
+  ```
+
+  当在 DOM 内模板使用 `.camel` 修饰符，可以驼峰化 `v-bind` attribute 的名称，例如 SVG `viewBox` attribute：
+
+  template
+
+  ```
+  <svg :view-box.camel="viewBox"></svg>
+  ```
+
+  如果使用字符串模板或使用构建步骤预编译模板，则不需要 `.camel`。
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -6000,4 +6142,179 @@ const app = new Vue({
   - [`.lazy`](https://cn.vuejs.org/guide/essentials/forms.html#lazy) - 监听 `change` 事件而不是 `input`
   - [`.number`](https://cn.vuejs.org/guide/essentials/forms.html#number) - 将输入的合法字符串转为数字
   - [`.trim`](https://cn.vuejs.org/guide/essentials/forms.html#trim) - 移除输入内容两端空格
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+    <form action="">
+        <!--视图和数据有任何一方被修改，另一方也会跟着修改-->
+        账号：<input type="text" v-model="username">
+        <br>
+        密码：<input type="password" v-model="password">
+        <br>
+        <button @click="submit">提交</button>
+        <button @click="reset">重置</button>
+    </form>
+</div>
+</body>
+</html>
+
+<!--导入Vue包-->
+<script src="src/vue.js"></script>
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            username: '',
+            password: ''
+        },
+        methods: {
+            submit(){
+                console.log(this.username, this.password)
+            },
+            reset(){
+                this.username = ''
+                this.password = ''
+            }
+        }
+    })
+</script>
+```
+
+## 5. 计算属性
+
+概念：基于现有的数据，计算出来的新属性，依赖的数据变化，自动重新计算
+
+语法：
+
+1. 声明在computed配置项中，一个计算属性对应一个函数
+2. 使用起来和普通属性一样使用{{计算属性名}}
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        table {
+            border: 1px solid #000;
+            text-align: center;
+            width: 240px;
+        }
+
+        th, td {
+            border: 1px solid #000;
+        }
+
+        h3 {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <h3>小黑的礼物清单</h3>
+    <table>
+        <tr>
+            <th>名字</th>
+            <th>数量</th>
+        </tr>
+        <tr v-for="(item, index) in list" :key="index.id">
+            <td>{{item.name}}</td>
+            <td>{{item.num}}个</td>
+        </tr>
+    </table>
+
+    <!-- 目标：统计求和，求得礼物总数 -->
+<!--    使用计算属性-->
+    <p>礼物总数：{{totalCount}}个</p>
+</div>
+<script src="./src/vue.js"></script>
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            list: [
+                {id: '1', name: '篮球', num: 6},
+                {id: '2', name: '足球', num: 3},
+                {id: '3', name: '羽毛球', num: 1}
+            ]
+        },
+        // 创建计算属性
+        computed: {
+            totalCount() {
+                return this.list.reduce((sum, item) => sum + item.num, 0)
+            }
+        }
+    })
+</script>
+</body>
+</html>
+```
+
+官方示例：
+
+```javascript
+export default {
+  data() {
+    return { a: 1 }
+  },
+  computed: {
+    // 只读
+    aDouble() {
+      return this.a * 2
+    },
+    // 可写
+    aPlus: {
+      get() {
+        return this.a + 1
+      },
+      set(v) {
+        this.a = v - 1
+      }
+    }
+  },
+  created() {
+    console.log(this.aDouble) // => 2
+    console.log(this.aPlus) // => 2
+
+    this.aPlus = 3
+    console.log(this.a) // => 2
+    console.log(this.aDouble) // => 4
+  }
+}
+```
+
+## 6. watch 
+
+侦听一个或多个响应式数据源，并在数据源变化时调用所给的回调函数。
+
+```javascript
+data: {
+    words: '苹果',
+    obj: {
+        words: '苹果'
+    }
+}
+
+wathc: {
+    // 改方法会再数据变化时，触发执行
+    数据属性名 (newValue, oldValue){
+        一些业务逻辑 或 异步操作
+    }
+    '对象.属性名'(newValue, oldValue){
+        一些业务逻辑 或 异步操作
+    }
+}
+```
 
