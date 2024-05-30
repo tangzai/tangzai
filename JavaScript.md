@@ -6318,3 +6318,185 @@ wathc: {
 }
 ```
 
+**watch 完整写法**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-size: 18px;
+        }
+
+        #app {
+            padding: 10px 20px;
+        }
+
+        .query {
+            margin: 10px 0;
+        }
+
+        .box {
+            display: flex;
+        }
+
+        textarea {
+            width: 300px;
+            height: 160px;
+            font-size: 18px;
+            border: 1px solid #dedede;
+            outline: none;
+            resize: none;
+            padding: 10px;
+        }
+
+        textarea:hover {
+            border: 1px solid #1589f5;
+        }
+
+        .transbox {
+            width: 300px;
+            height: 160px;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border: none;
+        }
+
+        .tip-box {
+            width: 300px;
+            height: 25px;
+            line-height: 25px;
+            display: flex;
+        }
+
+        .tip-box span {
+            flex: 1;
+            text-align: center;
+        }
+
+        .query span {
+            font-size: 18px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap span {
+            position: absolute;
+            right: 15px;
+            bottom: 15px;
+            font-size: 12px;
+        }
+
+        .input-wrap i {
+            font-size: 20px;
+            font-style: normal;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <!-- 条件选择框 -->
+    <div class="query">
+        <span>翻译成的语言：</span>
+        <select v-model="obj.lang">
+            <option value="italy">意大利</option>
+            <option value="english">英语</option>
+            <option value="german">德语</option>
+        </select>
+    </div>
+
+    <!-- 翻译框 -->
+    <div class="box">
+        <div class="input-wrap">
+            <textarea v-model="obj.words"></textarea>
+            <span><i>⌨️</i>文档翻译</span>
+        </div>
+        <div class="output-wrap">
+            <div class="transbox">{{result}}</div>
+        </div>
+    </div>
+</div>
+<script src="./src/vue.js"></script>
+<script src="./src/axios.min.js"></script>
+<script>
+    // 需求：输入内容，修改语言，都实时翻译
+
+    // 接口地址：https://applet-base-api-t.itheima.net/api/translate
+    // 请求方式：get
+    // 请求参数：
+    // （1）words：需要被翻译的文本（必传）
+    // （2）lang： 需要被翻译成的语言（可选）默认值-意大利
+    // -----------------------------------------------
+
+    const app = new Vue({
+        el: '#app',
+        data: {
+            result: '',
+            obj: {
+                words: '',
+                lang: 'italy'
+            }
+        },
+        watch: {
+            obj: {
+                deep: true,         // 深度监视
+                immediate: true,    // 立即执行
+                handler(newValue) {
+                    // 防抖: 延迟执行 → 干啥事先等一等，延迟一会，一段时间内没有再次触发，才执行
+                    clearTimeout(this.timeID)
+                    this.timeID = setTimeout(() => {
+                        axios({
+                            url: 'https://applet-base-api-t.itheima.net/api/translate',
+                            params: newValue
+                        }).then(result => {
+                            this.result = result.data.data
+                        })
+                    }, 300)
+                }
+            }
+        }
+    })
+</script>
+</body>
+</html>
+
+```
+
+- **详细信息**
+
+  `watch()` 默认是懒侦听的，即仅在侦听源发生变化时才执行回调函数。
+
+  第一个参数是侦听器的**源**。这个来源可以是以下几种：
+
+  - 一个函数，返回一个值
+  - 一个 ref
+  - 一个响应式对象
+  - ...或是由以上类型的值组成的数组
+
+  第二个参数是在发生变化时要调用的回调函数。这个回调函数接受三个参数：新值、旧值，以及一个用于注册副作用清理的回调函数。该回调函数会在副作用下一次重新执行前调用，可以用来清除无效的副作用，例如等待中的异步请求。
+
+  当侦听多个来源时，回调函数接受两个数组，分别对应来源数组中的新值和旧值。
+
+  第三个可选的参数是一个对象，支持以下这些选项：
+
+  - **`immediate`**：在侦听器创建时立即触发回调。第一次调用时旧值是 `undefined`。
+  - **`deep`**：如果源是对象，强制深度遍历，以便在深层级变更时触发回调。参考[深层侦听器](https://cn.vuejs.org/guide/essentials/watchers.html#deep-watchers)。
+  - **`flush`**：调整回调函数的刷新时机。参考[回调的刷新时机](https://cn.vuejs.org/guide/essentials/watchers.html#callback-flush-timing)及 [`watchEffect()`](https://cn.vuejs.org/api/reactivity-core.html#watcheffect)。
+  - **`onTrack / onTrigger`**：调试侦听器的依赖。参考[调试侦听器](https://cn.vuejs.org/guide/extras/reactivity-in-depth.html#watcher-debugging)。
+  - **`once`**：回调函数只会运行一次。侦听器将在回调函数首次运行后自动停止。 
+
+  与 [`watchEffect()`](https://cn.vuejs.org/api/reactivity-core.html#watcheffect) 相比，`watch()` 使我们可以：
+
+  - 懒执行副作用；
+  - 更加明确是应该由哪个状态触发侦听器重新执行；
+  - 可以访问所侦听状态的前一个值和当前值。
