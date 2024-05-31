@@ -6500,3 +6500,109 @@ wathc: {
   - 懒执行副作用；
   - 更加明确是应该由哪个状态触发侦听器重新执行；
   - 可以访问所侦听状态的前一个值和当前值。
+
+## 7. 生命周期和生命周期的四个阶段
+
+Vue 生命周期四个阶段：
+
+1. 创建
+2. 挂载
+3. 更新
+4. 销毁
+
+![image-20240531151940219](JavaScript.assets/image-20240531151940219.png)
+
+### 7.1 Vue 生命周期函数（钩子函数）
+
+Vue生命周期过程中，会自动运行一些函数，被称为生命周期钩子->让开发者可以再【特定阶段】运行自己的代码
+
+![image-20240531152130880](JavaScript.assets/image-20240531152130880.png)
+
+```javascript
+    const app = new Vue({
+        el: '#app',
+        // 创建前
+        beforeCreate(){},
+        // 创建后
+        created(){},
+        // 挂载前
+        beforeMount(){},
+        // 挂载后
+        mounted(){},
+        // 数据更新前
+        beforeUpdate(){},
+        // 数据更新后
+        updated(){},
+        // 销毁前
+        beforeDestroy(){},
+        // 销毁后
+        destroyed(){}
+    })
+```
+
+## 9. 工程化开发 & 脚手架 Vue CLI
+
+基本介绍：Vue CLI 是Vue官方提供的一个全局命令工具，可以帮助我们快速创建一个开发Vue项目的标准化基础架子
+
+**使用步骤：**
+
+1. 全局安装（一次）：`yarm global add @vue/cli` 或 `npm i @vue/cli -g`
+2. 查看Vue版本：`vue --version`
+3. 创建项目架子：`vue create project-name`（项目名-不能用中文）
+4. 启动项目：`yarm serve `或`npm run serve`（找 package.json）
+
+![image-20240531202028298](JavaScript.assets/image-20240531202028298.png)
+
+## 10. 普通组件的注册和使用
+
+### 10.1 局部组件
+
+在`src/components`下创建
+
+![image-20240531205644271](JavaScript.assets/image-20240531205644271.png)
+
+```vue
+<template>
+  <div id="HmFooter">
+    我是Footer
+  </div>
+</template>
+
+<script>
+</script>
+
+<style>
+#HmFooter {
+  width: 500px;
+  height: 100px;
+  background-color: #3c763d;
+  color: whitesmoke;
+  font-size: 30px;
+  text-align: center;
+}
+</style>
+```
+
+在`app.vue`下使用
+
+```vue
+<script>
+import HmFooter from './components/HmFooter.vue'
+
+export default {
+  components: {
+    HmFooter: HmFooter
+  }
+}
+</script>
+```
+
+### 10.2 全局组件
+
+```vue
+// 需要在 main.js 中写入
+import HmButton from './components/HmButton.vue'
+// Vue.component('zu'jian'mi', HmButton)
+Vue.component('HmButton', HmButton)
+```
+
