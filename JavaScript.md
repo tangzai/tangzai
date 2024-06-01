@@ -6606,3 +6606,160 @@ import HmButton from './components/HmButton.vue'
 Vue.component('HmButton', HmButton)
 ```
 
+## 11. scoped样式冲突
+
+默认情况：卸载组件中的样式会 **全局生效**，因此很容易造成多个组件之间的样式冲突问题
+
+1. 全局样式：默认组件中的样式会作用到全局
+2. 局部样式：可以给组件加上scoped属性，可以让样式做作用于当前组件
+
+**scoped原理：**
+
+1. 当前组件内标签都被添加`data-v-hash`值的属性
+2. css选择器都被添加`[data-v-hash值]`的属性选择器
+
+最终效果：必须是当前组件的元素，才会有这个自定义属性，才会被这个样式作用到
+
+```css
+<style scoped>
+</style>
+```
+
+## 12. data函数
+
+一个组件的data选项必须是一个函数。保证每个组件实例，维护独立的一份数据对象。每次创建新的组件实例，都会执行一次data函数，得到一个新对象
+
+```javascript
+<script>
+export default {
+  data() {
+    // {} 返回一个对象
+    return {count: 100}
+  }
+}
+</script>
+```
+
+## 13. 组件通信
+
+![image-20240601163117747](JavaScript.assets/image-20240601163117747.png)
+
+父组件 -> 子组件：
+
++ `:title="myTitle"`传到子组件
++ 子组件用：`props`接收，随后`{{}}`则可直接使用
+
+子组件 -> 父组件
+
++ `@click="handleClick"`注册方法调用`this.$emit`传给父组件
++ 父组件注册`@changeTitle`（触发事件父子组件需要同名）接收
++ 夫组件在方法中处理值
+
+## 14. props校验
+
+为组件的`props`指定验证要求，不符合要求，控制台就会有错误提示
+
+**类型校验**
+
+```javascript
+props: {校验的属性名: 类型}
+```
+
+**完整校验**
+
+```javascript
+props: {
+    校验的属性名: {
+        type: 类型
+        required: true
+        default: 默认值
+        validator (value){
+            return 是否通过校验
+        }
+    }
+}
+```
+
+### 14.1 prop & data 单向数据流
+
+共同点：都可以给组件提供数据
+
+区别：
+
++ data 的数据都是自己的 -> 随便改
++ prop 的数据是外部的 -> 不能直接改，要遵循单项数据流
+
+单向数据流：父级 prop 的数据更新，会向下流动，影响子组件。这个数据流是单向的
+
+![image-20240601170604988](JavaScript.assets/image-20240601170604988.png)
+
+## 15. 非父子通信-事件总线
+
+作用：非父子组件之间，进行简易消息传递
+
+1、创建一个都能访问的事件总线（空Vue实例）`utlis/EventBus`
+
+```javascript
+import Vue from "vue";
+const Bus = new Vue();
+export default Bus
+```
+
+2、接收放监听Bus实例的事件
+
+```javascript
+import EventBus from "../../utlis/EventBus";
+created() {
+    EventBus.$on('sendMsg', (msg) => {
+      this.msg = msg
+    })
+  }
+```
+
+3、发送方触发Bus实例的事件
+
+```javascript
+methods: {
+    sendMsg(){
+      EventBus.$emit('sendMsg', '新通知')
+    }
+  }
+```
+
+## 16. 非父子通信 - provide & inject
+
+`provide & inject`作用：跨层级共享数据
+
+1. 父组件`provide`提供数据
+
+   ```javascript
+   export default {
+     components: {
+       FatherDiv,
+     },
+     data(){
+       return {
+         color: 'red',
+         people: {name: 'Jack', age: 18}
+       }
+     },
+     provide(){
+       return {
+         color: this.color,		// 普通类型（非响应式，不会实时更新）
+         people: this.people		// 复杂类型（响应式：随着数据的更新而实时更新）
+       }
+     }
+   }
+   ```
+
+2. 子/孙组件`inject`取值使用
+
+   ```javascript
+   export default {
+     name: "SonDiv",
+       // 接收传值，后续直接
+     inject: ['color', 'people'],
+   }
+   ```
+
+   
