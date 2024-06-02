@@ -6757,9 +6757,111 @@ methods: {
    ```javascript
    export default {
      name: "SonDiv",
-       // 接收传值，后续直接
+       // 接收传值，后续直接调用即可
      inject: ['color', 'people'],
    }
    ```
 
-   
+   ## 17. v-model 详解
+
+   原理：`v-model`本质上是一个语法糖，例如应用在输入框上，就是**value属性**和**input事件**合写
+
+   作用：提供数据的双向绑定
+
+   1. 数据变：视图跟着变`:value`
+   2. 视图变，数据跟着变`@input`
+
+**注意：**`$event`用于模板中，获取事件的形参
+
+```vue
+<template>
+	<div id="app">
+        <input v-model="msg" type="text">
+        <input :value="msg" @input="msg = $event.target.value" type="text">
+    </div>
+</template>
+```
+
+基于此原理，我们可以通过`v-model`简化代码，实现子组件和父组件数据双向绑定
+
+1. 子组件中：`props`通过`value`接收，事件触发`input`
+2. 父组件：`v-model`给组件直接绑数据`(:value + @input)`
+
+```vue
+// 父组件
+<BaseSelect v-model="selectID"></BaseSelect>
+```
+
+```vue
+// 子组件
+props: {
+	value: String
+},
+methods: {
+	handleChange(e){
+		this.$emit('input', e.target.value)
+}
+}
+```
+
+![image-20240601222314567](JavaScript.assets/image-20240601222314567.png)
+
+## 17. ref 和 $refs
+
+作用：利用ref和`$ref`可以用于获取dom元素，或组件实例
+
+**特点：**查找范围-->当前组件内（更精确稳定）
+
+1. 获取dom
+
+   1. 目标标签 - 添加 ref 属性
+
+      ```vue
+      <div ref="chartRef">我是渲染图标的容器</div>
+      ```
+
+   2. 恰当时机，通过`this.$refs.xxx`获取目标标签
+
+      ```vue
+      method(){
+          console.log(this.$refs.chartRef)
+      }
+      ```
+
+      ![image-20240602155710221](JavaScript.assets/image-20240602155710221.png)
+
+2. 获取组件
+
+   目标组件 - 添加ref属性
+
+   ```vue
+   <BaseItem ref="baseFrom"></BaseItem>
+   ```
+
+   恰当时机，通过`this.$refs.xxx`获取目标组件，就可以调用组件对象里面的方法
+
+   ```vue
+   this.$refs.baseForm.组件方法()
+   ```
+
+   ![image-20240602200855848](JavaScript.assets/image-20240602200855848.png)
+
+## 18. Vue异步更新、$nextTick
+
+`$nextTick`：等DOM更新后，才会触发执行此方法里的函数体
+
+语法：`this.$nextTick(函数体)`
+
+```vue
+  methods: {
+    show() {
+      this.isShow = !this.isShow
+      this.$nextTick(() => {
+        this.$refs.inp.focus()
+      })
+    }
+  }
+```
+
+
+
