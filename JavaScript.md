@@ -6863,5 +6863,288 @@ methods: {
   }
 ```
 
+## 19. 自定义指令
 
++ 全局注册 - 语法
+
+  ```vue
+  Vue.directive('指令名', {
+      "inserted"(el) {
+  // 可以对 el 标签,扩展额外功能
+          el.focus()
+      }
+  })
+  ```
+
+  
+
+![image-20240602231006998](JavaScript.assets/image-20240602231006998.png)
+
++ 局部注册
+
+  ```vue
+    directives: {
+      "指令名": {
+        inserted(el){
+          el.focus()
+        }
+      }
+    }
+  ```
+
+![image-20240602231254259](JavaScript.assets/image-20240602231254259.png)
+
++ 指令的值
+
+  + 在绑定指令时,可以通过"等号"的形式为指令绑定具体的参数值
+
+  ```vue
+  <div v-color="color">我是内容</div>
+  ```
+
++ 通过`binding.value`可以拿到指令值,指令值修改会触发update函数
+
+```vue
+ directives: {
+    "color": {
+      inserted(el, binding) {
+        el.style.color = binding.value
+      },
+      update(el, binding) {
+        el.style.color = binding.value
+      }
+    }
+  }
+```
+
+![image-20240602231925952](JavaScript.assets/image-20240602231925952.png)
+
+### 19.1 v-loading
+
+> 实际开发过程中,发送请求需要时间,在请求的数据未回来时,页面会处于空白状态 => 用户体验不好,这时就需要一些过渡动画
+
+![image-20240602235121627](JavaScript.assets/image-20240602235121627.png)
+
+## 20 具名插槽
+
+作用：让组件内部的一些结构支持自定义
+
+组件内部使用`name`对插槽命名
+
+```vue
+<slot name="header"></slot>
+```
+
+`template`配合`#插槽名`使用
+
+```vue
+<template #header>
+      <h3>标题</h3>
+    </template>
+```
+
+![image-20240603134109357](JavaScript.assets/image-20240603134109357.png)
+
+## 21. 作用域插槽
+
+1. 给slot便签添加属性的方式传值
+
+   ```vue
+   <slot :id="item.id" msg="测试文本"></slot>
+   ```
+
+2. 所有添加的属性，都会被收集到一个对象中
+
+   ```
+   {id: 3, meg: '测试文本'}
+   ```
+
+3. 在template中，通过`#插槽名="obj"`接收，默认插槽名为default
+
+   ```vue
+   <tableItems :list="list">
+         <template #default="obj">
+           <button type="button" class="btn btn-primary" @click="show(obj.id)">查看</button>
+         </template>
+       </tableItems>
+   ```
+
+   ![image-20240603141640393](JavaScript.assets/image-20240603141640393.png)
+
+## 22. 路由
+
+22.1 路由的基础使用
+
+### 22.1.1 路由的安装
+
+1. 下载：下载VueRouter模块到当前工具
+
+   ```
+   npm install vue-router@3,6,5
+   ```
+
+2. 引入
+
+   ```vue
+   import VueRouter from "vue-router";
+   ```
+
+3. 安装注册
+
+   ```vue
+   const router = new VueRouter()
+   ```
+
+4. 注入，将路由对象注入到new Vue实例中
+
+   ```vue
+   new Vue({
+       render: h => h(App),
+       router
+   }).$mount('#app')
+   ```
+
+### 22.1.2 路由的使用
+
+在`/src`目录下创建`views`目录，用于放置路由组件
+
+![image-20240603165253650](JavaScript.assets/image-20240603165253650.png)
+
+创建需要的组件（views目录），配置路由规则
+
+```vue
+import MyFind from "@/views/MyFind.vue";
+import MyMusic from "@/views/MyMusic.vue";
+import MyFriend from "@/views/MyFriend.vue";
+
+const router = new VueRouter({
+    routes: [
+        {path: '/find', component: MyFind},
+        {path: '/friend', component: MyFriend},
+        {path: '/music', component: MyMusic}
+    ]
+})
+```
+
+配置导航，配置路由出口
+
+![image-20240603165407159](JavaScript.assets/image-20240603165407159.png)
+
+### 22.2 路由的封装和抽离
+
+随着路由的增多，如果全部放到`main.js`会不好维护，所以这时要做进一步的分离
+
+将所有与路由相关的代码都抽离到`index.js`文件中
+
+![image-20240603170501645](JavaScript.assets/image-20240603170501645.png)
+
+再使用`export default router`将对象暴露出来
+
+![image-20240603170531253](JavaScript.assets/image-20240603170531253.png)
+
+`main.js`导入并使用即可
+
+```vue
+import router from "@/router";
+
+new Vue({
+    render: h => h(App),
+    router
+}).$mount('#app')
+```
+
+### 22.3 声明式导航
+
+#### 22.3.1  声明式导航 - 导航链接
+
+`vue-router`提供了一个全局组件`router-link`（取代a标签）
+
+1. 能跳转，配置to属性指定路径（必须）。本质还是a标签，to无需`#`
+2. 能高亮，默认会提供高亮类名，可以设置高亮样式
+
+```vue
+<router-link to="/find">我的发现</router-link>
+```
+
+![image-20240603192523394](JavaScript.assets/image-20240603192523394.png)
+
+#### 22.3.2 声明式导航 - 跳转传参
+
+**1. 查询参数传参**
+
+语法格式：
+
+```
+<router-link to="/search?q=IT黑马">搜索页</router-link>
+```
+
+取值：
+
+```
+<p>搜索关键字：{{$route.query.q}}</p>
+```
+
+**2. 动态路由传参**
+
+1. 配置路由动态
+
+   ```javascript
+   const router = new VueRouter({
+       routes: [
+           {path: '/search/:words?', component: searchItem},
+           {path: '/home/:words?', component: homeItem}
+       ]
+   })
+   ```
+
+2. 链接传参
+
+   ```vue
+   <router-link to="/search/IT黑马">搜索页</router-link>
+   ```
+
+3. 取值
+
+   ```vue
+   <p>搜索关键字：{{$route.params.words}}</p>
+   ```
+
+### 22.4 路由重定向
+
+语法：`{path: 匹配路径, redirect: 重定向到的路径}`
+
+```vue
+const router = new VueRouter({
+    routes: [
+        {path: '/', redirect: '/home'},
+    ]
+})
+```
+
+### 22.5 404路由
+
+**必须配置再路由的最后**
+
+```javascript
+routes: [
+        {path: '/', redirect: '/home'},
+        {path: '/search/:words?', component: searchItem},
+        {path: '/home', component: homeItem},
+        {path: '*', component: NotFound}
+    ]
+```
+
+### 22.6 模式设置
+
++ hash路由（默认）：`http://localhost:8080/#/search`（带井号）
++ history路由（常用）：`http://localhost:8080/home#/search`（后续上线服务器要做额外配置）
+
+```javascript
+routes: [
+        {path: '/', redirect: '/home'},
+        {path: '/search/:words?', component: searchItem},
+        {path: '/home', component: homeItem},
+        {path: '*', component: NotFound}
+    ]
+```
 
