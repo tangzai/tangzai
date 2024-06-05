@@ -7148,3 +7148,231 @@ routes: [
     ]
 ```
 
+### 22.7 编程式导航 - 路由跳转
+
+**1. name 命名路由跳转传参 - 动态路由**
+
+```javascript
+const router = new VueRouter({
+    routes: [
+        {path: '/search/:words?', component: searchItem, name: 'search'},
+    ]
+})
+```
+
+```javascript
+methods: {
+    forwardClick() {
+      this.$router.push({
+        name: 'search',
+        params: {
+          words: 'ITheima'
+        }
+      })
+    }
+  }
+```
+
+**2. name 命名路由跳转传参 - 关键字路由**
+
+```javascript
+const router = new VueRouter({
+    routes: [
+        {path: '/search/', component: searchItem, name: 'search'}
+    ]
+})
+```
+
+```javascript
+methods: {
+    forwardClick() {
+      this.$router.push({
+        name: 'search',
+        query: {
+          words: 'ITheima'
+        }
+      })
+    }
+  }
+```
+
+**3. 基本跳转**
+
+```javascript
+methods: {
+    forwardClick() {
+      this.$router.push('/search/?q=ITheima')
+    }
+  }
+  
+// 动态路由
+methods: {
+    forwardClick() {
+      this.$router.push('/search/ITheima')
+    }
+  }
+```
+
+### 22.8 组件缓存 - keep-alive
+
+1. keep-alive是什么
+
+   keep-alive是Vue的内置组件，当它包裹动态组件时，会缓存不活动组件的实例，而不是销毁它们
+
+   keep-alive是一个抽象组件，它自身不会渲染成一个DOM元素，也不会出现再父组件链中
+
+2. kepp-alive的三个属性
+
+   + `include`：组件名数组，只有匹配的组件会被缓存
+   + `exclude`：组件名数组，任何匹配的组件都不会被缓存
+   + `max`：最多可以缓存多少组件实例
+
+   ```vue
+   <keep-alive :include="['Layout']">
+           <router-view></router-view>
+         </keep-alive> 
+   ```
+
+## 23 vuex
+
+> vuex 是一个状态管理工具，可以实现多个组件同时同一个数组做管理
+
+### 23.1 创建一个空仓库
+
+```javascript
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({})
+```
+
+### 23.2 数据访问
+
+```javascript
+// 模板
+$store.state.属性名
+// 对象
+this.$store.state.属性名
+```
+
+### 23.3 mapState 配合 computed 的数据访问
+
+可把仓库的数据挂载到计算属性上，后续可直接使用`{{count}}`访问
+
+```javascript
+<script>
+import { mapState } from 'vuex'
+
+export default {
+  name: 'App',
+  computed: {
+      // 解引用的形式访问
+    ...mapState(['count', 'title'])
+  },
+}
+</script>
+```
+
+### 22.4 mutations 修改仓库数据
+
+`$store`默认是单向数据流，不能直接修改；需要现在实例化处定义方法
+
+```javascript
+export default new Vuex.Store({
+  state: {
+    count: 100,
+    title: '仓库'
+  },
+  mutations: {
+    addCount (state, n) {
+      state.count += n
+    },
+    subCount (state, n) {
+      state.count -= n
+    },
+    resetCount (state, n) {
+      state.count = n
+    }
+  },
+})
+```
+
+后续可通过`$store.commit('方法名'ddd, 参数)`调用
+
+```vue
+<button @click="$store.commit('addCount', 1)">值+1</button>
+```
+
+### 22.5 辅助函数 mapMutations
+
+mapMutations 和 mapState 很像，它是把位于mutations中的方法提取出来，映射到组件methods中
+
+```javascript
+mutations: {
+    subCount (state, n) {
+        state.count -= n
+    }
+}
+```
+
+```vue
+import {mapMutations} from 'vuex'
+
+methods: {
+	...mapMutations(['subCount'])
+}
+```
+
+```
+this.subCount(10) 调用
+```
+
+### 22.6 actions 处理异步操作
+
+> mutations必须是同步的（便于检测数据变化，记录调试）
+
+```javascript
+export default new Vuex.Store({
+  state: {
+    count: 100,
+    title: '仓库'
+  },
+  getters: {},
+  mutations: {
+    resetCount (state, n) {
+      state.count = n
+    }
+  },
+  actions: {
+    asyncChange (store, n) {
+      setTimeout(() => { store.commit('resetCount', n) }, 1000)
+    }
+  },
+})
+
+```
+
+```vue
+<button @click="$store.dispatch('asyncChange', 666)">一秒后修改值</button>
+```
+
+### 22.7 辅助函数 - mapAction
+
+mapActions是把位于actions中的方法提取出来，映射到组件methods中
+
+```javascript
+import { mapActions } from 'vuex'
+export default {
+  name: 'sonItem2',
+  methods: {
+    ...mapActions(['asyncChange'])
+  }
+}
+```
+
+```vue
+<button @click="asyncChange(666)">一秒后修改值</button>
+```
+
