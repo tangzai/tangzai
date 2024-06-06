@@ -7376,3 +7376,125 @@ export default {
 <button @click="asyncChange(666)">一秒后修改值</button>
 ```
 
+### 22.8 核心概念 - getters
+
+> 除了state之外，有时我们还需要从state中派生出一些状态，这些状态时依赖state的，此时会用到getters
+
+1. 定义getters
+
+   ```javascript
+   export default new Vuex.Store({
+     state: {
+       count: 100,
+       title: '仓库',
+       list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+     },
+     getters: {
+       filterList (state) {
+         return state.list.filter(item => item >= 5)
+       }
+     },
+   })
+   ```
+
+2. 使用
+
+   ```vue
+   {{$store.getters.filterList}}
+   ```
+
+3. 辅助函数：mapGetters
+
+   ```javascript
+   import { mapGetters } from 'vuex'
+   
+   export default {
+     name: 'App',
+     computed: {
+       ...mapGetters(['filterList'])
+     },
+   }
+   ```
+
+4. 使用
+
+   ```vue
+   {{filterList}}
+   ```
+
+### 22.9 核心概念 - module
+
+随着仓库的数据越来越多，`index.js`文件就会随着越来越臃肿，这时就需要通过module模块拆分`index.js`文件
+
+1. 模块拆分
+
+   ```javascript
+   // @/store/modules/user
+   const state = {
+     userInfo: {
+       name: 'jack',
+       age: 18
+     },
+     score: 80
+   }
+   const mutation = {}
+   const action = {}
+   const getter = {}
+   
+   export default {
+     state,
+     mutation,
+     action,
+     getter
+   }
+   
+   ```
+
+2. 导入模块
+
+   ```javascript
+   import Vue from 'vue'
+   import Vuex from 'vuex'
+   
+   import user from '@/store/modules/user'
+   
+   Vue.use(Vuex)
+   
+   export default new Vuex.Store({
+     state: {
+       count: 100,
+       title: '仓库',
+       list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+     },
+     modules: {
+       user,
+     }
+   })
+   ```
+
+### 22.10 Vuex模块使用小结
+
+#### 1.直接使用
+
+1. state --> $store.state.**模块名**.数据项名
+2. getters --> $store.getters['**模块名**/属性名']
+3. mutations --> $store.commit('**模块名**/方法名', 其他参数)
+4. actions --> $store.dispatch('**模块名**/方法名', 其他参数)
+
+#### 2.借助辅助方法使用
+
+1.import { mapXxxx, mapXxx } from 'vuex'
+
+computed、methods: {
+
+​     // **...mapState、...mapGetters放computed中；**
+
+​    //  **...mapMutations、...mapActions放methods中；**
+
+​    ...mapXxxx(**'模块名'**, ['数据项|方法']),
+
+​    ...mapXxxx(**'模块名'**, { 新的名字: 原来的名字 }),
+
+}
+
+2.组件中直接使用 属性 `{{ age }}` 或 方法 `@click="updateAge(2)"`
