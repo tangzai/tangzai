@@ -7429,27 +7429,23 @@ export default {
 1. 模块拆分
 
    ```javascript
-   // @/store/modules/user
-   const state = {
-     userInfo: {
-       name: 'jack',
-       age: 18
-     },
-     score: 80
-   }
-   const mutation = {}
-   const action = {}
-   const getter = {}
-   
    export default {
-     state,
-     mutation,
-     action,
-     getter
+       namespaced: true,
+       state() {
+           return {
+               userInfo: {}
+           }
+       },
+       getters: {},
+       mutations: {
+           setUserInfo(state, payload) {
+               state.userInfo = payload
+           }
+       },
+       actions: {}
    }
-   
    ```
-
+   
 2. 导入模块
 
    ```javascript
