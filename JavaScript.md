@@ -7305,7 +7305,7 @@ export default new Vuex.Store({
 <button @click="$store.commit('addCount', 1)">值+1</button>
 ```
 
-### 22.5 辅助函数 mapMutations
+### 23.5 辅助函数 mapMutations
 
 mapMutations 和 mapState 很像，它是把位于mutations中的方法提取出来，映射到组件methods中
 
@@ -7329,7 +7329,7 @@ methods: {
 this.subCount(10) 调用
 ```
 
-### 22.6 actions 处理异步操作
+### 23.6 actions 处理异步操作
 
 > mutations必须是同步的（便于检测数据变化，记录调试）
 
@@ -7358,7 +7358,7 @@ export default new Vuex.Store({
 <button @click="$store.dispatch('asyncChange', 666)">一秒后修改值</button>
 ```
 
-### 22.7 辅助函数 - mapAction
+### 23.7 辅助函数 - mapAction
 
 mapActions是把位于actions中的方法提取出来，映射到组件methods中
 
@@ -7376,7 +7376,7 @@ export default {
 <button @click="asyncChange(666)">一秒后修改值</button>
 ```
 
-### 22.8 核心概念 - getters
+### 23.8 核心概念 - getters
 
 > 除了state之外，有时我们还需要从state中派生出一些状态，这些状态时依赖state的，此时会用到getters
 
@@ -7422,7 +7422,7 @@ export default {
    {{filterList}}
    ```
 
-### 22.9 核心概念 - module
+### 23.9 核心概念 - module
 
 随着仓库的数据越来越多，`index.js`文件就会随着越来越臃肿，这时就需要通过module模块拆分`index.js`文件
 
@@ -7468,7 +7468,7 @@ export default {
    })
    ```
 
-### 22.10 Vuex模块使用小结
+### 23.10 Vuex模块使用小结
 
 #### 1.直接使用
 
@@ -7494,3 +7494,44 @@ computed、methods: {
 }
 
 2.组件中直接使用 属性 `{{ age }}` 或 方法 `@click="updateAge(2)"`
+
+## 24 打包优化
+
+### 24.1 路由懒加载
+
+路由懒加载 & 异步组件， 不会一上来就将所有的组件都加载，而是访问到对应的路由了，才加载解析这个路由对应的所有组件
+
+官网链接：https://router.vuejs.org/zh/guide/advanced/lazy-loading.html#%E4%BD%BF%E7%94%A8-webpack
+
+> 当打包构建应用时，JavaScript 包会变得非常大，影响页面加载。如果我们能把不同路由对应的组件分割成不同的代码块，然后当路由被访问的时候才加载对应组件，这样就更加高效了。
+
+```js
+const ProDetail = () => import('@/views/prodetail')
+const Pay = () => import('@/views/pay')
+const MyOrder = () => import('@/views/myorder')
+```
+
+### 24.2 项目打包
+
+**配置publicPath**
+
+默认情况资源会从`/`开始加载，我们可以修改`vue.config.json`文件，配置publicPath属性修改加载的起始路径
+
+```javascript
+module.exports = {
+  // 设置获取.js,.css文件时，是以相对地址为基准的。
+  // https://cli.vuejs.org/zh/config/#publicpath
+  publicPath: './'
+}
+```
+
+**打包**
+
+vue脚手架工具已经提供了打包命令，直接使用即可。
+
+```bash
+yarn build
+npm run 
+```
+
+在项目的根目录会自动创建一个文件夹`dist`,dist中的文件就是打包后的文件，只需要放到服务器中即可。
