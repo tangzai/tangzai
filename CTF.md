@@ -11531,6 +11531,121 @@ print(flag)
 
 ![image-20240520194145491](CTF.assets/image-20240520194145491.png)
 
+## 2024 - 实训
+
+### MISC - Dns
+
+从这三条A记录中就可以看到有带外的流量
+
+![image-20240618213805869](CTF.assets/image-20240618213805869.png)
+
+首先过滤出所有DNS A记录的请求流量，可以看到数据主要集中在IP地址：`192.168.191.129`
+
+```
+┌──(kali㉿kali)-[~/桌面/misc]
+└─$ tshark -nr dns.pcap -Y "dns.qry.type == 1" -T fields -e dns.qry.name -e dns.a
+5647687063794270.192.168.191.129
+5647687063794270.192.168.191.129
+5647687063794270.192.168.191.129
+5647687063794270.192.168.191.129
+6379426849484e6c.192.168.191.129
+6379426849484e6c.192.168.191.129
+```
+
+进一步过滤出`192.168.191.129`再用`uniq`做去重处理，可以看到是十六进制，这里直接转字符
+
+![image-20240618214044631](CTF.assets/image-20240618214044631.png)
+
+![image-20240618214247618](CTF.assets/image-20240618214247618.png)
+
+### Misc - Keyboard
+
+> 参考：https://www.cnblogs.com/renhaoblog/p/15148455.html
+
+> USB是 UniversalSerial Bus（通用串行总线）的缩写，是一个外部总线标准，用于规范电脑与外部设备的连接和通讯，例如键盘、鼠标、打印机、磁盘或网络适配器等等。通过对该接口流量的监听，我们可以得到键盘的击键记录、鼠标的移动轨迹、磁盘的传输内容等一系列信息。
+
+由于这题考的是键盘的流量分析，所以这里先只说键盘的流量
+
+![image-20240618214832847](CTF.assets/image-20240618214832847.png)
+
+大概意思就是将HID Data的数据还原回去，这里有一个编码表，对着这个编码表还原即可。
+
+1、利用wireshark tshark.exe命令提取流量数据，详情如下：
+
+```
+tshark.exe -T json -r 55.pcapng > test.json
+//用法 tshark.exe -T json -r 数据包名称 > 要导出的文件
+```
+
+![image-20240618215130467](CTF.assets/image-20240618215130467.png)
+
+将这个JSON文件的所有`usbhid.data`提取出来之后格式化成下面图的格式即可
+
+![img](CTF.assets/1395105-20210824171542136-638587250.png)
+
+```py
+import json
+
+with open('test.json', 'r') as f:
+    data = json.loads(f.read())
+
+
+res = ''
+for i in data:
+    try:
+        res += i['_source']['layers']['usbhid.data'] + "\n"
+    except:
+        pass
+
+with open('usbdata.txt', 'w') as f:
+    f.write(res)
+```
+
+```py
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+
+normalKeys = {"04":"a", "05":"b", "06":"c", "07":"d", "08":"e", "09":"f", "0a":"g", "0b":"h", "0c":"i", "0d":"j", "0e":"k", "0f":"l", "10":"m", "11":"n", "12":"o", "13":"p", "14":"q", "15":"r", "16":"s", "17":"t", "18":"u", "19":"v", "1a":"w", "1b":"x", "1c":"y", "1d":"z","1e":"1", "1f":"2", "20":"3", "21":"4", "22":"5", "23":"6","24":"7","25":"8","26":"9","27":"0","28":"<RET>","29":"<ESC>","2a":"<DEL>", "2b":"\t","2c":"<SPACE>","2d":"-","2e":"=","2f":"[","30":"]","31":"\\","32":"<NON>","33":";","34":"'","35":"<GA>","36":",","37":".","38":"/","39":"<CAP>","3a":"<F1>","3b":"<F2>", "3c":"<F3>","3d":"<F4>","3e":"<F5>","3f":"<F6>","40":"<F7>","41":"<F8>","42":"<F9>","43":"<F10>","44":"<F11>","45":"<F12>"}
+shiftKeys = {"04":"A", "05":"B", "06":"C", "07":"D", "08":"E", "09":"F", "0a":"G", "0b":"H", "0c":"I", "0d":"J", "0e":"K", "0f":"L", "10":"M", "11":"N", "12":"O", "13":"P", "14":"Q", "15":"R", "16":"S", "17":"T", "18":"U", "19":"V", "1a":"W", "1b":"X", "1c":"Y", "1d":"Z","1e":"!", "1f":"@", "20":"#", "21":"$", "22":"%", "23":"^","24":"&","25":"*","26":"(","27":")","28":"<RET>","29":"<ESC>","2a":"<DEL>", "2b":"\t","2c":"<SPACE>","2d":"_","2e":"+","2f":"{","30":"}","31":"|","32":"<NON>","33":"\"","34":":","35":"<GA>","36":"<","37":">","38":"?","39":"<CAP>","3a":"<F1>","3b":"<F2>", "3c":"<F3>","3d":"<F4>","3e":"<F5>","3f":"<F6>","40":"<F7>","41":"<F8>","42":"<F9>","43":"<F10>","44":"<F11>","45":"<F12>"}
+output = []
+keys = open('usbdata.txt')
+for line in keys:
+    try:
+        if line[0]!='0' or (line[1]!='0' and line[1]!='2') or line[3]!='0' or line[4]!='0' or line[9]!='0' or line[10]!='0' or line[12]!='0' or line[13]!='0' or line[15]!='0' or line[16]!='0' or line[18]!='0' or line[19]!='0' or line[21]!='0' or line[22]!='0' or line[6:8]=="00":
+             continue
+        if line[6:8] in normalKeys.keys():
+            output += [[normalKeys[line[6:8]]],[shiftKeys[line[6:8]]]][line[1]=='2']
+        else:
+            output += ['[unknown]']
+    except:
+        pass
+keys.close()
+
+flag=0
+print("".join(output))
+for i in range(len(output)):
+    try:
+        a=output.index('<DEL>')
+        del output[a]
+        del output[a-1]
+    except:
+        pass
+for i in range(len(output)):
+    try:
+        if output[i]=="<CAP>":
+            flag+=1
+            output.pop(i)
+            if flag==2:
+                flag=0
+        if flag!=0:
+            output[i]=output[i].upper()
+    except:
+        pass
+print ('output :' + "".join(output))
+```
+
+![image-20240618215632600](CTF.assets/image-20240618215632600.png)
+
 
 
 # 数字取证
